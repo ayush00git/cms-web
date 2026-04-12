@@ -10,7 +10,7 @@ const (
 )
 
 type Warden struct {
-	ID					uint			`gorm:"primaryKey"`
+	ID					uint			`gorm:"primaryKey;autoIncrement"`
 	Name				string			`gorm:"not null"`
 	Email				string			`gorm:"uniqueIndex; not null"`
 	Hostel				HostelName		`gorm:"text; not null"`
