@@ -17,7 +17,7 @@ const (
 type Admin struct {
 	ID				uint			`gorm:"primaryKey;autoIncrement"`
 	Email			string			`gorm:"uniqueIndex;not null"`
-	Post			PostType		`gorm:"varchar(15);unique;not null"`
+	Post			PostType		`gorm:"type:varchar(15);unique;not null"`
 	IsVerified		bool			`gorm:"default:false"`
 	CreatedAt		time.Time		
 }

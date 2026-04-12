@@ -31,8 +31,8 @@ type Faculty struct {
 	Email				string			`gorm:"uniqueIndex; not null"`
 	Department			string			`gorm:"not null"`
 	HouseNumber			string			`gorm:"not null"`
-	Block				BlockLabel		`gorm:"char(1);not null"`
-	Type				BlockType		`gorm:"not null"`
+	Block				BlockLabel		`gorm:"type:char(1);not null"`
+	Type				BlockType		`gorm:"type:char(1);not null"`
 	PhoneNumber			string			`gorm:"uniqueIndex;not null"`
 	IsVerified			bool  			`gorm:"default:false"`
 	CreatedAt			time.Time		
