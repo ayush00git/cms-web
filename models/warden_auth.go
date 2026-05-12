@@ -23,8 +23,8 @@ const (
 
 type Warden struct {
 	ID					uint			`gorm:"primaryKey;autoIncrement"`
-	Name				string			`gorm:"not null"`
 	Email				string			`gorm:"uniqueIndex;not null"`
+	Password			string			`gorm:"not null"`
 	Hostel				HostelName		`gorm:"type:varchar(30);not null"`
 	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null"`
 	IsVerified			bool			`gorm:"default:false"`

@@ -45,6 +45,7 @@ type Faculty struct {
 	ID					uint  			`gorm:"primaryKey;autoIncrement"`
 	Name				string			`gorm:"not null"`
 	Email				string			`gorm:"uniqueIndex;not null"`
+	Password			string			`gorm:"not null"`
 	Department			DepartmentName	`gorm:"type:varchar(40);not null"`
 	HouseNumber			string			`gorm:"not null"`
 	Block				BlockLabel		`gorm:"type:char(1);not null"`

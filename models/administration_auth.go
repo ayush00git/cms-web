@@ -29,7 +29,7 @@ const (
 
 type CentreHead struct {
 	ID          uint         `gorm:"primaryKey;autoIncrement"`
-	Name        string       `gorm:"not null"`
+	Password    string       `gorm:"not null"`
 	Email       string       `gorm:"uniqueIndex;not null"`
 	Building    BuildingName `gorm:"type:varchar(100);not null"`
 	PhoneNumber string       `gorm:"type:char(10);uniqueIndex;not null"`

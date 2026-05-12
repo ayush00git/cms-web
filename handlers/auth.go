@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
@@ -19,6 +20,14 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 		c.JSON(500, gin.H{"error": "request body unacceptable"})
 		return
 	}
+
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to hash the password"})
+		return
+	}
+
+	inputs.Password = string(hashedPass);
 
 	// password hashing logic
 	// generate a jwt token and send a verification email
