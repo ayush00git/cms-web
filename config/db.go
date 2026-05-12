@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,5 +27,13 @@ func ConnectDB() {
 	}
 
 	DB = db
+
+	DB.AutoMigrate(
+		&models.Admin{},
+		&models.Faculty{},
+		&models.Admin{},
+		&models.CentreHead{},
+	)
+
 	log.Println("Database connected")
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ayush00git/cms-web/config"
-	"github.com/ayush00git/cms-web/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,12 +11,6 @@ import (
 func main() {
 
 	config.ConnectDB()	
-	config.DB.AutoMigrate(
-		&models.Admin{},
-		&models.Faculty{},
-		&models.Warden{},
-		&models.CentreHead{},
-	)
 
 	r := gin.Default()
 
