@@ -22,11 +22,11 @@ const (
 )
 
 type Warden struct {
-	ID					uint			`gorm:"primaryKey;autoIncrement"`
-	Email				string			`gorm:"uniqueIndex;not null"`
-	Password			string			`gorm:"not null"`
-	Hostel				HostelName		`gorm:"type:varchar(30);not null"`
-	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null"`
-	IsVerified			bool			`gorm:"default:false"`
-	CreatedAt			time.Time
+	ID					uint			`gorm:"primaryKey;autoIncrement" json:"id"`
+	Email				string			`gorm:"uniqueIndex;not null" json:"email"`
+	Password			string			`gorm:"not null" json:"password"`
+	Hostel				HostelName		`gorm:"type:varchar(30);not null" json:"hostel"`
+	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
+	IsVerified			bool			`gorm:"default:false" json:"is_verified"`
+	CreatedAt			time.Time		`json:"created_at"`
 }

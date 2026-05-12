@@ -42,15 +42,15 @@ const (
 )
 
 type Faculty struct {
-	ID					uint  			`gorm:"primaryKey;autoIncrement"`
-	Name				string			`gorm:"not null"`
-	Email				string			`gorm:"uniqueIndex;not null"`
-	Password			string			`gorm:"not null"`
-	Department			DepartmentName	`gorm:"type:varchar(40);not null"`
-	HouseNumber			string			`gorm:"not null"`
-	Block				BlockLabel		`gorm:"type:char(1);not null"`
-	Type				BlockType		`gorm:"type:char(1);not null"`
-	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null"`
-	IsVerified			bool  			`gorm:"default:false"`
-	CreatedAt			time.Time		
+	ID					uint  			`gorm:"primaryKey;autoIncrement" json:"id"`
+	Name				string			`gorm:"not null" json:"name"`
+	Email				string			`gorm:"uniqueIndex;not null" json:"email"`
+	Password			string			`gorm:"not null" json:"password"`
+	Department			DepartmentName	`gorm:"type:varchar(40);not null" json:"department"`
+	HouseNumber			string			`gorm:"not null" json:"house_number"`
+	Block				BlockLabel		`gorm:"type:char(1);not null" json:"block"`
+	Type				BlockType		`gorm:"type:char(1);not null" json:"type"`
+	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
+	IsVerified			bool  			`gorm:"default:false" json:"is_verified"`
+	CreatedAt			time.Time		`json:"created_at"`
 }
