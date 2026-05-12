@@ -15,9 +15,9 @@ const (
 )
 
 type Admin struct {
-	ID				uint			`gorm:"primaryKey;autoIncrement"`
-	Email			string			`gorm:"uniqueIndex;not null"`
-	Post			PostType		`gorm:"type:varchar(15);unique;not null"`
-	IsVerified		bool			`gorm:"default:false"`
-	CreatedAt		time.Time		
+	ID				uint			`gorm:"primaryKey;autoIncrement" json:"id"`
+	Email			string			`gorm:"uniqueIndex;not null" json:"email"`
+	Post			PostType		`gorm:"type:varchar(15);unique;not null" json:"post"`
+	IsVerified		bool			`gorm:"default:false" json:"is_verified"`
+	CreatedAt		time.Time		`json:"created_at"`
 }

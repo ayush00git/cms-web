@@ -28,11 +28,11 @@ const (
 )
 
 type CentreHead struct {
-	ID          uint         `gorm:"primaryKey;autoIncrement"`
-	Password    string       `gorm:"not null"`
-	Email       string       `gorm:"uniqueIndex;not null"`
-	Building    BuildingName `gorm:"type:varchar(100);not null"`
-	PhoneNumber string       `gorm:"type:char(10);uniqueIndex;not null"`
-	IsVerified  bool         `gorm:"default:false"`
-	CreatedAt   time.Time
+	ID          uint         `gorm:"primaryKey;autoIncrement" json:"id"`
+	Password    string       `gorm:"not null" json:"password"`
+	Email       string       `gorm:"uniqueIndex;not null" json:"email"`
+	Building    BuildingName `gorm:"type:varchar(100);not null" json:"building"`
+	PhoneNumber string       `gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
+	IsVerified  bool         `gorm:"default:false" json:"is_verified"`	
+	CreatedAt   time.Time	 `json:"created_at"`
 }
