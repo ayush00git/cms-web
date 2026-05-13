@@ -11,4 +11,14 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 		faculty.POST("/signup", h.FacultySignup)
 		faculty.POST("/login", h.FacultyLogin)
 	}
+	warden := e.Group("/api/auth/warden")
+	{
+		warden.POST("/signup", h.WardenSignup)
+		warden.POST("/login", h.WardenLogin)
+	}
+	centrehead := e.Group("/api/auth/centre_head")
+	{
+		centrehead.POST("/signup", h.CentreHeadSignup)
+		centrehead.POST("/login", h.CentreHeadLogin)
+	}
 }
