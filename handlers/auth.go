@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"time"
 	"strings"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/helpers"
@@ -15,11 +16,11 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) FacultySignup (c *gin.Context) {
-	var inputs models.Faculty
+	var inputs models.FacultySignup
 
 	// bind the request body in a json format
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "request body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -32,8 +33,21 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 
 	inputs.Password = string(hashedPass);
 
+	faculty := models.Faculty{
+		Name: inputs.Name,
+		Email: inputs.Email,
+		Password: inputs.Password,
+		Department: inputs.Department,
+		HouseNumber: inputs.HouseNumber,
+		Block: inputs.Block,
+		Type: inputs.Type,
+		PhoneNumber: inputs.PhoneNumber,
+		IsVerified: false,
+		CreatedAt: time.Now(),
+	}
+
 	// insert the profile details to the table
-	result := h.DB.Create(&inputs)
+	result := h.DB.Create(&faculty)
 	// log.Println(result)
 	// log.Printf("Error imma lookin for: %s", result.Error)
 	if result.Error != nil {
@@ -49,7 +63,7 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 }
 
 func (h *AuthHandler) FacultyLogin (c *gin.Context) {
-	var inputs models.Faculty
+	var inputs models.FacultyLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -80,7 +94,7 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60 * 1000,	// 30 days
+		30 * 24 * 60 * 60,			// 30 days
 		"/",
 		"localhost",
 		false,						// set to true during deployment (secure bool)
