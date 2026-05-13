@@ -183,10 +183,10 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 }
 
 func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
-	var inputs models.CentreHead
+	var inputs models.CentreHeadSignup
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "request body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -197,8 +197,17 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	}
 
 	inputs.Password = string(hashedPass)
+
+	centrehead := models.CentreHead{
+		Email: inputs.Email,
+		Password: inputs.Password,
+		Building: inputs.Building,
+		PhoneNumber: inputs.PhoneNumber,
+		IsVerified: false,
+		CreatedAt: time.Now(),
+	}
 	
-	result := h.DB.Create(&inputs)
+	result := h.DB.Create(&centrehead)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "unique constraint") {
 			c.JSON(409, gin.H{"error": "user with that email already exists, login instead"})
@@ -210,10 +219,10 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 }
 
 func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
-	var inputs models.CentreHead
+	var inputs models.CentreHeadLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "error body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -239,7 +248,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60 * 1000,
+		30 * 24 * 60 * 60,
 		"/",
 		"localhost",
 		false,
