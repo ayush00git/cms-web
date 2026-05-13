@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"time"
+	"errors"
 
 	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/models"
@@ -76,7 +77,11 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	var faculty models.Faculty
 	result := h.DB.Where("email = ?", inputs.Email).Take(&faculty)
 	if result.Error != nil {
-		c.JSON(404, gin.H{"error": "user with that email doesn't exists"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"email": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -156,7 +161,11 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 	var warden models.Warden
 	result := h.DB.Where("email = ?", inputs.Email).Take(&warden)
 	if result.Error != nil {
-		c.JSON(404, gin.H{"error": "user with that email doesn't exists"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -235,7 +244,11 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	var head models.CentreHead
 	result := h.DB.Where("email = ?", inputs.Email).Take(&head)
 	if result.Error != nil {
-		c.JSON(404, gin.H{"error": "user with that email doesn't exists"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(404, gin.H{"error": "internal server error"})
 		return
 	}
 
