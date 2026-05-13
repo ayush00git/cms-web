@@ -17,6 +17,8 @@ type AuthHandler struct {
 	DB *gorm.DB
 }
 
+// FacultySignup registers a new faculty member.
+// On success, sends a verification email with a JWT token link.
 func (h *AuthHandler) FacultySignup (c *gin.Context) {
 	var inputs models.FacultySignup
 
@@ -65,6 +67,8 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 	c.JSON(201, gin.H{"success": "Signup success!"})
 }
 
+// FacultyLogin authenticates a faculty member using email and password.
+// On success, signs a JWT and stores it in an httpOnly cookie.
 func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	var inputs models.FacultyLogin
 
@@ -111,6 +115,8 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "logged in successfully"})
 }
 
+// WardenSignup registers a warden.
+// On success, sends a verification email with a JWT token link.
 func (h *AuthHandler) WardenSignup (c *gin.Context) {
 	var inputs models.WardenSignup
 
@@ -150,6 +156,8 @@ func (h *AuthHandler) WardenSignup (c *gin.Context) {
 	c.JSON(201, gin.H{"success": "signup success!"})	
 }
 
+// WardenLogin authenticates warden user using email and password.
+// On success, signs a JWT and stores it in an httpOnly cookie.
 func (h *AuthHandler) WardenLogin (c *gin.Context) {
 	var inputs models.WardenLogin
 
@@ -194,6 +202,8 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
 
+// CentreHeadSignup registers the head of adminstrations.
+// On success, sends a verification email with a JWT token link.
 func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	var inputs models.CentreHeadSignup
 
@@ -233,6 +243,8 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	c.JSON(201, gin.H{"success": "signup success!"})
 }
 
+// CentreHeadLogin authenticates the head admin member using email and password.
+// On success, signs a JWT and stores it in an httpOnly cookie.
 func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	var inputs models.CentreHeadLogin
 
@@ -276,3 +288,5 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
+
+// APIs left to implement - logout API, admins login
