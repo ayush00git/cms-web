@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"time"
-	"strings"
-	"github.com/ayush00git/cms-web/models"
+
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/models"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
@@ -51,15 +52,16 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 	// log.Println(result)
 	// log.Printf("Error imma lookin for: %s", result.Error)
 	if result.Error != nil {
-		if strings.Contains(result.Error.Error(), "unique constraint") {
-			c.JSON(409, gin.H{"error": "user with that email already exists! login instead"})
+		pgErr, ok := result.Error.(*pgconn.PgError);
+		if ok && pgErr.Code == "23505" {
+			c.JSON(409, gin.H{"error": "email already registered"})
 			return
 		}
-		c.JSON(500, gin.H{"error": "failed inserting object to the table"})
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
 	// send email logic
-	c.JSON(201, gin.H{"success": "Signup success! (email verification ahead)"})
+	c.JSON(201, gin.H{"success": "Signup success!"})
 }
 
 func (h *AuthHandler) FacultyLogin (c *gin.Context) {
@@ -132,11 +134,12 @@ func (h *AuthHandler) WardenSignup (c *gin.Context) {
 
 	result := h.DB.Create(&warden)
 	if result.Error != nil {
-		if strings.Contains(result.Error.Error(), "unique constraint") {
-			c.JSON(409, gin.H{"error": "user with that email already exists! login instead"})
-			return
-		}
-		c.JSON(500, gin.H{"error": "failed inserting object to the table"})
+		pgErr, ok := result.Error.(*pgconn.PgError);
+			if ok && pgErr.Code == "23505" {
+				c.JSON(409, gin.H{"error": "email already registered"})
+				return
+			}
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
 	c.JSON(201, gin.H{"success": "signup success!"})	
@@ -209,10 +212,13 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	
 	result := h.DB.Create(&centrehead)
 	if result.Error != nil {
-		if strings.Contains(result.Error.Error(), "unique constraint") {
-			c.JSON(409, gin.H{"error": "user with that email already exists, login instead"})
+		pgErr, ok := result.Error.(*pgconn.PgError)
+		if ok && pgErr.Code == "23505" {
+			c.JSON(409, gin.H{"error": "email already registered"})
 			return
 		}
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
+		return
 	}
 
 	c.JSON(201, gin.H{"success": "signup success!"})
