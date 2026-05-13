@@ -32,7 +32,7 @@ type CentreHead struct {
 	Email       string       `gorm:"uniqueIndex;not null" json:"email"`
 	Password    string       `gorm:"not null" json:"password"`
 	Building    BuildingName `gorm:"type:varchar(100);not null" json:"building"`
-	PhoneNumber string       `gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
+	PhoneNumber string       `gorm:"type:char(10);not null" json:"phone_number"`
 	IsVerified  bool         `gorm:"default:false" json:"is_verified"`	
 	CreatedAt   time.Time	 `json:"created_at"`
 }
