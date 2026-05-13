@@ -243,7 +243,7 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	c.JSON(201, gin.H{"success": "signup success!"})
 }
 
-// CentreHeadLogin authenticates the head admin member using email and password.
+// CentreHeadLogin authenticates the head of administrations using email and password.
 // On success, signs a JWT and stores it in an httpOnly cookie.
 func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	var inputs models.CentreHeadLogin
@@ -302,4 +302,49 @@ func (h *AuthHandler) Logout (c *gin.Context) {
 		true,
 	)
 	c.JSON(200, gin.H{"success": "logged out successfully!"})
+}
+
+// AdminLogin authenticates the admin using email and password.
+// On success, signs a JWT and stores it in an httpOnly cookie.
+func (h *AuthHandler) AdminLogin (c *gin.Context) {
+	var inputs models.AdminLogin
+
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	var admin models.Admin
+	result := h.DB.Where("email = ?", inputs.Email).Take(&admin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(inputs.Password))
+	if err != nil {
+		c.JSON(401, gin.H{"error": "incorrect password"})
+		return
+	}
+
+	token, err := helpers.GenerateToken(inputs.Email)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed signing the jwt token"})
+		return
+	}
+
+	c.SetCookie(
+		"token",
+		token,
+		30 * 24 * 60 * 60,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
