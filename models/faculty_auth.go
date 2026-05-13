@@ -50,7 +50,7 @@ type Faculty struct {
 	HouseNumber			string			`gorm:"not null" json:"house_number"`
 	Block				BlockLabel		`gorm:"type:char(1);not null" json:"block"`
 	Type				BlockType		`gorm:"type:char(1);not null" json:"type"`
-	PhoneNumber			string			`gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
+	PhoneNumber			string			`gorm:"type:char(10);not null" json:"phone_number"`
 	IsVerified			bool  			`gorm:"default:false" json:"is_verified"`
 	CreatedAt			time.Time		`json:"created_at"`
 }
