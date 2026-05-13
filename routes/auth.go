@@ -21,4 +21,5 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 		centrehead.POST("/signup", h.CentreHeadSignup)
 		centrehead.POST("/login", h.CentreHeadLogin)
 	}
+	e.POST("/api/auth/logout", h.Logout)
 }

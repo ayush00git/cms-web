@@ -289,4 +289,17 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
 
-// APIs left to implement - logout API, admins login
+// Logout clears the token stored in httpCookie.
+// User is set to unauthenticated.
+func (h *AuthHandler) Logout (c *gin.Context) {
+	c.SetCookie(
+		"token",
+		" ",
+		-1,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	c.JSON(200, gin.H{"success": "logged out successfully!"})
+}
