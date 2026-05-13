@@ -31,7 +31,7 @@ func ConnectDB() {
 	DB.AutoMigrate(
 		&models.Admin{},
 		&models.Faculty{},
-		&models.Admin{},
+		&models.Warden{},
 		&models.CentreHead{},
 	)
 
