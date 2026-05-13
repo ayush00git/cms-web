@@ -54,3 +54,19 @@ type Faculty struct {
 	IsVerified			bool  			`gorm:"default:false" json:"is_verified"`
 	CreatedAt			time.Time		`json:"created_at"`
 }
+
+type FacultySignup struct {
+	Name				string			`json:"name" binding:"required"`
+	Email				string			`json:"email" binding:"required"`
+	Password			string			`json:"password" binding:"required"`
+	Department			DepartmentName	`json:"department" binding:"required"`
+	HouseNumber			string			`json:"house_number" binding:"required"`
+	Block				BlockLabel		`json:"block" binding:"required"`
+	Type				BlockType		`json:"type" binding:"required"`
+	PhoneNumber			string			`json:"phone_number" binding:"required"`
+}
+
+type FacultyLogin struct {
+	Email				string			`json:"email" binding:"required"`
+	Password			string			`json:"password" binding:"required"`
+}

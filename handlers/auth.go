@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"time"
 	"strings"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/helpers"
@@ -15,11 +16,11 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) FacultySignup (c *gin.Context) {
-	var inputs models.Faculty
+	var inputs models.FacultySignup
 
 	// bind the request body in a json format
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "request body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -32,8 +33,21 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 
 	inputs.Password = string(hashedPass);
 
+	faculty := models.Faculty{
+		Name: inputs.Name,
+		Email: inputs.Email,
+		Password: inputs.Password,
+		Department: inputs.Department,
+		HouseNumber: inputs.HouseNumber,
+		Block: inputs.Block,
+		Type: inputs.Type,
+		PhoneNumber: inputs.PhoneNumber,
+		IsVerified: false,
+		CreatedAt: time.Now(),
+	}
+
 	// insert the profile details to the table
-	result := h.DB.Create(&inputs)
+	result := h.DB.Create(&faculty)
 	// log.Println(result)
 	// log.Printf("Error imma lookin for: %s", result.Error)
 	if result.Error != nil {
@@ -49,7 +63,7 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 }
 
 func (h *AuthHandler) FacultyLogin (c *gin.Context) {
-	var inputs models.Faculty
+	var inputs models.FacultyLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -80,7 +94,7 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60 * 1000,	// 30 days
+		30 * 24 * 60 * 60,			// 30 days
 		"/",
 		"localhost",
 		false,						// set to true during deployment (secure bool)
@@ -91,10 +105,10 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 }
 
 func (h *AuthHandler) WardenSignup (c *gin.Context) {
-	var inputs models.Warden
+	var inputs models.WardenSignup
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "request body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -107,7 +121,16 @@ func (h *AuthHandler) WardenSignup (c *gin.Context) {
 
 	// send a email for account verification
 
-	result := h.DB.Create(&inputs)
+	warden := models.Warden{
+		Email: inputs.Email,
+		Password: inputs.Password,
+		Hostel: inputs.Hostel,
+		PhoneNumber: inputs.PhoneNumber,
+		IsVerified: false,
+		CreatedAt: time.Now(),
+	}
+
+	result := h.DB.Create(&warden)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "unique constraint") {
 			c.JSON(409, gin.H{"error": "user with that email already exists! login instead"})
@@ -120,7 +143,7 @@ func (h *AuthHandler) WardenSignup (c *gin.Context) {
 }
 
 func (h *AuthHandler) WardenLogin (c *gin.Context) {
-	var inputs models.Warden
+	var inputs models.WardenLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "request body unacceptable"})
@@ -149,7 +172,7 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60 * 1000,
+		30 * 24 * 60 * 60,
 		"/",
 		"localhost",
 		false,
@@ -160,10 +183,10 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 }
 
 func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
-	var inputs models.CentreHead
+	var inputs models.CentreHeadSignup
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "request body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -174,8 +197,17 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 	}
 
 	inputs.Password = string(hashedPass)
+
+	centrehead := models.CentreHead{
+		Email: inputs.Email,
+		Password: inputs.Password,
+		Building: inputs.Building,
+		PhoneNumber: inputs.PhoneNumber,
+		IsVerified: false,
+		CreatedAt: time.Now(),
+	}
 	
-	result := h.DB.Create(&inputs)
+	result := h.DB.Create(&centrehead)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "unique constraint") {
 			c.JSON(409, gin.H{"error": "user with that email already exists, login instead"})
@@ -187,10 +219,10 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 }
 
 func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
-	var inputs models.CentreHead
+	var inputs models.CentreHeadLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "error body unacceptable"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -216,7 +248,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60 * 1000,
+		30 * 24 * 60 * 60,
 		"/",
 		"localhost",
 		false,

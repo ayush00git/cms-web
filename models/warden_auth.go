@@ -30,3 +30,15 @@ type Warden struct {
 	IsVerified			bool			`gorm:"default:false" json:"is_verified"`
 	CreatedAt			time.Time		`json:"created_at"`
 }
+
+type WardenSignup struct {
+	Email				string			`json:"email" binding:"required"`
+	Password			string			`json:"password" binding:"required"`
+	Hostel				HostelName		`json:"hostel" binding:"required"`
+	PhoneNumber			string			`json:"phone_number" binding:"required"`	
+}
+
+type WardenLogin struct {
+	Email				string			`json:"email" binding:"required"`
+	Password			string			`json:"password" binding:"required"`
+}

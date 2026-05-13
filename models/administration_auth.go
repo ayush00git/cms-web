@@ -29,10 +29,22 @@ const (
 
 type CentreHead struct {
 	ID          uint         `gorm:"primaryKey;autoIncrement" json:"id"`
-	Password    string       `gorm:"not null" json:"password"`
 	Email       string       `gorm:"uniqueIndex;not null" json:"email"`
+	Password    string       `gorm:"not null" json:"password"`
 	Building    BuildingName `gorm:"type:varchar(100);not null" json:"building"`
 	PhoneNumber string       `gorm:"type:char(10);uniqueIndex;not null" json:"phone_number"`
 	IsVerified  bool         `gorm:"default:false" json:"is_verified"`	
 	CreatedAt   time.Time	 `json:"created_at"`
+}
+
+type CentreHeadSignup struct {
+	Email       string       `json:"email" binding:"required"`
+	Password    string       `json:"password" binding:"required"`
+	Building    BuildingName `json:"building" binding:"required"`
+	PhoneNumber string       `json:"phone_number" binding:"required"`
+}
+
+type CentreHeadLogin struct {
+	Email       string       `json:"email" binding:"required"`
+	Password    string       `json:"password" binding:"required"`
 }
