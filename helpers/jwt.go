@@ -7,11 +7,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secret = GetEnv("JWT_SECRET")
-// signing key is passed as slice of bytes
-var secretKey = []byte(secret)
-
 func GenerateToken(email string) (string, error) {
+	secretKey := []byte(GetEnv("JWT_SECRET"))
 
 	// define the algorithm to sign the header and payload with
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
@@ -30,6 +27,8 @@ func GenerateToken(email string) (string, error) {
 }
 
 func VerifyToken(tokenString string) (error) {
+	secretKey := []byte(GetEnv("JWT_SECRET"))
+
 	// parsing the jwt string
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error){
 		return secretKey, nil

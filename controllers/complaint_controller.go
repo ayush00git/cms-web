@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FacultyReportComplaint handles complaint submission by faculty
+// Let faculty members submit a new complaint
 func FacultyReportComplaint(c *gin.Context) {
 	var input struct {
 		FacultyID       uint                  `json:"faculty_id" binding:"required"`
@@ -40,7 +40,7 @@ func FacultyReportComplaint(c *gin.Context) {
 		database.DB.Create(&complaint)
 	}
 
-	// Route to relevant XEN
+	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -51,7 +51,7 @@ func FacultyReportComplaint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
-// WardenReportComplaint handles complaint submission by wardens
+// Let wardens submit a complaint for their hostel
 func WardenReportComplaint(c *gin.Context) {
 	var input struct {
 		WardenID        uint                 `json:"warden_id" binding:"required"`
@@ -81,7 +81,7 @@ func WardenReportComplaint(c *gin.Context) {
 		database.DB.Create(&complaint)
 	}
 
-	// Route to relevant XEN
+	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -92,7 +92,7 @@ func WardenReportComplaint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
-// CentreHeadReportComplaint handles complaint submission by Centre Heads
+// Let Centre Heads submit complaints for their department
 func CentreHeadReportComplaint(c *gin.Context) {
 	var input struct {
 		CentreHeadID    uint                 `json:"centre_head_id" binding:"required"`
@@ -120,7 +120,7 @@ func CentreHeadReportComplaint(c *gin.Context) {
 		database.DB.Create(&complaint)
 	}
 
-	// Route to relevant XEN
+	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -131,7 +131,7 @@ func CentreHeadReportComplaint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
-// XENUpdateStatus handles XEN passing or rejecting complaints
+// Allow XEN to review the complaint and either pass it forward or reject it
 func XENUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
@@ -152,7 +152,7 @@ func XENUpdateStatus(c *gin.Context) {
 			return
 		}
 
-		// Ensure it's at XEN stage
+		// Make sure the complaint is actually waiting for XEN's approval
 		if complaint.Stage != models.StageXEN {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at XEN stage"})
 			return
@@ -184,7 +184,7 @@ func XENUpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by XEN"})
 }
 
-// AEUpdateStatus handles AE passing (and delegating) or rejecting
+// Allow AE to review the complaint, and if passing, assign a specific JE
 func AEUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
@@ -233,7 +233,7 @@ func AEUpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by AE"})
 }
 
-// JEUpdateStatus handles JE resolving or rejecting
+// Allow JE to mark the complaint as finally resolved or reject it
 func JEUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
@@ -279,7 +279,7 @@ func JEUpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by JE"})
 }
 
-// GetPublicDashboard returns complaints with status and comments
+// Fetch all complaints and their comments to show on the public dashboard
 func GetPublicDashboard(c *gin.Context) {
 	var complaints []models.Complaint
 
