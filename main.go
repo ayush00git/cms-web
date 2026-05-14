@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ayush00git/cms-web/database"
+	"github.com/ayush00git/cms-web/config"
 	"github.com/ayush00git/cms-web/handlers"
 	"github.com/ayush00git/cms-web/routes"
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,7 @@ import (
 
 func main() {
 	godotenv.Load()
-	database.ConnectDB()
+	config.ConnectDB()
 
 	r := gin.Default()
 
@@ -21,13 +21,17 @@ func main() {
 	})
 
 	authHandler := &handlers.AuthHandler{
-		DB: database.DB,
+		DB: config.DB,
 	}
 
 	routes.AuthRoute(r, authHandler)
 
+	complaintHandler := &handlers.ComplaintHandler{
+		DB: config.DB,
+	}
+
 	// Setup application routes
-	routes.SetupComplaintRoutes(r)
+	routes.ComplaintRoute(r, complaintHandler)
 
 	r.Run(":8080")
 	fmt.Println("Sevrer running on port 8080")

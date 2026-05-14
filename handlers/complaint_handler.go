@@ -1,17 +1,20 @@
-package controllers
+package handlers
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/ayush00git/cms-web/database"
 	"github.com/ayush00git/cms-web/models"
-	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
+type ComplaintHandler struct {
+	DB *gorm.DB
+}
+
 // Let faculty members submit a new complaint
-func FacultyReportComplaint(c *gin.Context) {
+func (h *ComplaintHandler) FacultyReportComplaint(c *gin.Context) {
 	var input struct {
 		FacultyID       uint                  `json:"faculty_id" binding:"required"`
 		Place           models.ComplaintPlace `json:"place" binding:"required"`
@@ -36,8 +39,8 @@ func FacultyReportComplaint(c *gin.Context) {
 		Stage:           models.StageXEN,
 	}
 
-	if database.DB != nil {
-		database.DB.Create(&complaint)
+	if h.DB != nil {
+		h.DB.Create(&complaint)
 	}
 
 	// Figure out which XEN should get the email based on the complaint type
@@ -46,13 +49,13 @@ func FacultyReportComplaint(c *gin.Context) {
 		xenEmail = "xen_electrical@nit.edu"
 	}
 
-	services.SendStatusEmail(xenEmail, "New Faculty Complaint", fmt.Sprintf("A new %s complaint was reported: %s", input.TypeOfComplaint, input.Title))
+	fmt.Printf("Email to %s: New Faculty Complaint - A new %s complaint was reported: %s\n", xenEmail, input.TypeOfComplaint, input.Title)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
 // Let wardens submit a complaint for their hostel
-func WardenReportComplaint(c *gin.Context) {
+func (h *ComplaintHandler) WardenReportComplaint(c *gin.Context) {
 	var input struct {
 		WardenID        uint                 `json:"warden_id" binding:"required"`
 		TypeOfComplaint models.ComplaintType `json:"type_of_complaint" binding:"required"`
@@ -77,8 +80,8 @@ func WardenReportComplaint(c *gin.Context) {
 		Stage:           models.StageXEN,
 	}
 
-	if database.DB != nil {
-		database.DB.Create(&complaint)
+	if h.DB != nil {
+		h.DB.Create(&complaint)
 	}
 
 	// Figure out which XEN should get the email based on the complaint type
@@ -87,13 +90,13 @@ func WardenReportComplaint(c *gin.Context) {
 		xenEmail = "xen_electrical@nit.edu"
 	}
 
-	services.SendStatusEmail(xenEmail, "New Warden Complaint", fmt.Sprintf("A new %s complaint was reported for room %s: %s", input.TypeOfComplaint, input.RoomNumber, input.Title))
+	fmt.Printf("Email to %s: New Warden Complaint - A new %s complaint was reported for room %s: %s\n", xenEmail, input.TypeOfComplaint, input.RoomNumber, input.Title)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
 // Let Centre Heads submit complaints for their department
-func CentreHeadReportComplaint(c *gin.Context) {
+func (h *ComplaintHandler) CentreHeadReportComplaint(c *gin.Context) {
 	var input struct {
 		CentreHeadID    uint                 `json:"centre_head_id" binding:"required"`
 		TypeOfComplaint models.ComplaintType `json:"type_of_complaint" binding:"required"`
@@ -116,8 +119,8 @@ func CentreHeadReportComplaint(c *gin.Context) {
 		Stage:           models.StageXEN,
 	}
 
-	if database.DB != nil {
-		database.DB.Create(&complaint)
+	if h.DB != nil {
+		h.DB.Create(&complaint)
 	}
 
 	// Figure out which XEN should get the email based on the complaint type
@@ -126,13 +129,13 @@ func CentreHeadReportComplaint(c *gin.Context) {
 		xenEmail = "xen_electrical@nit.edu"
 	}
 
-	services.SendStatusEmail(xenEmail, "New Centre Head Complaint", fmt.Sprintf("A new %s complaint was reported by Centre Head: %s", input.TypeOfComplaint, input.Title))
+	fmt.Printf("Email to %s: New Centre Head Complaint - A new %s complaint was reported by Centre Head: %s\n", xenEmail, input.TypeOfComplaint, input.Title)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
 }
 
 // Allow XEN to review the complaint and either pass it forward or reject it
-func XENUpdateStatus(c *gin.Context) {
+func (h *ComplaintHandler) XENUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "pass" or "reject"
@@ -146,8 +149,8 @@ func XENUpdateStatus(c *gin.Context) {
 	}
 
 	var complaint models.Complaint
-	if database.DB != nil {
-		if err := database.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+	if h.DB != nil {
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
@@ -163,7 +166,7 @@ func XENUpdateStatus(c *gin.Context) {
 			AdminID:     input.AdminID,
 			CommentText: input.CommentText,
 		}
-		database.DB.Create(&comment)
+		h.DB.Create(&comment)
 
 		if input.Action == "pass" {
 			complaint.Status = models.StatusPendingAE
@@ -173,19 +176,19 @@ func XENUpdateStatus(c *gin.Context) {
 			if complaint.TypeOfComplaint == models.TypeElectrical {
 				aeEmail = "ae_electrical@nit.edu"
 			}
-			services.SendStatusEmail(aeEmail, "Complaint Forwarded to AE", "A complaint has been forwarded to you for action.")
+			fmt.Printf("Email to %s: Complaint Forwarded to AE - A complaint has been forwarded to you for action.\n", aeEmail)
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			services.SendStatusEmail("filer@nit.edu", "Complaint Rejected", "Your complaint has been rejected by XEN.")
+			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by XEN.")
 		}
-		database.DB.Save(&complaint)
+		h.DB.Save(&complaint)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by XEN"})
 }
 
 // Allow AE to review the complaint, and if passing, assign a specific JE
-func AEUpdateStatus(c *gin.Context) {
+func (h *ComplaintHandler) AEUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "pass" or "reject"
@@ -200,8 +203,8 @@ func AEUpdateStatus(c *gin.Context) {
 	}
 
 	var complaint models.Complaint
-	if database.DB != nil {
-		if err := database.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+	if h.DB != nil {
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
@@ -216,25 +219,25 @@ func AEUpdateStatus(c *gin.Context) {
 			AdminID:     input.AdminID,
 			CommentText: input.CommentText,
 		}
-		database.DB.Create(&comment)
+		h.DB.Create(&comment)
 
 		if input.Action == "pass" && input.SelectJE_ID != nil {
 			complaint.Status = models.StatusPendingJE
 			complaint.Stage = models.StageJE
 			complaint.AssignedJE_ID = input.SelectJE_ID
-			services.SendStatusEmail("je@nit.edu", "Complaint Assigned to JE", "A new complaint has been assigned to you by AE.")
+			fmt.Println("Email to je@nit.edu: Complaint Assigned to JE - A new complaint has been assigned to you by AE.")
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			services.SendStatusEmail("filer@nit.edu", "Complaint Rejected", "Your complaint has been rejected by AE.")
+			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by AE.")
 		}
-		database.DB.Save(&complaint)
+		h.DB.Save(&complaint)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by AE"})
 }
 
 // Allow JE to mark the complaint as finally resolved or reject it
-func JEUpdateStatus(c *gin.Context) {
+func (h *ComplaintHandler) JEUpdateStatus(c *gin.Context) {
 	var input struct {
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "resolve" or "reject"
@@ -248,8 +251,8 @@ func JEUpdateStatus(c *gin.Context) {
 	}
 
 	var complaint models.Complaint
-	if database.DB != nil {
-		if err := database.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+	if h.DB != nil {
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
@@ -264,29 +267,28 @@ func JEUpdateStatus(c *gin.Context) {
 			AdminID:     input.AdminID,
 			CommentText: input.CommentText,
 		}
-		database.DB.Create(&comment)
+		h.DB.Create(&comment)
 
 		if input.Action == "resolve" {
 			complaint.Status = models.StatusResolved
-			services.SendStatusEmail("filer@nit.edu", "Complaint Resolved", "Your complaint has been successfully resolved.")
+			fmt.Println("Email to filer@nit.edu: Complaint Resolved - Your complaint has been successfully resolved.")
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			services.SendStatusEmail("filer@nit.edu", "Complaint Rejected", "Your complaint has been rejected by JE.")
+			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by JE.")
 		}
-		database.DB.Save(&complaint)
+		h.DB.Save(&complaint)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by JE"})
 }
 
 // Fetch all complaints and their comments to show on the public dashboard
-func GetPublicDashboard(c *gin.Context) {
+func (h *ComplaintHandler) GetPublicDashboard(c *gin.Context) {
 	var complaints []models.Complaint
 
-	if database.DB != nil {
-		database.DB.Preload("Comments").Find(&complaints)
+	if h.DB != nil {
+		h.DB.Preload("Comments").Find(&complaints)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"complaints": complaints})
 }
-
