@@ -33,6 +33,10 @@ func ConnectDB() {
 		&models.Faculty{},
 		&models.Warden{},
 		&models.CentreHead{},
+		&models.FacultyComplaint{},
+		&models.WardenComplaint{},
+		&models.CentreHeadComplaint{},
+		&models.Comment{},
 	)
 
 	log.Println("Database connected")

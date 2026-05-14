@@ -28,8 +28,7 @@ func (h *ComplaintHandler) FacultyReportComplaint(c *gin.Context) {
 		return
 	}
 
-	complaint := models.Complaint{
-		Source:          models.SourceFaculty,
+	complaint := models.FacultyComplaint{
 		FacultyID:       &input.FacultyID,
 		Place:           input.Place,
 		TypeOfComplaint: input.TypeOfComplaint,
@@ -43,7 +42,6 @@ func (h *ComplaintHandler) FacultyReportComplaint(c *gin.Context) {
 		h.DB.Create(&complaint)
 	}
 
-	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -69,8 +67,7 @@ func (h *ComplaintHandler) WardenReportComplaint(c *gin.Context) {
 		return
 	}
 
-	complaint := models.Complaint{
-		Source:          models.SourceWarden,
+	complaint := models.WardenComplaint{
 		WardenID:        &input.WardenID,
 		RoomNumber:      input.RoomNumber,
 		TypeOfComplaint: input.TypeOfComplaint,
@@ -84,7 +81,6 @@ func (h *ComplaintHandler) WardenReportComplaint(c *gin.Context) {
 		h.DB.Create(&complaint)
 	}
 
-	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -109,8 +105,7 @@ func (h *ComplaintHandler) CentreHeadReportComplaint(c *gin.Context) {
 		return
 	}
 
-	complaint := models.Complaint{
-		Source:          models.SourceCentreHead,
+	complaint := models.CentreHeadComplaint{
 		CentreHeadID:    &input.CentreHeadID,
 		TypeOfComplaint: input.TypeOfComplaint,
 		Title:           input.Title,
@@ -123,7 +118,6 @@ func (h *ComplaintHandler) CentreHeadReportComplaint(c *gin.Context) {
 		h.DB.Create(&complaint)
 	}
 
-	// Figure out which XEN should get the email based on the complaint type
 	xenEmail := "xen_civil@nit.edu"
 	if input.TypeOfComplaint == models.TypeElectrical {
 		xenEmail = "xen_electrical@nit.edu"
@@ -137,6 +131,7 @@ func (h *ComplaintHandler) CentreHeadReportComplaint(c *gin.Context) {
 // Allow XEN to review the complaint and either pass it forward or reject it
 func (h *ComplaintHandler) XENUpdateStatus(c *gin.Context) {
 	var input struct {
+		Source      string `json:"source" binding:"required"` // "Faculty", "Warden", "CentreHead"
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "pass" or "reject"
 		CommentText string `json:"comment" binding:"required"`
@@ -148,40 +143,97 @@ func (h *ComplaintHandler) XENUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	var complaint models.Complaint
-	if h.DB != nil {
+	if h.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database connection missing"})
+		return
+	}
+
+	var typeOfComplaint models.ComplaintType
+	var stage models.ComplaintStage
+	commentableType := input.Source + "Complaint"
+
+	// Fetch and update based on source
+	if input.Source == string(models.SourceFaculty) {
+		var complaint models.FacultyComplaint
 		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
-
-		// Make sure the complaint is actually waiting for XEN's approval
-		if complaint.Stage != models.StageXEN {
+		typeOfComplaint = complaint.TypeOfComplaint
+		stage = complaint.Stage
+		if stage != models.StageXEN {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at XEN stage"})
 			return
 		}
-
-		comment := models.Comment{
-			ComplaintID: input.ComplaintID,
-			AdminID:     input.AdminID,
-			CommentText: input.CommentText,
-		}
-		h.DB.Create(&comment)
-
 		if input.Action == "pass" {
 			complaint.Status = models.StatusPendingAE
 			complaint.Stage = models.StageAE
-			
-			aeEmail := "ae_civil@nit.edu"
-			if complaint.TypeOfComplaint == models.TypeElectrical {
-				aeEmail = "ae_electrical@nit.edu"
-			}
-			fmt.Printf("Email to %s: Complaint Forwarded to AE - A complaint has been forwarded to you for action.\n", aeEmail)
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by XEN.")
 		}
 		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceWarden) {
+		var complaint models.WardenComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		typeOfComplaint = complaint.TypeOfComplaint
+		stage = complaint.Stage
+		if stage != models.StageXEN {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at XEN stage"})
+			return
+		}
+		if input.Action == "pass" {
+			complaint.Status = models.StatusPendingAE
+			complaint.Stage = models.StageAE
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceCentreHead) {
+		var complaint models.CentreHeadComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		typeOfComplaint = complaint.TypeOfComplaint
+		stage = complaint.Stage
+		if stage != models.StageXEN {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at XEN stage"})
+			return
+		}
+		if input.Action == "pass" {
+			complaint.Status = models.StatusPendingAE
+			complaint.Stage = models.StageAE
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid source"})
+		return
+	}
+
+	// Create the comment
+	comment := models.Comment{
+		CommentableID:   input.ComplaintID,
+		CommentableType: commentableType,
+		AdminID:         input.AdminID,
+		CommentText:     input.CommentText,
+	}
+	h.DB.Create(&comment)
+
+	if input.Action == "pass" {
+		aeEmail := "ae_civil@nit.edu"
+		if typeOfComplaint == models.TypeElectrical {
+			aeEmail = "ae_electrical@nit.edu"
+		}
+		fmt.Printf("Email to %s: Complaint Forwarded to AE - A complaint has been forwarded to you for action.\n", aeEmail)
+	} else if input.Action == "reject" {
+		fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by XEN.")
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by XEN"})
@@ -190,6 +242,7 @@ func (h *ComplaintHandler) XENUpdateStatus(c *gin.Context) {
 // Allow AE to review the complaint, and if passing, assign a specific JE
 func (h *ComplaintHandler) AEUpdateStatus(c *gin.Context) {
 	var input struct {
+		Source      string `json:"source" binding:"required"`
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "pass" or "reject"
 		CommentText string `json:"comment" binding:"required"`
@@ -202,35 +255,92 @@ func (h *ComplaintHandler) AEUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	var complaint models.Complaint
-	if h.DB != nil {
+	if h.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database connection missing"})
+		return
+	}
+
+	var stage models.ComplaintStage
+	commentableType := input.Source + "Complaint"
+
+	// Fetch and update based on source
+	if input.Source == string(models.SourceFaculty) {
+		var complaint models.FacultyComplaint
 		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
-
-		if complaint.Stage != models.StageAE {
+		stage = complaint.Stage
+		if stage != models.StageAE {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at AE stage"})
 			return
 		}
-
-		comment := models.Comment{
-			ComplaintID: input.ComplaintID,
-			AdminID:     input.AdminID,
-			CommentText: input.CommentText,
-		}
-		h.DB.Create(&comment)
-
 		if input.Action == "pass" && input.SelectJE_ID != nil {
 			complaint.Status = models.StatusPendingJE
 			complaint.Stage = models.StageJE
 			complaint.AssignedJE_ID = input.SelectJE_ID
-			fmt.Println("Email to je@nit.edu: Complaint Assigned to JE - A new complaint has been assigned to you by AE.")
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by AE.")
 		}
 		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceWarden) {
+		var complaint models.WardenComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		stage = complaint.Stage
+		if stage != models.StageAE {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at AE stage"})
+			return
+		}
+		if input.Action == "pass" && input.SelectJE_ID != nil {
+			complaint.Status = models.StatusPendingJE
+			complaint.Stage = models.StageJE
+			complaint.AssignedJE_ID = input.SelectJE_ID
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceCentreHead) {
+		var complaint models.CentreHeadComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		stage = complaint.Stage
+		if stage != models.StageAE {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at AE stage"})
+			return
+		}
+		if input.Action == "pass" && input.SelectJE_ID != nil {
+			complaint.Status = models.StatusPendingJE
+			complaint.Stage = models.StageJE
+			complaint.AssignedJE_ID = input.SelectJE_ID
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid source"})
+		return
+	}
+
+	// Create the comment
+	comment := models.Comment{
+		CommentableID:   input.ComplaintID,
+		CommentableType: commentableType,
+		AdminID:         input.AdminID,
+		CommentText:     input.CommentText,
+	}
+	h.DB.Create(&comment)
+
+	if input.Action == "pass" && input.SelectJE_ID != nil {
+		fmt.Println("Email to je@nit.edu: Complaint Assigned to JE - A new complaint has been assigned to you by AE.")
+	} else if input.Action == "reject" {
+		fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by AE.")
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by AE"})
@@ -239,6 +349,7 @@ func (h *ComplaintHandler) AEUpdateStatus(c *gin.Context) {
 // Allow JE to mark the complaint as finally resolved or reject it
 func (h *ComplaintHandler) JEUpdateStatus(c *gin.Context) {
 	var input struct {
+		Source      string `json:"source" binding:"required"`
 		ComplaintID uint   `json:"complaint_id" binding:"required"`
 		Action      string `json:"action" binding:"required"` // "resolve" or "reject"
 		CommentText string `json:"comment" binding:"required"`
@@ -250,33 +361,86 @@ func (h *ComplaintHandler) JEUpdateStatus(c *gin.Context) {
 		return
 	}
 
-	var complaint models.Complaint
-	if h.DB != nil {
+	if h.DB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database connection missing"})
+		return
+	}
+
+	var stage models.ComplaintStage
+	commentableType := input.Source + "Complaint"
+
+	// Fetch and update based on source
+	if input.Source == string(models.SourceFaculty) {
+		var complaint models.FacultyComplaint
 		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
 		}
-
-		if complaint.Stage != models.StageJE {
+		stage = complaint.Stage
+		if stage != models.StageJE {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at JE stage"})
 			return
 		}
-
-		comment := models.Comment{
-			ComplaintID: input.ComplaintID,
-			AdminID:     input.AdminID,
-			CommentText: input.CommentText,
-		}
-		h.DB.Create(&comment)
-
 		if input.Action == "resolve" {
 			complaint.Status = models.StatusResolved
-			fmt.Println("Email to filer@nit.edu: Complaint Resolved - Your complaint has been successfully resolved.")
 		} else if input.Action == "reject" {
 			complaint.Status = models.StatusRejected
-			fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by JE.")
 		}
 		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceWarden) {
+		var complaint models.WardenComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		stage = complaint.Stage
+		if stage != models.StageJE {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at JE stage"})
+			return
+		}
+		if input.Action == "resolve" {
+			complaint.Status = models.StatusResolved
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+
+	} else if input.Source == string(models.SourceCentreHead) {
+		var complaint models.CentreHeadComplaint
+		if err := h.DB.First(&complaint, input.ComplaintID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		stage = complaint.Stage
+		if stage != models.StageJE {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Complaint is not at JE stage"})
+			return
+		}
+		if input.Action == "resolve" {
+			complaint.Status = models.StatusResolved
+		} else if input.Action == "reject" {
+			complaint.Status = models.StatusRejected
+		}
+		h.DB.Save(&complaint)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid source"})
+		return
+	}
+
+	// Create the comment
+	comment := models.Comment{
+		CommentableID:   input.ComplaintID,
+		CommentableType: commentableType,
+		AdminID:         input.AdminID,
+		CommentText:     input.CommentText,
+	}
+	h.DB.Create(&comment)
+
+	if input.Action == "resolve" {
+		fmt.Println("Email to filer@nit.edu: Complaint Resolved - Your complaint has been successfully resolved.")
+	} else if input.Action == "reject" {
+		fmt.Println("Email to filer@nit.edu: Complaint Rejected - Your complaint has been rejected by JE.")
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated by JE"})
@@ -284,11 +448,19 @@ func (h *ComplaintHandler) JEUpdateStatus(c *gin.Context) {
 
 // Fetch all complaints and their comments to show on the public dashboard
 func (h *ComplaintHandler) GetPublicDashboard(c *gin.Context) {
-	var complaints []models.Complaint
+	var facultyComplaints []models.FacultyComplaint
+	var wardenComplaints []models.WardenComplaint
+	var centreHeadComplaints []models.CentreHeadComplaint
 
 	if h.DB != nil {
-		h.DB.Preload("Comments").Find(&complaints)
+		h.DB.Preload("Comments").Find(&facultyComplaints)
+		h.DB.Preload("Comments").Find(&wardenComplaints)
+		h.DB.Preload("Comments").Find(&centreHeadComplaints)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"complaints": complaints})
+	c.JSON(http.StatusOK, gin.H{
+		"faculty_complaints":     facultyComplaints,
+		"warden_complaints":      wardenComplaints,
+		"centre_head_complaints": centreHeadComplaints,
+	})
 }

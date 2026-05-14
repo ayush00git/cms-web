@@ -44,14 +44,10 @@ const (
 	StageJE  ComplaintStage = "JE"
 )
 
-type Complaint struct {
+type FacultyComplaint struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement"`
-	Source          ComplaintSource `gorm:"type:varchar(20);not null"`
 	FacultyID       *uint           // Link to Faculty
-	WardenID        *uint           // Link to Warden
-	CentreHeadID    *uint           // Link to CentreHead
-	Place           ComplaintPlace  `gorm:"type:varchar(20)"` // Faculty only
-	RoomNumber      string          `gorm:"type:varchar(50)"` // Warden only
+	Place           ComplaintPlace  `gorm:"type:varchar(20)"`
 	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
 	Title           string          `gorm:"not null"`
 	Description     string          `gorm:"type:text;not null"`
@@ -61,13 +57,45 @@ type Complaint struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 
-	Comments []Comment `gorm:"foreignKey:ComplaintID"`
+	Comments []Comment `gorm:"polymorphic:Commentable;"`
+}
+
+type WardenComplaint struct {
+	ID              uint            `gorm:"primaryKey;autoIncrement"`
+	WardenID        *uint           // Link to Warden
+	RoomNumber      string          `gorm:"type:varchar(50)"`
+	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
+	Title           string          `gorm:"not null"`
+	Description     string          `gorm:"type:text;not null"`
+	Status          ComplaintStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
+	Stage           ComplaintStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
+	AssignedJE_ID   *uint           // Populated when AE delegates to JE
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+
+	Comments []Comment `gorm:"polymorphic:Commentable;"`
+}
+
+type CentreHeadComplaint struct {
+	ID              uint            `gorm:"primaryKey;autoIncrement"`
+	CentreHeadID    *uint           // Link to CentreHead
+	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
+	Title           string          `gorm:"not null"`
+	Description     string          `gorm:"type:text;not null"`
+	Status          ComplaintStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
+	Stage           ComplaintStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
+	AssignedJE_ID   *uint           // Populated when AE delegates to JE
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+
+	Comments []Comment `gorm:"polymorphic:Commentable;"`
 }
 
 type Comment struct {
-	ID          uint      `gorm:"primaryKey;autoIncrement"`
-	ComplaintID uint      `gorm:"not null"`
-	AdminID     uint      `gorm:"not null"`
-	CommentText string    `gorm:"type:text;not null"`
-	CreatedAt   time.Time
+	ID              uint      `gorm:"primaryKey;autoIncrement"`
+	CommentableID   uint      `gorm:"not null"`
+	CommentableType string    `gorm:"type:varchar(50);not null"`
+	AdminID         uint      `gorm:"not null"`
+	CommentText     string    `gorm:"type:text;not null"`
+	CreatedAt       time.Time
 }
