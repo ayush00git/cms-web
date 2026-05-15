@@ -11,7 +11,10 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error while loading the environment variables")
+	}
 	config.ConnectDB()
 
 	r := gin.Default()
