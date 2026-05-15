@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(email string) (string, error) {
+func GenerateToken(id uint, email string) (string, error) {
 	secretKey := []byte(GetEnv("JWT_SECRET"))
 
 	// define the algorithm to sign the header and payload with

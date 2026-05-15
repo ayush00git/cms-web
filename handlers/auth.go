@@ -96,7 +96,7 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	}
 
 	// sign a jwt and store it in cookies
-	token, err := helpers.GenerateToken(inputs.Email)
+	token, err := helpers.GenerateToken(faculty.ID, faculty.Email)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "unable to sign the jwt token"})
 		return
@@ -183,7 +183,7 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(inputs.Email)
+	token, err := helpers.GenerateToken(warden.ID, warden.Email)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "unable to sign the jwt token"})
 		return
@@ -270,7 +270,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(inputs.Email)
+	token, err := helpers.GenerateToken(head.ID, head.Email)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "unable to sign the jwt token"})
 		return
@@ -331,7 +331,7 @@ func (h *AuthHandler) AdminLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(inputs.Email)
+	token, err := helpers.GenerateToken(admin.ID, admin.Email)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "failed signing the jwt token"})
 		return
