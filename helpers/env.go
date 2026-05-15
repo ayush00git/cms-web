@@ -3,18 +3,12 @@ package helpers
 import (
 	"log"
 	"os"
-	"github.com/joho/godotenv"
 )
 
-func GetEnv(target string) (string) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error while loading the environment variables")
-	}
-
+func GetEnv(target string) string {
 	value := os.Getenv(target)
 	if value == "" {
-		log.Fatalf("No value for %s exists in environment variables", value)
+		log.Fatalf("No value for %s exists in environment variables", target)
 	}
 	return value
 }
