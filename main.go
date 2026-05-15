@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/ayush00git/cms-web/config"
 	"github.com/ayush00git/cms-web/handlers"
@@ -27,13 +28,11 @@ func main() {
 		DB: config.DB,
 	}
 
-	routes.AuthRoute(r, authHandler)
-
 	complaintHandler := &handlers.ComplaintHandler{
 		DB: config.DB,
 	}
 
-	// Setup application routes
+	routes.AuthRoute(r, authHandler)
 	routes.ComplaintRoute(r, complaintHandler)
 
 	r.Run(":8080")
