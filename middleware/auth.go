@@ -24,7 +24,7 @@ func IsAuthenticated() (gin.HandlerFunc) {
 
 		// if not found means user is unauthenticated
 		if tokenString == "" {
-			c.JSON(401, gin.H{"error": "authentication is not completed"})
+			c.JSON(401, gin.H{"error": "unauthentication user"})
 			c.Abort()
 			return
 		}
@@ -38,9 +38,9 @@ func IsAuthenticated() (gin.HandlerFunc) {
 		}
 
 		// gin context injections
-		c.Set(UserIDKey, claims.ID)
+		c.Set(UserIDKey, claims.UserId)
 		c.Set(EmailKey, claims.Email)
-
+		
 		c.Next()
 	}
 }
