@@ -41,14 +41,14 @@ const (
 
 type FacultyComplaint struct {
 	ID              	uint            	`gorm:"primaryKey;autoIncrement" json:"id"`
-	FacultyID       	*uint           	`gorm:"not null" json:"faculty_id"`
+	FacultyID       	uint           		`gorm:"not null" json:"faculty_id"`
 	Place           	ComplaintPlace  	`gorm:"type:varchar(20);not null" json:"place" binding:"required"`
 	TypeOfComplaint 	ComplaintType   	`gorm:"type:varchar(20);not null" json:"type_of_complaint" binding:"required"`
 	Title           	string          	`gorm:"type:varchar(50);not null" json:"title" binding:"required"`
 	Description     	string          	`gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          	ComplaintStatus 	`gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
 	Stage           	ComplaintStage  	`gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
-	AssignedJE_ID   	*uint           	`gorm:"not null" json:"assigned_je_id"`
+	AssignedJE_ID   	*uint           	`json:"assigned_je_id"`
 	CreatedAt       	time.Time			`json:"created_at"`
 	UpdatedAt       	time.Time			`json:"updated_at"`
 
@@ -57,14 +57,14 @@ type FacultyComplaint struct {
 
 type WardenComplaint struct {
 	ID              	uint            	`gorm:"primaryKey;autoIncrement" json:"id"`
-	WardenID        	*uint           	`gorm:"not null" json:"warden_id"`
+	WardenID        	uint         	  	`gorm:"not null" json:"warden_id"`
 	RoomNumber      	string          	`gorm:"type:varchar(50)" json:"room_number" binding:"required"`
 	TypeOfComplaint 	ComplaintType   	`gorm:"type:varchar(20);not null" json:"type_of_complaint" binding:"required"`
-	Title           	string          	`gorm:"not null" json:"titile" binding:"required"`
+	Title           	string          	`gorm:"not null" json:"title" binding:"required"`
 	Description     	string          	`gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          	ComplaintStatus 	`gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
 	Stage           	ComplaintStage  	`gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
-	AssignedJE_ID   	*uint           	`gorm:"not null" json:"assigned_je_id"`
+	AssignedJE_ID   	*uint           	`json:"assigned_je_id"`
 	CreatedAt       	time.Time			`json:"created_at"`
 	UpdatedAt       	time.Time			`json:"updated_at"`
 
@@ -73,13 +73,13 @@ type WardenComplaint struct {
 
 type CentreHeadComplaint struct {
 	ID              	uint            	`gorm:"primaryKey;autoIncrement" json:"id"`
-	CentreHeadID    	*uint           	`gotm:"" json:"centre_head_id"`
+	CentreHeadID    	uint        	   	`gotm:"" json:"centre_head_id"`
 	TypeOfComplaint 	ComplaintType   	`gorm:"type:varchar(20);not null" json:"type_of_complaint" binding:"required"`
 	Title           	string          	`gorm:"not null" json:"title" binding:"required"`
 	Description     	string          	`gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          	ComplaintStatus 	`gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
 	Stage           	ComplaintStage  	`gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
-	AssignedJE_ID   	*uint           	`gorm:"not null" json:"assigned_je_id"`
+	AssignedJE_ID   	*uint           	`json:"assigned_je_id"`
 	CreatedAt       	time.Time			`json:"created_at"`
 	UpdatedAt       	time.Time			`json:"updated_at"`
 
