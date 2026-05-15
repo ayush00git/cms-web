@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"time"
 	"net/http"
 
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -13,119 +15,96 @@ type ComplaintHandler struct {
 	DB *gorm.DB
 }
 
-// Let faculty members submit a new complaint
-func (h *ComplaintHandler) FacultyReportComplaint(c *gin.Context) {
-	var input struct {
-		FacultyID       uint                  `json:"faculty_id" binding:"required"`
-		Place           models.ComplaintPlace `json:"place" binding:"required"`
-		TypeOfComplaint models.ComplaintType  `json:"type_of_complaint" binding:"required"`
-		Title           string                `json:"title" binding:"required"`
-		Description     string                `json:"description" binding:"required"`
-	}
+// FacultyReportComplaint registers the complaint of faculty members.
+// forwards the complaint to the associated XEN.
+func (h *ComplaintHandler) FacultyComplaint (c *gin.Context) {
+	var inputs models.FacultyComplaint
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	complaint := models.FacultyComplaint{
-		FacultyID:       &input.FacultyID,
-		Place:           input.Place,
-		TypeOfComplaint: input.TypeOfComplaint,
-		Title:           input.Title,
-		Description:     input.Description,
-		Status:          models.StatusPendingXEN,
-		Stage:           models.StageXEN,
+	// gets userId from the context keys set by the IsAuthenticated middleware
+	facultyId, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "unauthenticated access"})
+		return
 	}
+	inputs.FacultyID = facultyId.(uint)
 
-	if h.DB != nil {
-		h.DB.Create(&complaint)
+	inputs.CreatedAt = time.Now()
+	inputs.UpdatedAt = time.Now()
+
+	result := h.DB.Create(&inputs)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
+		return
 	}
-
-	xenEmail := "xen_civil@nit.edu"
-	if input.TypeOfComplaint == models.TypeElectrical {
-		xenEmail = "xen_electrical@nit.edu"
-	}
-
-	fmt.Printf("Email to %s: New Faculty Complaint - A new %s complaint was reported: %s\n", xenEmail, input.TypeOfComplaint, input.Title)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
+	
+	c.JSON(201, gin.H{"success": "complaint submitted successfully", "complaint": inputs})
 }
 
-// Let wardens submit a complaint for their hostel
-func (h *ComplaintHandler) WardenReportComplaint(c *gin.Context) {
-	var input struct {
-		WardenID        uint                 `json:"warden_id" binding:"required"`
-		TypeOfComplaint models.ComplaintType `json:"type_of_complaint" binding:"required"`
-		RoomNumber      string               `json:"room_number" binding:"required"`
-		Title           string               `json:"title" binding:"required"`
-		Description     string               `json:"description" binding:"required"`
-	}
+// WardenComplaint registers the complaint of warden members.
+// forwards the complaint to the associated XEN.
+func (h *ComplaintHandler) WardenComplaint (c *gin.Context) {
+	var inputs models.WardenComplaint
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	complaint := models.WardenComplaint{
-		WardenID:        &input.WardenID,
-		RoomNumber:      input.RoomNumber,
-		TypeOfComplaint: input.TypeOfComplaint,
-		Title:           input.Title,
-		Description:     input.Description,
-		Status:          models.StatusPendingXEN,
-		Stage:           models.StageXEN,
+	// gets userId from the context keys set by the IsAuthenticated middleware
+	wardenId, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "unauthenticated access"})
+		return
+	}
+	inputs.WardenID = wardenId.(uint)
+
+	// set default values
+	inputs.CreatedAt = time.Now()
+	inputs.UpdatedAt = time.Now()
+
+	result := h.DB.Create(&inputs)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
+		return
 	}
 
-	if h.DB != nil {
-		h.DB.Create(&complaint)
-	}
-
-	xenEmail := "xen_civil@nit.edu"
-	if input.TypeOfComplaint == models.TypeElectrical {
-		xenEmail = "xen_electrical@nit.edu"
-	}
-
-	fmt.Printf("Email to %s: New Warden Complaint - A new %s complaint was reported for room %s: %s\n", xenEmail, input.TypeOfComplaint, input.RoomNumber, input.Title)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
+	c.JSON(201, gin.H{"error": "Complaint submitted successfully", "complaint": inputs})
 }
 
-// Let Centre Heads submit complaints for their department
-func (h *ComplaintHandler) CentreHeadReportComplaint(c *gin.Context) {
-	var input struct {
-		CentreHeadID    uint                 `json:"centre_head_id" binding:"required"`
-		TypeOfComplaint models.ComplaintType `json:"type_of_complaint" binding:"required"`
-		Title           string               `json:"title" binding:"required"`
-		Description     string               `json:"description" binding:"required"`
-	}
+// CentreHeadComplaint registers the complaint of centre-head members.
+// forwards the complaint to the associated XEN.
+func (h *ComplaintHandler) CentreHeadComplaint (c *gin.Context) {
+	var inputs models.CentreHeadComplaint
 
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	complaint := models.CentreHeadComplaint{
-		CentreHeadID:    &input.CentreHeadID,
-		TypeOfComplaint: input.TypeOfComplaint,
-		Title:           input.Title,
-		Description:     input.Description,
-		Status:          models.StatusPendingXEN,
-		Stage:           models.StageXEN,
+	// gets userId from the context keys set by the IsAuthenticated middleware
+	centreheadId, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "unauthenticated access"})
+		return
+	}
+	inputs.CentreHeadID = centreheadId.(uint)
+
+	// set default values
+	inputs.CreatedAt = time.Now()
+	inputs.UpdatedAt = time.Now()
+
+	result := h.DB.Create(&inputs)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed inserting to table"})
+		return
 	}
 
-	if h.DB != nil {
-		h.DB.Create(&complaint)
-	}
-
-	xenEmail := "xen_civil@nit.edu"
-	if input.TypeOfComplaint == models.TypeElectrical {
-		xenEmail = "xen_electrical@nit.edu"
-	}
-
-	fmt.Printf("Email to %s: New Centre Head Complaint - A new %s complaint was reported by Centre Head: %s\n", xenEmail, input.TypeOfComplaint, input.Title)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Complaint submitted successfully", "complaint": complaint})
+	c.JSON(201, gin.H{"message": "Complaint submitted successfully", "complaint": inputs})
 }
 
 // Allow XEN to review the complaint and either pass it forward or reject it
