@@ -33,9 +33,9 @@ func ConnectDB() {
 		&models.Faculty{},
 		&models.Warden{},
 		&models.CentreHead{},
-		&models.FacultyComplaint{},
-		&models.WardenComplaint{},
-		&models.CentreHeadComplaint{},
+		&models.FacultyPost{},
+		&models.WardenPost{},
+		&models.CentreHeadPost{},
 		&models.Comment{},
 	)
 
