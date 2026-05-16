@@ -12,7 +12,11 @@ func ComplaintRoute(e *gin.Engine, h *handlers.ComplaintHandler) {
 	e.POST("/api/complaint/warden", middleware.IsAuthenticated(), h.WardenComplaint)
 	e.POST("/api/complaint/centre_head", middleware.IsAuthenticated(), h.CentreHeadComplaint)
 
-	e.POST("/api/post/faculty/edit/:post_id", middleware.IsAuthenticated(), h.FacultyPostEdit)
-	e.POST("/api/post/warden/edit/:post_id", middleware.IsAuthenticated(), h.WardenPostEdit)
-	e.POST("/api/post/centre_head/edit/:post_id", middleware.IsAuthenticated(), h.CentreHeadPostEdit)
+	e.PUT("/api/post/faculty/edit/:post_id", middleware.IsAuthenticated(), h.FacultyPostEdit)
+	e.PUT("/api/post/warden/edit/:post_id", middleware.IsAuthenticated(), h.WardenPostEdit)
+	e.PUT("/api/post/centre_head/edit/:post_id", middleware.IsAuthenticated(), h.CentreHeadPostEdit)
+
+	e.DELETE("/api/post/faculty/delete/:post_id", middleware.IsAuthenticated(), h.FacultyPostDelete)
+	e.DELETE("/api/post/warden/delete/:post_id", middleware.IsAuthenticated(), h.WardenPostDelete)
+	e.DELETE("/api/post/centre_head/delete/:post_id", middleware.IsAuthenticated(), h.CentreHeadPostDelete)
 }
