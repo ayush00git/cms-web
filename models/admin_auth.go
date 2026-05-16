@@ -4,21 +4,21 @@ import (
 	"time"
 )
 
-type AdminPost string
+type PositionType string
 const (
-	TypeXENCivil 		AdminPost = "XEN_Civil"
-	TypeAECivil 		AdminPost = "AE_Civil"
-	TypeJECivil 		AdminPost = "JE_Civil"
-	TypeXENElectrical 	AdminPost = "XEN_Electrical"
-	TypeAEElectrical 	AdminPost = "AE_Electrical"
-	TypeJEElectrical 	AdminPost = "JE_Electrical"
+	TypeXENCivil 		PositionType = "XEN_Civil"
+	TypeAECivil 		PositionType = "AE_Civil"
+	TypeJECivil 		PositionType = "JE_Civil"
+	TypeXENElectrical 	PositionType = "XEN_Electrical"
+	TypeAEElectrical 	PositionType = "AE_Electrical"
+	TypeJEElectrical 	PositionType = "JE_Electrical"
 )
 
 type Admin struct {
 	ID				uint			`gorm:"primaryKey;autoIncrement" json:"id"`
 	Email			string			`gorm:"uniqueIndex;not null" json:"email"`
 	Password		string			`gorm:"not null" json:"password"`
-	Post			AdminPost		`gorm:"type:varchar(15);unique;not null" json:"post"`
+	Post			PositionType	`gorm:"type:varchar(15);unique;not null" json:"post"`
 	IsVerified		bool			`gorm:"default:false" json:"is_verified"`
 	CreatedAt		time.Time		`json:"created_at"`
 }

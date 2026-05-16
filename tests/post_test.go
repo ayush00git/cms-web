@@ -2,75 +2,119 @@ package tests
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ayush00git/cms-web/handlers"
-	"github.com/gin-gonic/gin"
+	"github.com/ayush00git/cms-web/models"
+	"github.com/stretchr/testify/assert"
 )
 
-func setupTestRouter() *gin.Engine {
-	r := gin.Default()
-	
-	postHandler := &handlers.PostHandler{}
-	
-	postGroup := r.Group("/post")
-	{
-		postGroup.POST("/faculty", postHandler.FacultyReportPost)
-		postGroup.POST("/warden", postHandler.WardenReportPost)
-		postGroup.GET("/public", postHandler.GetPublicDashboard)
-	}
-	
-	return r
-}
+func TestPostWorkflow(t *testing.T) {
+	db := SetupTestDB()
+	router := SetupTestRouter(db)
 
-func TestFacultyReportPost_InvalidInput(t *testing.T) {
-	router := setupTestRouter()
+	var facultyPostID uint
 
-	body := []byte(`{"title":"Fix the sink","description":"Sink in dept is leaking","place":"Departmental"}`)
-	
-	req, _ := http.NewRequest("POST", "/post/faculty", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	t.Run("Faculty Report Post", func(t *testing.T) {
+		postData := map[string]interface{}{
+			"faculty_id":   1,
+			"place":        "Departmental",
+			"type_of_post": "Civil",
+			"title":        "Leaking Pipe",
+			"description":  "The pipe in CSE lab is leaking.",
+		}
+		body, _ := json.Marshal(postData)
+		req, _ := http.NewRequest("POST", "/faculty/post/report", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("Expected status Bad Request, got %v", w.Code)
-	}
-}
+		assert.Equal(t, http.StatusOK, w.Code)
+		
+		var resp map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+		post := resp["post"].(map[string]interface{})
+		facultyPostID = uint(post["ID"].(float64))
+	})
 
-func TestFacultyReportPost_ValidInput(t *testing.T) {
-	// Skipping actual route execution to avoid DB panic, but compile check setup logic.
-	_ = setupTestRouter()
+	t.Run("XEN Pass Post to AE", func(t *testing.T) {
+		updateData := map[string]interface{}{
+			"source":   "Faculty",
+			"post_id":  facultyPostID,
+			"action":   "pass",
+			"comment":  "Forwarding to AE for technical review",
+			"admin_id": 1,
+		}
+		body, _ := json.Marshal(updateData)
+		req, _ := http.NewRequest("POST", "/admin/xen/post/status", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
 
-	body := []byte(`{
-		"title": "Fix the sink",
-		"description": "Sink in dept is leaking",
-		"place": "Departmental",
-		"type_of_post": "Civil"
-	}`)
-	
-	req, _ := http.NewRequest("POST", "/post/faculty", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	
-	w := httptest.NewRecorder()
-	
-	if w.Code != http.StatusOK && w.Code != http.StatusInternalServerError {
-		// Just ensuring the setup logic compiles and works conceptually
-	}
-}
+		assert.Equal(t, http.StatusOK, w.Code)
 
-func TestPublicDashboard(t *testing.T) {
-	_ = setupTestRouter()
+		var post models.FacultyPost
+		db.First(&post, facultyPostID)
+		assert.Equal(t, models.StatusPendingAE, post.Status)
+		assert.Equal(t, models.StageAE, post.Stage)
+	})
 
-	req, _ := http.NewRequest("GET", "/post/public", nil)
-	
-	w := httptest.NewRecorder()
-	
-	if w.Code != http.StatusOK && w.Code != http.StatusInternalServerError {
-		// Route compiles.
-	}
-	_ = req // using variable to prevent compile error
+	t.Run("AE Pass Post to JE", func(t *testing.T) {
+		updateData := map[string]interface{}{
+			"source":        "Faculty",
+			"post_id":       facultyPostID,
+			"action":        "pass",
+			"comment":       "Assigning to JE Sharma",
+			"select_je_id":  10,
+			"admin_id":      2,
+		}
+		body, _ := json.Marshal(updateData)
+		req, _ := http.NewRequest("POST", "/admin/ae/post/status", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var post models.FacultyPost
+		db.First(&post, facultyPostID)
+		assert.Equal(t, models.StatusPendingJE, post.Status)
+		assert.Equal(t, models.StageJE, post.Stage)
+		assert.Equal(t, uint(10), *post.AssignedJE_ID)
+	})
+
+	t.Run("JE Resolve Post", func(t *testing.T) {
+		updateData := map[string]interface{}{
+			"source":   "Faculty",
+			"post_id":  facultyPostID,
+			"action":   "resolve",
+			"comment":  "Fixed the leak.",
+			"admin_id": 10,
+		}
+		body, _ := json.Marshal(updateData)
+		req, _ := http.NewRequest("POST", "/admin/je/post/status", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var post models.FacultyPost
+		db.First(&post, facultyPostID)
+		assert.Equal(t, models.StatusResolved, post.Status)
+	})
+
+	t.Run("Public Dashboard", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/posts/public", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		
+		var resp map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+		assert.NotNil(t, resp["faculty_posts"])
+	})
 }
