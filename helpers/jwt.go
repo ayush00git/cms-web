@@ -1,32 +1,21 @@
 package helpers
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type Claims struct {
-	UserId		uint		`json:"user_id"`
-	Email		string		`json:"email"`
-	jwt.RegisteredClaims
-}
-
-func GenerateToken(id uint, email string) (string, error) {
+func GenerateToken(email string) (string, error) {
 	secretKey := []byte(GetEnv("JWT_SECRET"))
 
-	claims := Claims{
-		UserId: id,
-		Email: email,
-        RegisteredClaims: jwt.RegisteredClaims{
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
-            IssuedAt: jwt.NewNumericDate(time.Now()), 
-        },
-	}
-
 	// define the algorithm to sign the header and payload with
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"email": email,
+			"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		})
 	
 	// signing the header and payload to get token
 	tokenString, err := token.SignedString(secretKey)
@@ -37,22 +26,21 @@ func GenerateToken(id uint, email string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) (*Claims, error) {
+func VerifyToken(tokenString string) (error) {
 	secretKey := []byte(GetEnv("JWT_SECRET"))
 
 	// parsing the jwt string
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, 
-		func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error){
 		return secretKey, nil
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Valid method is populated while we parse a type *jwt.Token
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil
+	if !token.Valid {
+		return fmt.Errorf("Invalid token")
 	}
-	return nil, errors.New("Invalid token")
+	return nil
 }
