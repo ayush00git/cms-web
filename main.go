@@ -29,12 +29,12 @@ func main() {
 
 	routes.AuthRoute(r, authHandler)
 
-	complaintHandler := &handlers.ComplaintHandler{
+	postHandler := &handlers.PostHandler{
 		DB: config.DB,
 	}
 
 	// Setup application routes
-	routes.ComplaintRoute(r, complaintHandler)
+	routes.PostRoute(r, postHandler)
 
 	r.Run(":8080")
 	fmt.Println("Sevrer running on port 8080")

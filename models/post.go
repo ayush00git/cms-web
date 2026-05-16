@@ -4,55 +4,55 @@ import (
 	"time"
 )
 
-type ComplaintSource string
+type PostSource string
 
 const (
-	SourceFaculty    ComplaintSource = "Faculty"
-	SourceWarden     ComplaintSource = "Warden"
-	SourceCentreHead ComplaintSource = "CentreHead"
+	SourceFaculty    PostSource = "Faculty"
+	SourceWarden     PostSource = "Warden"
+	SourceCentreHead PostSource = "CentreHead"
 )
 
-type ComplaintPlace string
+type PostPlace string
 
 const (
-	PlaceResidential  ComplaintPlace = "Residential"
-	PlaceDepartmental ComplaintPlace = "Departmental"
+	PlaceResidential  PostPlace = "Residential"
+	PlaceDepartmental PostPlace = "Departmental"
 )
 
-type ComplaintType string
+type PostType string
 
 const (
-	TypeCivil      ComplaintType = "Civil"
-	TypeElectrical ComplaintType = "Electrical"
+	TypeCivil      PostType = "Civil"
+	TypeElectrical PostType = "Electrical"
 )
 
-type ComplaintStatus string
+type PostStatus string
 
 const (
-	StatusPendingXEN ComplaintStatus = "Pending_XEN"
-	StatusPendingAE  ComplaintStatus = "Pending_AE"
-	StatusPendingJE  ComplaintStatus = "Pending_JE"
-	StatusResolved   ComplaintStatus = "Resolved"
-	StatusRejected   ComplaintStatus = "Rejected"
+	StatusPendingXEN PostStatus = "Pending_XEN"
+	StatusPendingAE  PostStatus = "Pending_AE"
+	StatusPendingJE  PostStatus = "Pending_JE"
+	StatusResolved   PostStatus = "Resolved"
+	StatusRejected   PostStatus = "Rejected"
 )
 
-type ComplaintStage string
+type PostStage string
 
 const (
-	StageXEN ComplaintStage = "XEN"
-	StageAE  ComplaintStage = "AE"
-	StageJE  ComplaintStage = "JE"
+	StageXEN PostStage = "XEN"
+	StageAE  PostStage = "AE"
+	StageJE  PostStage = "JE"
 )
 
-type FacultyComplaint struct {
+type FacultyPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement"`
 	FacultyID       *uint           // Link to Faculty
-	Place           ComplaintPlace  `gorm:"type:varchar(20)"`
-	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
+	Place           PostPlace  `gorm:"type:varchar(20)"`
+	TypeOfPost PostType   `gorm:"type:varchar(20);not null"`
 	Title           string          `gorm:"not null"`
 	Description     string          `gorm:"type:text;not null"`
-	Status          ComplaintStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
-	Stage           ComplaintStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
+	Status          PostStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
+	Stage           PostStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
 	AssignedJE_ID   *uint           // Populated when AE delegates to JE
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -60,15 +60,15 @@ type FacultyComplaint struct {
 	Comments []Comment `gorm:"polymorphic:Commentable;"`
 }
 
-type WardenComplaint struct {
+type WardenPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement"`
 	WardenID        *uint           // Link to Warden
 	RoomNumber      string          `gorm:"type:varchar(50)"`
-	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
+	TypeOfPost PostType   `gorm:"type:varchar(20);not null"`
 	Title           string          `gorm:"not null"`
 	Description     string          `gorm:"type:text;not null"`
-	Status          ComplaintStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
-	Stage           ComplaintStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
+	Status          PostStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
+	Stage           PostStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
 	AssignedJE_ID   *uint           // Populated when AE delegates to JE
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -76,14 +76,14 @@ type WardenComplaint struct {
 	Comments []Comment `gorm:"polymorphic:Commentable;"`
 }
 
-type CentreHeadComplaint struct {
+type CentreHeadPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement"`
 	CentreHeadID    *uint           // Link to CentreHead
-	TypeOfComplaint ComplaintType   `gorm:"type:varchar(20);not null"`
+	TypeOfPost PostType   `gorm:"type:varchar(20);not null"`
 	Title           string          `gorm:"not null"`
 	Description     string          `gorm:"type:text;not null"`
-	Status          ComplaintStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
-	Stage           ComplaintStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
+	Status          PostStatus `gorm:"type:varchar(20);not null;default:'Pending_XEN'"`
+	Stage           PostStage  `gorm:"type:varchar(20);not null;default:'XEN'"`
 	AssignedJE_ID   *uint           // Populated when AE delegates to JE
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
