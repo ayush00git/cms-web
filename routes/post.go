@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ComplaintRoute(e *gin.Engine, h *handlers.ComplaintHandler) {
-	e.POST("/api/complaint/faculty", middleware.IsAuthenticated(), h.FacultyComplaint)
-	e.POST("/api/complaint/warden", middleware.IsAuthenticated(), h.WardenComplaint)
-	e.POST("/api/complaint/centre_head", middleware.IsAuthenticated(), h.CentreHeadComplaint)
+func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
+	e.POST("/api/post/faculty", middleware.IsAuthenticated(), h.FacultyPost)
+	e.POST("/api/post/warden", middleware.IsAuthenticated(), h.WardenPost)
+	e.POST("/api/post/centre_head", middleware.IsAuthenticated(), h.CentreHeadPost)
 
 	e.PUT("/api/post/faculty/edit/:post_id", middleware.IsAuthenticated(), h.FacultyPostEdit)
 	e.PUT("/api/post/warden/edit/:post_id", middleware.IsAuthenticated(), h.WardenPostEdit)

@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type ComplaintHandler struct {
+type PostHandler struct {
 	DB *gorm.DB
 }
 
@@ -38,10 +38,10 @@ type CentreHeadPostEditType struct {
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
-// FacultyReportComplaint registers the complaint of faculty members.
-// forwards the complaint to the associated XEN.
-func (h *ComplaintHandler) FacultyComplaint (c *gin.Context) {
-	var inputs models.FacultyComplaint
+// FacultyPost registers the post of faculty members.
+// forwards the post to the associated XEN.
+func (h *PostHandler) FacultyPost (c *gin.Context) {
+	var inputs models.FacultyPost
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -65,13 +65,13 @@ func (h *ComplaintHandler) FacultyComplaint (c *gin.Context) {
 		return
 	}
 	
-	c.JSON(201, gin.H{"success": "complaint submitted successfully", "complaint": inputs})
+	c.JSON(201, gin.H{"success": "post submitted successfully", "post": inputs})
 }
 
-// WardenComplaint registers the complaint of warden members.
-// forwards the complaint to the associated XEN.
-func (h *ComplaintHandler) WardenComplaint (c *gin.Context) {
-	var inputs models.WardenComplaint
+// WardenPost registers the post of warden members.
+// forwards the post to the associated XEN.
+func (h *PostHandler) WardenPost (c *gin.Context) {
+	var inputs models.WardenPost
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -96,13 +96,13 @@ func (h *ComplaintHandler) WardenComplaint (c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, gin.H{"error": "Complaint submitted successfully", "complaint": inputs})
+	c.JSON(201, gin.H{"success": "post submitted successfully", "post": inputs})
 }
 
-// CentreHeadComplaint registers the complaint of centre-head members.
-// forwards the complaint to the associated XEN.
-func (h *ComplaintHandler) CentreHeadComplaint (c *gin.Context) {
-	var inputs models.CentreHeadComplaint
+// CentreHeadPost registers the post of centre-head members.
+// forwards the post to the associated XEN.
+func (h *PostHandler) CentreHeadPost (c *gin.Context) {
+	var inputs models.CentreHeadPost
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -127,12 +127,12 @@ func (h *ComplaintHandler) CentreHeadComplaint (c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, gin.H{"message": "Complaint submitted successfully", "complaint": inputs})
+	c.JSON(201, gin.H{"success": "post submitted successfully", "post": inputs})
 }
 
 // FacultyPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *ComplaintHandler) FacultyPostEdit (c *gin.Context) {
+func (h *PostHandler) FacultyPostEdit (c *gin.Context) {
 	// who is trying to edit the post
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -140,7 +140,7 @@ func (h *ComplaintHandler) FacultyPostEdit (c *gin.Context) {
 		return
 	}
 	
-	var post models.FacultyComplaint
+	var post models.FacultyPost
 	// who is the owner of the post
 	postID := c.Param("post_id")
 	result := h.DB.Where("id = ?", postID).Take(&post)
@@ -176,7 +176,7 @@ func (h *ComplaintHandler) FacultyPostEdit (c *gin.Context) {
 
 // WardenPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *ComplaintHandler) WardenPostEdit (c *gin.Context) {
+func (h *PostHandler) WardenPostEdit (c *gin.Context) {
 	// get the id of the user from gin context
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -184,7 +184,7 @@ func (h *ComplaintHandler) WardenPostEdit (c *gin.Context) {
 		return
 	}
 
-	var post models.WardenComplaint
+	var post models.WardenPost
 	postID := c.Param("post_id")
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
@@ -218,9 +218,9 @@ func (h *ComplaintHandler) WardenPostEdit (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "post updated successfully"})
 }
 
-// WardenPostEdit let's the author of the post edit it.
+// CentreHeadPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *ComplaintHandler) CentreHeadPostEdit (c *gin.Context) {
+func (h *PostHandler) CentreHeadPostEdit (c *gin.Context) {
 	// get the id of the user from gin context
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -228,7 +228,7 @@ func (h *ComplaintHandler) CentreHeadPostEdit (c *gin.Context) {
 		return
 	}
 
-	var post models.CentreHeadComplaint
+	var post models.CentreHeadPost
 	postID := c.Param("post_id")
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
@@ -264,7 +264,7 @@ func (h *ComplaintHandler) CentreHeadPostEdit (c *gin.Context) {
 
 // FacultyPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *ComplaintHandler) FacultyPostDelete (c *gin.Context) {
+func (h *PostHandler) FacultyPostDelete (c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -274,7 +274,7 @@ func (h *ComplaintHandler) FacultyPostDelete (c *gin.Context) {
 
 	// get postID from parameters and fetch the post
 	postID := c.Param("post_id")
-	var post models.FacultyComplaint
+	var post models.FacultyPost
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -300,7 +300,7 @@ func (h *ComplaintHandler) FacultyPostDelete (c *gin.Context) {
 
 // WardenPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *ComplaintHandler) WardenPostDelete (c *gin.Context) {
+func (h *PostHandler) WardenPostDelete (c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -310,7 +310,7 @@ func (h *ComplaintHandler) WardenPostDelete (c *gin.Context) {
 
 	// get postID from parameters and fetch the post
 	postID := c.Param("post_id")
-	var post models.WardenComplaint
+	var post models.WardenPost
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -336,7 +336,7 @@ func (h *ComplaintHandler) WardenPostDelete (c *gin.Context) {
 
 // CentreHeadPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *ComplaintHandler) CentreHeadPostDelete (c *gin.Context) {
+func (h *PostHandler) CentreHeadPostDelete (c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -346,7 +346,7 @@ func (h *ComplaintHandler) CentreHeadPostDelete (c *gin.Context) {
 
 	// get postID from parameters and fetch the post
 	postID := c.Param("post_id")
-	var post models.CentreHeadComplaint
+	var post models.CentreHeadPost
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
