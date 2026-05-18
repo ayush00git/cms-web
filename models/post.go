@@ -88,9 +88,10 @@ type CentreHeadPost struct {
 
 type Comment struct {
 	ID              uint      		`gorm:"primaryKey;autoIncrement" json:"id"`
-	CommentableID   uint      		`gorm:"not null" json:"commentable_id"`
-	CommentableType string    		`gorm:"type:varchar(50);not null" json:"commentable_type"`
-	AdminID         uint      		`gorm:"not null" json:"admin_id"`
-	CommentText     string    		`gorm:"type:text;not null" json:"comment_text"`
+	CommentableID	uint			`gorm:"not null"`
+	CommentableType string      	`gorm:"not null"`
+	Content     	string    		`gorm:"type:text;not null" json:"comment_text"`
+	AuthorID		uint			`gorm:"not null" json:"author_id"`
 	CreatedAt       time.Time		`json:"created_at"`
+	UpdatedAt		time.Time		`json:"updated_at"`
 }

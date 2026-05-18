@@ -21,9 +21,5 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 		centrehead.POST("/signup", h.CentreHeadSignup)
 		centrehead.POST("/login", h.CentreHeadLogin)
 	}
-	admin := e.Group("/api/auth/admin")
-	{
-		admin.POST("/login", h.AdminLogin)
-	}
 	e.POST("/api/auth/logout", h.Logout)
 }

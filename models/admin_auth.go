@@ -18,7 +18,7 @@ type Admin struct {
 	ID				uint			`gorm:"primaryKey;autoIncrement" json:"id"`
 	Email			string			`gorm:"uniqueIndex;not null" json:"email"`
 	Password		string			`gorm:"not null" json:"password"`
-	Position		PositionType	`gorm:"type:varchar(15);unique;not null" json:"position"`
+	Position		PositionType	`gorm:"type:varchar(15);not null" json:"position"`
 	IsVerified		bool			`gorm:"default:false" json:"is_verified"`
 	CreatedAt		time.Time		`json:"created_at"`
 }
