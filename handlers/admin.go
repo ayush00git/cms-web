@@ -99,7 +99,7 @@ func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 	result := h.DB.Where("email = ?", emailID).Take(&admin)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			c.JSON(401, gin.H{"error": "you are not authorized for this action"})
+			c.JSON(404, gin.H{"error": "no authorization for accessing this page"})
 			return
 		}
 		c.JSON(500, gin.H{"error": "internal server error"})
@@ -162,3 +162,43 @@ func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }
+
+// func (h *AdminHandler) AdminPostStatus (c *gin.Context) {
+// 	adminEmail, exists := c.Get(middleware.EmailKey)
+// 	if !exists {
+// 		c.JSON(401, gin.H{"error": "permission denied"})
+// 		return
+// 	}
+
+// 	var admin models.Admin
+// 	result := h.DB.Where("email = ?", adminEmail).Take(admin)
+// 	if result.Error != nil {
+// 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+// 			c.JSON(404, gin.H{"error": "no authorization for accessing this page"})
+// 			return
+// 		}
+// 		c.JSON(500, gin.H{"error": "internal server error"})
+// 		return
+// 	}
+
+// 	postIdString := c.Param("post_id")
+// 	postId, err := strconv.ParseUint(postIdString, 10, 64)
+// 	if err != nil {
+// 		c.JSON(500, gin.H{"error": "failed parsing the post_id"})
+// 		return
+// 	}
+
+// 	tableMap := map[string]interface{} {
+// 		"faculty_posts": &models.FacultyPost{},
+// 		"warden_posts": &models.WardenPost{},
+// 		"centrehead_posts": &models.CentreHeadPost{},
+// 	}
+
+// 	postType := c.Param("post_type")
+// 	postModel, ok := tableMap[postType]
+// 	if !ok {
+// 		c.JSON(404, gin.H{"error": "invalid post type"})
+// 		return
+// 	}
+
+// }
