@@ -16,8 +16,8 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	stage := e.Group("/api/admin")
 	{
 		stage.PATCH("/faculty_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminFacultyPostStatus)
-		// stage.PATCH("/warden_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminWardenPostStatus)
-		// stage.PATCH("/centre_head_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreHeadPostStatus)
+		stage.PATCH("/warden_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminWardenPostStatus)
+		stage.PATCH("/centre_head_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreHeadPostStatus)
 	}
 
 }

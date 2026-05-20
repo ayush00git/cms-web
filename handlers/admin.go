@@ -210,6 +210,9 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 	// accepted / rejected type of response would be accepted by the admin
 	// true by XEN means send it to Pending_AE status
 	// false by XEN means post is closed
+	// only a XEN is allowed to open/close the post
+	// je can't close the post as the post query is resolved by him, he just sends a signal "Resolved_JE"
+	
 	var review AdminReview
 	if err := c.ShouldBindJSON(&review); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -285,42 +288,234 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "status updated"})
 }
 
-// func (h *AdminHandler) AdminPostStatus (c *gin.Context) {
-// 	adminEmail, exists := c.Get(middleware.EmailKey)
-// 	if !exists {
-// 		c.JSON(401, gin.H{"error": "permission denied"})
-// 		return
-// 	}
+// AdminWardenPostStatus sets the stage of the warden posts
+func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
+	adminEmail, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "permission denied"})
+		return
+	}
 
-// 	var admin models.Admin
-// 	result := h.DB.Where("email = ?", adminEmail).Take(admin)
-// 	if result.Error != nil {
-// 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-// 			c.JSON(404, gin.H{"error": "no authorization for accessing this page"})
-// 			return
-// 		}
-// 		c.JSON(500, gin.H{"error": "internal server error"})
-// 		return
-// 	}
+	var admin models.Admin
+	result := h.DB.Where("email = ?", adminEmail).Take(&admin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "no authorization for accessing this page"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
 
-// 	postIdString := c.Param("post_id")
-// 	postId, err := strconv.ParseUint(postIdString, 10, 64)
-// 	if err != nil {
-// 		c.JSON(500, gin.H{"error": "failed parsing the post_id"})
-// 		return
-// 	}
+	postIDString := c.Param("post_id")
+	postID, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse post_id"})
+		return
+	}
 
-// 	tableMap := map[string]interface{} {
-// 		"faculty_posts": &models.FacultyPost{},
-// 		"warden_posts": &models.WardenPost{},
-// 		"centrehead_posts": &models.CentreHeadPost{},
-// 	}
+	// see if this post exists
+	var post models.WardenPost
+	result = h.DB.Where("id = ?", uint(postID)).Take(&post)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "post not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	
+	// accepted / rejected type of response would be accepted by the admin
+	// true by XEN means send it to Pending_AE status
+	// false by XEN means post is closed
+	var review AdminReview
+	if err := c.ShouldBindJSON(&review); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
 
-// 	postType := c.Param("post_type")
-// 	postModel, ok := tableMap[postType]
-// 	if !ok {
-// 		c.JSON(404, gin.H{"error": "invalid post type"})
-// 		return
-// 	}
 
-// }
+	switch post.Status {
+	case "Pending_XEN" :
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "to_ae" {
+			post.Status = "Pending_AE"
+		} else if review.Review == "open" {
+			post.Status = "Pending_XEN"
+		} else if review.Review == "close" {
+			post.Status = "Closed"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	
+	case "Pending_AE":
+		if !strings.Contains(string(admin.Position), "AE") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "to_je" {
+			post.Status = "Pending_JE"
+		} else if review.Review == "require_review" {
+			post.Status = "Pending_XEN"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+
+	case "Pending_JE":
+		if !strings.Contains(string(admin.Position), "JE") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "resolved" {
+			post.Status = "Resolved_JE"
+		} else if review.Review == "require_review" {
+			post.Status = "Pending_AE"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	case "Closed":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "open" {
+			post.Status = "Pending_XEN"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	default:
+		c.JSON(400, gin.H{"error": "invalid review type"})
+		return
+	}
+
+	result = h.DB.Model(&post).Updates(post)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed updating the post"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "status updated"})
+}
+
+// AdminCentreHeadPostStatus sets the stage of the centre_head posts
+func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
+	adminEmail, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "permission denied"})
+		return
+	}
+
+	var admin models.Admin
+	result := h.DB.Where("email = ?", adminEmail).Take(&admin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "no authorization for accessing this page"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	postIDString := c.Param("post_id")
+	postID, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse post_id"})
+		return
+	}
+
+	// see if this post exists
+	var post models.CentreHeadPost
+	result = h.DB.Where("id = ?", uint(postID)).Take(&post)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "post not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	
+	// accepted / rejected type of response would be accepted by the admin
+	// true by XEN means send it to Pending_AE status
+	// false by XEN means post is closed
+	var review AdminReview
+	if err := c.ShouldBindJSON(&review); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+
+	switch post.Status {
+	case "Pending_XEN" :
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "to_ae" {
+			post.Status = "Pending_AE"
+		} else if review.Review == "open" {
+			post.Status = "Pending_XEN"
+		} else if review.Review == "close" {
+			post.Status = "Closed"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	
+	case "Pending_AE":
+		if !strings.Contains(string(admin.Position), "AE") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "to_je" {
+			post.Status = "Pending_JE"
+		} else if review.Review == "require_review" {
+			post.Status = "Pending_XEN"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+
+	case "Pending_JE":
+		if !strings.Contains(string(admin.Position), "JE") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "resolved" {
+			post.Status = "Resolved_JE"
+		} else if review.Review == "require_review" {
+			post.Status = "Pending_AE"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	case "Closed":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "open" {
+			post.Status = "Pending_XEN"
+		} else {
+			c.JSON(400, gin.H{"error": "invalid review type"})
+			return
+		}
+	default:
+		c.JSON(400, gin.H{"error": "invalid review type"})
+		return
+	}
+
+	result = h.DB.Model(&post).Updates(post)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed updating the post"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "status updated"})
+}
