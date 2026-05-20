@@ -25,11 +25,12 @@ const (
 
 type PostStatus string
 const (
-	StatusPendingXEN PostStatus = "Pending_XEN"
+	StatusPendingXEN PostStatus = "Pending_XEN" // default to open post
 	StatusPendingAE  PostStatus = "Pending_AE"
 	StatusPendingJE  PostStatus = "Pending_JE"
+	StatusResolvedJE  PostStatus = "Resolved_JE"
 	StatusResolved   PostStatus = "Resolved"
-	StatusRejected   PostStatus = "Rejected"
+	StatusRejected   PostStatus = "Closed"
 )
 
 type PostStage string
