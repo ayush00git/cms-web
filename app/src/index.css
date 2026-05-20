@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #003366; /* Deep Blue typical of NITH */
+  --color-primary-light: #00509e;
+  --color-secondary: #f0f4f8; /* Light gray for backgrounds */
+  --color-accent: #ff9900; /* Orange/Yellow for highlights */
+  --color-text-dark: #333333;
+  --color-text-light: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-[var(--color-text-dark)] font-sans antialiased min-h-screen;
+    margin: 0;
+    padding: 0;
+  }
+}
