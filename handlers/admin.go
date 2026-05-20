@@ -86,7 +86,8 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
 
-
+// AdminPost comment allow any admin comment on any type of post.
+// Common for all type of admins and posts.
 func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 	// verify the admin
 	emailID, exists := c.Get(middleware.EmailKey)
