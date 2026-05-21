@@ -66,7 +66,7 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(admin.ID, admin.Email)
+	token, err := helpers.GenerateToken(admin.ID, admin.Email, "admin")
 	if err != nil {
 		c.JSON(500, gin.H{"error": "failed to generate a token"})
 		return

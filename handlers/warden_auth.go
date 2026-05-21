@@ -82,7 +82,7 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(warden.ID, warden.Email)
+	token, err := helpers.GenerateToken(warden.ID, warden.Email, "warden")
 	if err != nil {
 		c.JSON(500, gin.H{"error": "unable to sign the jwt token"})
 		return

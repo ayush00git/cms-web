@@ -82,7 +82,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(head.ID, head.Email)
+	token, err := helpers.GenerateToken(head.ID, head.Email, "centrehead")
 	if err != nil {
 		c.JSON(500, gin.H{"error": "unable to sign the jwt token"})
 		return
@@ -99,20 +99,4 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	)
 	
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
-}
-
-
-// Logout clears the token stored in httpCookie.
-// User is set to unauthenticated.
-func (h *AuthHandler) Logout (c *gin.Context) {
-	c.SetCookie(
-		"token",
-		" ",
-		-1,
-		"/",
-		"localhost",
-		false,
-		true,
-	)
-	c.JSON(200, gin.H{"success": "logged out successfully!"})
 }
