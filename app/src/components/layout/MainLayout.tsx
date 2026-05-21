@@ -10,12 +10,12 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="d-flex flex-column min-vh-100 bg-light">
       <TopBar />
       <Header />
       <Navbar />
       
-      <div className="flex-grow flex flex-col">
+      <div className="flex-grow-1 d-flex flex-column">
         {children}
       </div>
 
