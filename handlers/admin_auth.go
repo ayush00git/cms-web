@@ -32,6 +32,8 @@ import (
 // 	c.JSON(201, gin.H{"success": "admin registered successfully!"})
 // }
 
+// Note that for admins as they are pre-set to the service the
+// isVerified field is always by default true.
 // AdminLogin authenticates the admin using email and password.
 // On success, signs a JWT and stores it in an httpOnly cookie.
 func (h *AdminHandler) AdminLogin (c *gin.Context) {
@@ -50,6 +52,11 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 			return
 		}
 		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	if admin.IsVerified == false {
+		c.JSON(401, gin.H{"error": "unverified user"})
 		return
 	}
 
