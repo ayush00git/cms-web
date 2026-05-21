@@ -4,13 +4,13 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 
-	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 // CentreHeadSignup registers the head of adminstrations.
@@ -40,18 +40,33 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 	
-	result := h.DB.Create(&centrehead)
-	if result.Error != nil {
-		pgErr, ok := result.Error.(*pgconn.PgError)
-		if ok && pgErr.Code == "23505" {
-			c.JSON(409, gin.H{"error": "email already registered"})
+	var existingUser models.CentreHead
+	result := h.DB.Where("email = ?", centrehead.Email).Take(&existingUser)
+	if result.Error == nil {
+		if !existingUser.IsVerified {
+			if err := services.SendVerificationMail(existingUser.ID, existingUser.Email, "centrehead"); err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(200, gin.H{"success": "email sent for verification"})
 			return
 		}
+		c.JSON(409, gin.H{"error": "email is already registered, please login"})
+		return
+	}
+
+	result = h.DB.Create(&centrehead)
+	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
 
-	c.JSON(201, gin.H{"success": "signup success!"})
+	if err := services.SendVerificationMail(centrehead.ID, centrehead.Email, "centrehead"); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(201, gin.H{"success": "check your email inbox for the getting in"})
 }
 
 
@@ -73,6 +88,11 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 			return
 		}
 		c.JSON(404, gin.H{"error": "internal server error"})
+		return
+	}
+
+	if head.IsVerified == false {
+		c.JSON(403, gin.H{"error": "please verify your account first"})
 		return
 	}
 
