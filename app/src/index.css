@@ -1,52 +1,19 @@
-:root {
-  --color-primary: #003366;
-  --color-primary-light: #00509e;
-  --color-secondary: #f0f4f8;
-  --color-accent: #ff9900;
-  --color-text-dark: #333333;
-  --color-text-light: #ffffff;
+@import "tailwindcss";
+
+@theme {
+  --color-nith-primary: #003366;
+  --color-nith-primary-light: #00509e;
+  --color-nith-secondary: #f0f4f8;
+  --color-nith-accent: #ff9900;
 }
 
-body {
-  font-family: sans-serif;
-  background-color: var(--color-secondary);
-  color: var(--color-text-dark);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-}
-
-.bg-nith-primary {
-  background-color: var(--color-primary) !important;
-  color: var(--color-text-light) !important;
-}
-
-.bg-nith-primary-light {
-  background-color: var(--color-primary-light) !important;
-  color: var(--color-text-light) !important;
-}
-
-.bg-nith-accent {
-  background-color: var(--color-accent) !important;
-  color: white !important;
-}
-
-.text-nith-primary {
-  color: var(--color-primary) !important;
-}
-
-.text-nith-accent {
-  color: var(--color-accent) !important;
-}
-
-.border-nith-primary {
-  border-color: var(--color-primary) !important;
-}
-
-.border-nith-accent {
-  border-color: var(--color-accent) !important;
-}
-
-.hover-bg-nith-primary-light:hover {
-  background-color: var(--color-primary-light) !important;
+@layer base {
+  body {
+    background-color: var(--color-nith-secondary);
+    color: #333333;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
 }

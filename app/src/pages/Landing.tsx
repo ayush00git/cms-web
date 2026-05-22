@@ -6,67 +6,67 @@ export function Landing() {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <div className="w-100 position-relative border-bottom border-4 border-nith-accent overflow-hidden" style={{ height: '400px' }}>
+      <div className="w-full relative border-b-4 border-nith-accent overflow-hidden h-[400px]">
         <img 
           src="https://upload.wikimedia.org/wikipedia/commons/c/ca/NIT_Hamirpur%2C_Himachal_Pradesh.jpg" 
           alt="NIT Hamirpur Campus" 
-          className="w-100 h-100 object-fit-cover"
+          className="w-full h-full object-cover"
         />
-        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
-          <h2 className="display-5 fw-bold text-center mb-3">Complaint Management System</h2>
-          <p className="fs-5 text-center">Estate Office, National Institute of Technology Hamirpur</p>
+        <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-white bg-black/30">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-3">Complaint Management System</h2>
+          <p className="text-lg md:text-xl text-center">Estate Office, National Institute of Technology Hamirpur</p>
         </div>
       </div>
 
       {/* Quick Tracking Bar */}
-      <div className="bg-light border-bottom border-secondary shadow-sm py-4">
-        <div className="container d-flex flex-column flex-md-row align-items-center justify-content-center gap-3">
-          <div className="fs-5 fw-semibold text-nith-primary">Quick Track:</div>
-          <div className="input-group w-100" style={{ maxWidth: '600px' }}>
+      <div className="bg-white border-b border-gray-200 shadow-sm py-6">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-center gap-4">
+          <div className="text-xl font-semibold text-nith-primary">Quick Track:</div>
+          <div className="flex w-full max-w-[600px] shadow-sm rounded-md overflow-hidden">
             <input 
               type="text" 
               placeholder="Enter your Complaint ID (e.g. CMS-1042)" 
-              className="form-control form-control-lg border-0 shadow-sm"
+              className="flex-grow px-4 py-3 border border-r-0 border-gray-300 focus:outline-none focus:border-nith-primary focus:ring-1 focus:ring-nith-primary"
             />
-            <button className="btn bg-nith-accent fw-bold text-white shadow-sm d-flex align-items-center px-4">
-              <Search className="me-2" size={20} /> Track Status
+            <button className="bg-nith-accent hover:bg-orange-600 transition-colors font-bold text-white px-6 py-3 flex items-center whitespace-nowrap">
+              <Search className="mr-2" size={20} /> Track Status
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content Grid */}
-      <main className="container flex-grow-1 py-5">
-        <div className="row g-4">
+      <main className="container mx-auto px-4 flex-grow py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Estate Office Notices */}
-          <div className="col-12 col-md-4">
-            <div className="card h-100 shadow-sm border-0">
-              <div className="card-header bg-nith-primary text-white py-3 fw-semibold d-flex justify-content-between align-items-center rounded-top">
-                <span className="mb-0">Estate Office Notices</span>
-                <button className="btn btn-sm bg-nith-accent text-white py-0 px-2" style={{ fontSize: '0.75rem' }}>View All</button>
+          <div className="col-span-1">
+            <div className="bg-white h-full shadow-sm rounded-md overflow-hidden border border-gray-100 flex flex-col">
+              <div className="bg-nith-primary text-white py-3 px-4 font-semibold flex justify-between items-center">
+                <span className="m-0">Estate Office Notices</span>
+                <button className="bg-nith-accent hover:bg-orange-600 transition-colors text-white py-1 px-3 text-xs rounded">View All</button>
               </div>
-              <div className="card-body overflow-auto" style={{ maxHeight: '350px' }}>
-                <ul className="list-unstyled mb-0">
-                  <li className="border-bottom pb-3 mb-3">
-                    <span className="badge bg-danger mb-2">Urgent</span>
-                    <a href="#" className="d-block text-dark text-decoration-none fw-medium small mb-1 hover-text-nith-primary-light">
+              <div className="p-4 overflow-y-auto max-h-[350px] flex-grow">
+                <ul className="list-none m-0 p-0">
+                  <li className="border-b border-gray-100 pb-3 mb-3">
+                    <span className="inline-block bg-red-600 text-white text-xs px-2 py-0.5 rounded mb-2">Urgent</span>
+                    <a href="#" className="block text-gray-800 no-underline font-medium text-sm mb-1 hover:text-nith-primary-light">
                       Scheduled Power Outage in Main Admin Block due to HT panel maintenance.
                     </a>
-                    <small className="text-secondary">20 May, 2026</small>
+                    <span className="text-xs text-gray-500">20 May, 2026</span>
                   </li>
-                  <li className="border-bottom pb-3 mb-3">
-                    <span className="badge bg-nith-accent mb-2">New</span>
-                    <a href="#" className="d-block text-dark text-decoration-none fw-medium small mb-1 hover-text-nith-primary-light">
+                  <li className="border-b border-gray-100 pb-3 mb-3">
+                    <span className="inline-block bg-nith-accent text-white text-xs px-2 py-0.5 rounded mb-2">New</span>
+                    <a href="#" className="block text-gray-800 no-underline font-medium text-sm mb-1 hover:text-nith-primary-light">
                       Water supply disruption expected in Kailash Boys Hostel for pipe repair.
                     </a>
-                    <small className="text-secondary">18 May, 2026</small>
+                    <span className="text-xs text-gray-500">18 May, 2026</span>
                   </li>
-                  <li className="border-bottom pb-3 mb-3">
-                    <a href="#" className="d-block text-dark text-decoration-none fw-medium small mb-1 hover-text-nith-primary-light">
+                  <li className="border-b border-gray-100 pb-3 mb-3">
+                    <a href="#" className="block text-gray-800 no-underline font-medium text-sm mb-1 hover:text-nith-primary-light">
                       Annual AC servicing schedule released for Departmental Buildings.
                     </a>
-                    <small className="text-secondary">15 May, 2026</small>
+                    <span className="text-xs text-gray-500">15 May, 2026</span>
                   </li>
                 </ul>
               </div>
@@ -74,33 +74,33 @@ export function Landing() {
           </div>
 
           {/* Guidelines & Manuals */}
-          <div className="col-12 col-md-4">
-            <div className="card h-100 shadow-sm border-0">
-              <div className="card-header bg-nith-primary text-white py-3 fw-semibold d-flex justify-content-between align-items-center rounded-top">
-                <span className="mb-0">Filing Guidelines</span>
+          <div className="col-span-1">
+            <div className="bg-white h-full shadow-sm rounded-md overflow-hidden border border-gray-100 flex flex-col">
+              <div className="bg-nith-primary text-white py-3 px-4 font-semibold flex justify-between items-center">
+                <span className="m-0">Filing Guidelines</span>
               </div>
-              <div className="card-body overflow-auto" style={{ maxHeight: '350px' }}>
-                <ul className="list-unstyled mb-0">
-                  <li className="d-flex align-items-start border-bottom pb-3 mb-3">
-                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle me-3 mt-1">1</span>
-                    <a href="#" className="text-dark text-decoration-none fw-medium small hover-text-nith-primary-light">
+              <div className="p-4 overflow-y-auto max-h-[350px] flex-grow">
+                <ul className="list-none m-0 p-0">
+                  <li className="flex items-start border-b border-gray-100 pb-3 mb-3">
+                    <span className="bg-blue-50 text-blue-600 border border-blue-200 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">1</span>
+                    <a href="#" className="text-gray-800 no-underline font-medium text-sm hover:text-nith-primary-light">
                       Select correct category (Civil/Electrical) to avoid delays.
                     </a>
                   </li>
-                  <li className="d-flex align-items-start border-bottom pb-3 mb-3">
-                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle me-3 mt-1">2</span>
-                    <a href="#" className="text-dark text-decoration-none fw-medium small hover-text-nith-primary-light">
+                  <li className="flex items-start border-b border-gray-100 pb-3 mb-3">
+                    <span className="bg-blue-50 text-blue-600 border border-blue-200 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">2</span>
+                    <a href="#" className="text-gray-800 no-underline font-medium text-sm hover:text-nith-primary-light">
                       Provide accurate location (Building/Room No) in the description.
                     </a>
                   </li>
-                  <li className="d-flex align-items-start border-bottom pb-3 mb-3">
-                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle me-3 mt-1">3</span>
-                    <a href="#" className="text-dark text-decoration-none fw-medium small hover-text-nith-primary-light">
+                  <li className="flex items-start border-b border-gray-100 pb-3 mb-3">
+                    <span className="bg-blue-50 text-blue-600 border border-blue-200 w-6 h-6 rounded flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">3</span>
+                    <a href="#" className="text-gray-800 no-underline font-medium text-sm hover:text-nith-primary-light">
                       Only Wardens can file complaints for hostel common areas.
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-nith-primary-light fw-bold small text-decoration-none">
+                    <a href="#" className="text-nith-primary-light font-bold text-sm no-underline hover:underline">
                       Read Complete Manual &rarr;
                     </a>
                   </li>
@@ -110,25 +110,25 @@ export function Landing() {
           </div>
 
           {/* Quick Links & Portal Access */}
-          <div className="col-12 col-md-4">
-            <div className="card h-100 shadow-sm border-0">
-              <div className="card-header bg-nith-primary text-white py-3 fw-semibold d-flex justify-content-between align-items-center rounded-top">
-                <span className="mb-0">Portal Access</span>
+          <div className="col-span-1">
+            <div className="bg-white h-full shadow-sm rounded-md overflow-hidden border border-gray-100 flex flex-col">
+              <div className="bg-nith-primary text-white py-3 px-4 font-semibold flex justify-between items-center">
+                <span className="m-0">Portal Access</span>
               </div>
-              <div className="card-body d-flex flex-column gap-3 p-4">
-                <Link to="/login/faculty" className="btn btn-nith-primary-light text-white w-100 py-2 fw-semibold border-0" style={{ backgroundColor: 'var(--color-primary-light)' }}>
+              <div className="flex flex-col gap-3 p-5 flex-grow">
+                <Link to="/login/faculty" className="bg-nith-primary-light hover:bg-nith-primary transition-colors text-white text-center w-full py-2.5 rounded font-semibold no-underline">
                   Login as Faculty
                 </Link>
-                <Link to="/login/warden" className="btn btn-nith-primary-light text-white w-100 py-2 fw-semibold border-0" style={{ backgroundColor: 'var(--color-primary-light)' }}>
+                <Link to="/login/warden" className="bg-nith-primary-light hover:bg-nith-primary transition-colors text-white text-center w-full py-2.5 rounded font-semibold no-underline">
                   Login as Warden
                 </Link>
-                <Link to="/login/centre-head" className="btn btn-nith-primary-light text-white w-100 py-2 fw-semibold border-0" style={{ backgroundColor: 'var(--color-primary-light)' }}>
+                <Link to="/login/centre-head" className="bg-nith-primary-light hover:bg-nith-primary transition-colors text-white text-center w-full py-2.5 rounded font-semibold no-underline">
                   Login as Centre Head
                 </Link>
                 
-                <div className="mt-auto pt-4 border-top">
-                  <p className="small text-secondary mb-2">Estate Office Administration</p>
-                  <Link to="/login/staff" className="btn btn-outline-primary text-nith-primary border-nith-primary w-100 py-2 fw-semibold">
+                <div className="mt-auto pt-5 border-t border-gray-100">
+                  <p className="text-sm text-gray-500 mb-2">Estate Office Administration</p>
+                  <Link to="/login/staff" className="block text-center border-2 border-nith-primary text-nith-primary hover:bg-nith-primary hover:text-white transition-colors w-full py-2 rounded font-semibold no-underline">
                     Staff Login (XEN / AE / JE)
                   </Link>
                 </div>
