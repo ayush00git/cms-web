@@ -4,31 +4,33 @@ export function StaffLogin() {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div className="w-full max-w-md bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-          <div className="bg-[#003366] text-white px-6 py-4">
-            <h2 className="text-xl font-bold">Estate Office Staff Login</h2>
-            <p className="text-sm text-blue-200 mt-1">Secure portal for XEN / AE / JE.</p>
+        <div className="bg-white w-full shadow-sm border border-gray-100 rounded-md overflow-hidden max-w-[450px]">
+          <div className="bg-nith-primary text-white py-4 px-5">
+            <h2 className="text-lg font-bold mb-1">Estate Office Staff Login</h2>
+            <p className="text-sm text-white/70 mb-0">Secure portal for XEN / AE / JE.</p>
           </div>
           
-          <form className="p-6 space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Staff Email Address</label>
-                <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#00509e]" placeholder="staff@nith.ac.in" required />
+          <div className="p-6">
+            <form>
+              <div className="mb-6">
+                <div className="mb-4">
+                  <label className="block font-semibold text-gray-800 text-sm mb-1.5">Staff Email Address</label>
+                  <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-nith-primary focus:ring-1 focus:ring-nith-primary" placeholder="staff@nith.ac.in" required />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block font-semibold text-gray-800 text-sm mb-1.5">Password</label>
+                  <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-nith-primary focus:ring-1 focus:ring-nith-primary" placeholder="••••••••" required />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Password</label>
-                <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#00509e]" placeholder="••••••••" required />
+              <div className="pt-4 border-t border-gray-100">
+                <button type="submit" className="bg-nith-primary-light hover:bg-nith-primary transition-colors text-white font-bold w-full py-2.5 rounded">
+                  Login to Portal
+                </button>
               </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100">
-              <button type="submit" className="w-full bg-[#00509e] hover:bg-[#003366] text-white font-bold py-3 px-4 rounded transition-colors">
-                Login to Portal
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </MainLayout>
