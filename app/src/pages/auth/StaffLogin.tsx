@@ -100,7 +100,7 @@ export function StaffLogin() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 cursor-pointer"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -113,7 +113,7 @@ export function StaffLogin() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50"
+                className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Logging in to Portal...' : 'Login to Portal'}
               </button>

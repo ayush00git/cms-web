@@ -1,8 +1,17 @@
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 
 export function Landing() {
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch('/api/profile', { credentials: 'include' })
+      .then(res => setIsAuth(res.ok))
+      .catch(() => setIsAuth(false));
+  }, []);
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -126,11 +135,27 @@ export function Landing() {
           </div>
 
           {/* Quick Links & Portal Access */}
-          <div className="col-span-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col h-[400px]">
+          <div className="col-span-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
             <div className="bg-[#2d2d2d] text-white px-4 py-2 font-semibold flex justify-between items-center">
               <span>Portal Access</span>
             </div>
-            <div className="p-6 overflow-y-auto flex-grow flex flex-col space-y-4">
+            <div className="p-6 flex-grow flex flex-col space-y-4">
+
+              {/* Profile section */}
+              {isAuth === true && (
+                <Link
+                  to="/profile"
+                  className="w-full bg-[#ff9900] hover:bg-orange-500 text-white py-3 rounded text-sm font-semibold transition-colors text-center block"
+                >
+                  My Profile
+                </Link>
+              )}
+              {isAuth === false && (
+                <p className="text-xs text-center text-gray-400 py-1">
+                  <span className="font-semibold text-[#4a4a4a]">New here?</span> Signup to create a profile.
+                </p>
+              )}
+
               <Link to="/faculty/login" className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white py-3 rounded text-sm font-semibold transition-colors text-center block">
                 Login as Faculty
               </Link>

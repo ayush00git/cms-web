@@ -105,7 +105,7 @@ export function WardenLogin() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 cursor-pointer"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -118,14 +118,14 @@ export function WardenLogin() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50"
+                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>
             
             <p className="text-center text-sm text-gray-600 mt-4">
-              Don't have an account? <Link to="/warden/signup" className="text-[#4a4a4a] font-semibold hover:underline">Register here</Link>
+              Don't have an account? <Link to="/warden/signup" className="text-[#4a4a4a] font-semibold hover:underline cursor-pointer">Register here</Link>
             </p>
           </form>
         </div>

@@ -220,14 +220,14 @@ export function FacultySignup() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50"
+                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Registering...' : 'Register as Faculty'}
               </button>
             </div>
             
             <p className="text-center text-sm text-gray-600 mt-4">
-              Already registered? <Link to="/faculty/login" className="text-[#4a4a4a] font-semibold hover:underline">Login here</Link>
+              Already registered? <Link to="/faculty/login" className="text-[#4a4a4a] font-semibold hover:underline cursor-pointer">Login here</Link>
             </p>
           </form>
         </div>

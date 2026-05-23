@@ -7,6 +7,7 @@ import { FacultyLogin } from './pages/auth/FacultyLogin';
 import { WardenLogin } from './pages/auth/WardenLogin';
 import { CentreHeadLogin } from './pages/auth/CentreHeadLogin';
 import { StaffLogin } from './pages/auth/StaffLogin';
+import { VerifyAccount } from './pages/auth/VerifyAccount';
 import { FacultyPost } from './pages/post/FacultyPost';
 import { WardenPost } from './pages/post/WardenPost';
 import { CentreHeadPost } from './pages/post/CentreHeadPost';
@@ -27,6 +28,7 @@ function App() {
         <Route path="/faculty/post" element={<FacultyPost />} />
         <Route path="/warden/post" element={<WardenPost />} />
         <Route path="/centre-head/post" element={<CentreHeadPost />} />
+        <Route path="/account/verify" element={<VerifyAccount />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
