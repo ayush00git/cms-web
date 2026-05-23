@@ -48,6 +48,16 @@ export const HOSTELS = [
   { value: "Aravali Girls Hostel", label: "Aravali Girls Hostel" }
 ];
 
+export const POST_PLACES = [
+  { value: "Residential", label: "Residential" },
+  { value: "Departmental", label: "Departmental" }
+];
+
+export const POST_TYPES = [
+  { value: "Civil", label: "Civil" },
+  { value: "Electrical", label: "Electrical" }
+];
+
 export const BUILDINGS = [
   { value: "Administrative Block", label: "Administrative Block" },
   { value: "Deans' Block", label: "Deans' Block" },

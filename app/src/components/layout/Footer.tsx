@@ -2,7 +2,7 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-[#002244] text-gray-300 py-10 border-t-4 border-[#ff9900] mt-auto">
+    <footer className="bg-[#1e1e1e] text-gray-300 py-5 border-t-4 border-[#ff9900] mt-auto">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 className="text-white font-bold text-lg mb-4">NIT Hamirpur</h3>

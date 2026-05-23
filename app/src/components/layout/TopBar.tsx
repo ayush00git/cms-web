@@ -1,6 +1,6 @@
 export function TopBar() {
   return (
-    <div className="bg-[#003366] text-white py-1 px-4 text-xs">
+    <div className="bg-[#2d2d2d] text-white py-1 px-4 text-xs">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex space-x-4">
           <a href="#" className="hover:text-[#ff9900]">Grey Scale</a>
