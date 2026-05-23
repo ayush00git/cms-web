@@ -10,6 +10,7 @@ import (
 const (
 	UserIDKey	= "userId"
 	EmailKey	= "emailId"
+	RoleKey		= "role"
 )
 
 func IsAuthenticated() (gin.HandlerFunc) {
@@ -40,6 +41,7 @@ func IsAuthenticated() (gin.HandlerFunc) {
 		// gin context injections
 		c.Set(UserIDKey, claims.UserId)
 		c.Set(EmailKey, claims.Email)
+		c.Set(RoleKey, claims.Role)
 		
 		c.Next()
 	}
