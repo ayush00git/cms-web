@@ -48,7 +48,7 @@ func (h *AuthHandler) VerifyAccount (c *gin.Context) {
 		c.JSON(400, gin.H{"error": "role not defined"})
 		return
 	}
-	c.JSON(200, gin.H{"success": "account verified"})
+	c.JSON(200, gin.H{"success": "account verified", "role": claims.Role})
 }
 
 func (h *AuthHandler) UserProfile (c *gin.Context) {

@@ -42,7 +42,7 @@ func SendVerificationMail(userId uint, email, role string) (error) {
 	}
 
 	// create the verification url
-	verificationURL := fmt.Sprintf(`http://localhost:8080/api/auth/verify?token=%s`, token)
+	verificationURL := fmt.Sprintf(`http://localhost:5173/account/verify?token=%s`, token)
 
 	// send the email
 	mail := fmt.Sprintf(`
