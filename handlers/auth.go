@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 
 	"github.com/gin-gonic/gin"
@@ -48,4 +49,49 @@ func (h *AuthHandler) VerifyAccount (c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"success": "account verified"})
+}
+
+func (h *AuthHandler) UserProfile (c *gin.Context) {
+	// get role from gin context keys
+	role, exists := c.Get(middleware.RoleKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "access denied"})
+		return
+	}
+
+	// get email from context keys as well
+	email, exists := c.Get(middleware.EmailKey)
+
+	var userProfile any
+	switch role{
+	case "faculty":
+		var profile models.Faculty
+		result := h.DB.Where("email = ?", email).Take(&profile)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed to fetch user profile"})
+			return
+		}
+		userProfile = profile
+	case "warden":
+		var profile models.Warden
+		result := h.DB.Where("email = ?", email).Take(&profile)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed to fetch user profile"})
+			return
+		}
+		userProfile = profile
+	case "centrehead":
+		var profile models.CentreHead
+		result := h.DB.Where("email = ?", email).Take(&profile)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed to fetch user profile"})
+			return
+		}
+		userProfile = profile
+	default:
+		c.JSON(404, gin.H{"error": "undefined role"})
+		return
+	}
+
+	c.JSON(200, userProfile);
 }

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/ayush00git/cms-web/handlers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,4 +26,7 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 
 	// for account verifications
 	e.GET("/api/auth/verify", h.VerifyAccount)
+
+	// for returning the user's profile
+	e.GET("/api/profile", middleware.IsAuthenticated(), h.UserProfile)
 }
