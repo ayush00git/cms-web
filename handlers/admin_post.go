@@ -529,3 +529,59 @@ func (h *AdminHandler) GetXENPosts (c *gin.Context) {
 		"centre_head_posts": centreheadPosts,
 	})
 }
+
+// for now we treat 404 and 500 during fetching post the same
+func (h *AdminHandler) AdminGetPost (c *gin.Context) {
+	// get role and post_id from query parameters
+	role := c.Param("role")
+
+	postIDString := c.Param("post_id")
+	postID64, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse the post_id"})
+		return
+	}
+	postID := uint(postID64)
+	var reqPost any
+	// get the post table type from the role
+	switch role {
+	case "faculty":
+		var post models.FacultyPost
+		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
+			return db.Select("id, email, name, house_number, department, phone_number, block, type")
+		}).
+		Where("id = ?", postID).Take(&post)
+		if result.Error != nil {
+			c.JSON(404, gin.H{"error": "failed to fetch the post"})
+			return
+		}
+		reqPost = post
+	case "warden":
+		var post models.WardenPost
+		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
+			return db.Select("id, email, hostel, phone_number")
+		}).
+		Where("id = ?", postID).Take(&post)
+		if result.Error != nil {
+			c.JSON(404, gin.H{"error": "failed to fetch the post"})
+			return
+		}
+		reqPost = post
+	case "centrehead":
+		var post models.CentreHeadPost
+		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
+			return db.Select("id, email, building, phone_number")
+		}).
+		Where("id = ?", postID).Take(&post)
+		if result.Error != nil {
+			c.JSON(404, gin.H{"error": "failed to fetch the post"})
+			return
+		}
+		reqPost = post
+	default:
+		c.JSON(403, gin.H{"error": "undefined role"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": "post fetched", "post": reqPost})
+}

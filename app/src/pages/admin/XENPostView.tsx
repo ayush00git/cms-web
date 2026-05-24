@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
@@ -50,10 +50,11 @@ const STATUS_STYLES: Record<string, string> = {
 interface PostTileProps {
   label: string;
   icon: React.ReactNode;
+  role: string;
   posts: PostRow[];
 }
 
-function PostTile({ label, icon, posts }: PostTileProps) {
+function PostTile({ label, icon, role, posts }: PostTileProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
       {/* Tile header */}
@@ -73,8 +74,9 @@ function PostTile({ label, icon, posts }: PostTileProps) {
       ) : (
         <ul className="divide-y divide-gray-100">
           {posts.map((post) => (
-            <li
-              key={post.id}
+            <li key={post.id}>
+            <Link
+              to={`/admin/posts/${role}/${post.id}`}
               className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               {/* ID chip */}
@@ -91,6 +93,7 @@ function PostTile({ label, icon, posts }: PostTileProps) {
               <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
                 {post.status.replace('_', ' ')}
               </span>
+            </Link>
             </li>
           ))}
         </ul>
@@ -216,18 +219,21 @@ export function XENPostView() {
             <PostTile
               label="Faculty Posts"
               icon={<GraduationCap className="w-4 h-4" />}
+              role="faculty"
               posts={normalise(fp)}
             />
 
             <PostTile
               label="Warden Posts"
               icon={<BedDouble className="w-4 h-4" />}
+              role="warden"
               posts={normalise(wp)}
             />
 
             <PostTile
               label="Centre Head Posts"
               icon={<Building2 className="w-4 h-4" />}
+              role="centrehead"
               posts={normalise(cp)}
             />
           </div>
