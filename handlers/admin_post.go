@@ -474,6 +474,13 @@ func (h *AdminHandler) GetXENPosts (c *gin.Context) {
 		return
 	}
 
+	// only allow admins type XEN to enter this route
+	if admin.Position != "XEN_CIVIL" && admin.Position != "XEN_ELECTRICAL" {
+		c.JSON(403, gin.H{"error": "only XENs are allowed access to this page"})
+		return
+	}
+
+	// sort type_of_post according to position type of admins (civil / electrical)
 	var complaintType string
 	if strings.Contains(string(admin.Position), "CIVIL") {
 		complaintType = "Civil"
