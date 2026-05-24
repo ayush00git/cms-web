@@ -493,19 +493,30 @@ func (h *AdminHandler) GetXENPosts (c *gin.Context) {
 	var centreheadPosts []models.CentreHeadPost
 
 	// fetch faculty posts
-	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&facultyPosts)
+	// this api only returns the fields that are required at the
+	// main page of all queries
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
+	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("type_of_post = ?", complaintType).
+	Find(&facultyPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment"})
 		return
 	}
 
-	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&wardenPosts)
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
+	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("type_of_post = ?", complaintType).
+	Find(&wardenPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment"})
 		return
 	}
 
-	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&centreheadPosts)
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
+	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("type_of_post = ?", complaintType).
+	Find(&centreheadPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch centre head posts at the moment"})
 		return
