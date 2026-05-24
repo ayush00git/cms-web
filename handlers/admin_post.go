@@ -460,24 +460,45 @@ func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
 //"Resolved"
 //"Closed"
 func (h *AdminHandler) GetXENPosts (c *gin.Context) {
+
+	emailID, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "access denied"})
+		return
+	}
+
+	var admin models.Admin
+	result := h.DB.Where("email = ?", emailID).Take(&admin)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed at the moment"})
+		return
+	}
+
+	var complaintType string
+	if strings.Contains(string(admin.Position), "CIVIL") {
+		complaintType = "Civil"
+	} else {
+		complaintType = "Electrical"
+	}
+
 	var facultyPosts []models.FacultyPost
 	var wardenPosts []models.WardenPost
 	var centreheadPosts []models.CentreHeadPost
 
 	// fetch faculty posts
-	result := h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&facultyPosts)
+	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&facultyPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment"})
 		return
 	}
 
-	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&wardenPosts)
+	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&wardenPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment"})
 		return
 	}
 
-	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&centreheadPosts)
+	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Where("type_of_post = ?", complaintType).Find(&centreheadPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch centre head posts at the moment"})
 		return
