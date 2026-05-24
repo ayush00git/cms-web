@@ -25,7 +25,7 @@ func IsAuthenticated() (gin.HandlerFunc) {
 
 		// if not found means user is unauthenticated
 		if tokenString == "" {
-			c.JSON(401, gin.H{"error": "unauthentication user"})
+			c.JSON(401, gin.H{"error": "login first!"})
 			c.Abort()
 			return
 		}

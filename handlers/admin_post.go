@@ -452,3 +452,41 @@ func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"success": "status updated"})
 }
+
+//"Pending_XEN" // default to open post
+//"Pending_AE"
+//"Pending_JE"
+//"Resolved_JE"
+//"Resolved"
+//"Closed"
+func (h *AdminHandler) GetXENPosts (c *gin.Context) {
+	var facultyPosts []models.FacultyPost
+	var wardenPosts []models.WardenPost
+	var centreheadPosts []models.CentreHeadPost
+
+	// fetch faculty posts
+	result := h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&facultyPosts)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment"})
+		return
+	}
+
+	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&wardenPosts)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment"})
+		return
+	}
+
+	result = h.DB.Preload("Author").Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).Find(&centreheadPosts)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch centre head posts at the moment"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "posts fetched successfully",
+		"faculty_posts": facultyPosts,
+		"warden_posts": wardenPosts,
+		"centre_head_posts": centreheadPosts,
+	})
+}
