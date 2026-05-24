@@ -20,4 +20,13 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 		stage.PATCH("/centre_head_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreHeadPostStatus)
 	}
 
+	// get the posts according to the status
+	posts := e.Group("/api/admin")
+	{
+		posts.GET("xen/posts", middleware.IsAuthenticated(), h.GetXENPosts)
+	}
+
+
+	// for any post
+	e.GET("/api/admin/posts/:role/:post_id", middleware.IsAuthenticated(), h.AdminGetPost)
 }

@@ -42,7 +42,8 @@ const (
 
 type FacultyPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
-	FacultyID       uint           	`gorm:"not null" json:"faculty_id"`
+	FacultyID       uint        	`gorm:"not null" json:"faculty_id"`
+	Author			Faculty			`gorm:"foreignKey:FacultyID"`
 	Place           PostPlace  	    `gorm:"type:varchar(20);not null" json:"place" binding:"required"`
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
@@ -59,6 +60,7 @@ type FacultyPost struct {
 type WardenPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	WardenID        uint         	`gorm:"not null" json:"warden_id"`
+	Author			Warden			`gorm:"foreignKey:WardenID"`
 	RoomNumber      string          `gorm:"type:varchar(50)" json:"room_number" binding:"required"`
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
@@ -75,6 +77,7 @@ type WardenPost struct {
 type CentreHeadPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	CentreHeadID    uint        	`gorm:"not null" json:"centre_head_id"`
+	Author			CentreHead		`gorm:"foreignKey:CentreHeadID"`
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
