@@ -13,6 +13,8 @@ import { WardenPost } from './pages/post/WardenPost';
 import { CentreHeadPost } from './pages/post/CentreHeadPost';
 import { Profile } from './pages/profile/Profile';
 import { XENPostView } from './pages/admin/XENPostView';
+import { AEPostView } from './pages/admin/AEPostView';
+import { JEPostView } from './pages/admin/JEPostView';
 import { AdminPostView } from './pages/admin/AdminPostView';
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
         <Route path="/account/verify" element={<VerifyAccount />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin/xen" element={<XENPostView />} />
+        <Route path="/admin/ae" element={<AEPostView />} />
+        <Route path="/admin/je" element={<JEPostView />} />
         <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
       </Routes>
     </Router>
