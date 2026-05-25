@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -19,6 +19,7 @@ import {
   GraduationCap,
   BookOpen,
   Home,
+  Send,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
@@ -141,6 +142,13 @@ function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
+// Maps URL role param → API :type param
+const ROLE_TO_TYPE: Record<string, string> = {
+  faculty:     'faculty_posts',
+  warden:      'wardens_posts',
+  centrehead:  'centreheads_posts',
+};
+
 export function AdminPostView() {
   const { role, post_id } = useParams<{ role: string; post_id: string }>();
   const navigate = useNavigate();
@@ -149,7 +157,16 @@ export function AdminPostView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ message: string; status?: number } | null>(null);
 
-  useEffect(() => {
+  // Comment form state
+  const [commentText, setCommentText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // `silent` = background refresh after comment post (no full-page spinner)
+  const fetchPost = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     fetch(`/api/admin/posts/${role}/${post_id}`, { credentials: 'include' })
       .then(async (res) => {
         if (!res.ok) {
@@ -163,14 +180,63 @@ export function AdminPostView() {
       })
       .then((json: ApiResponse) => {
         setPost(json.post);
-        setLoading(false);
+        if (!silent) setLoading(false);
       })
       .catch((err: Error & { status?: number }) => {
-        setError({ message: err.message, status: err.status });
-        setLoading(false);
-        if (err.status === 401 || err.status === 403) setTimeout(() => navigate('/'), 4000);
+        if (!silent) {
+          setError({ message: err.message, status: err.status });
+          setLoading(false);
+          if (err.status === 401 || err.status === 403) setTimeout(() => navigate('/'), 4000);
+        }
       });
   }, [role, post_id, navigate]);
+
+  useEffect(() => { fetchPost(); }, [fetchPost]);
+
+  async function handleAddComment(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = commentText.trim();
+    if (!trimmed) return;
+
+    const postType = ROLE_TO_TYPE[role ?? ''];
+    if (!postType) {
+      setSubmitError('Unknown role — cannot post comment.');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      const res = await fetch(`/api/admin/comment/${postType}/${post_id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Content: trimmed }),
+      });
+
+      if (!res.ok) {
+        let msg = `Failed to post comment (${res.status})`;
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      setCommentText('');
+      setSubmitSuccess(true);
+      if (successTimer.current) clearTimeout(successTimer.current);
+      successTimer.current = setTimeout(() => setSubmitSuccess(false), 3000);
+      // Silent re-fetch so the new comment appears without a full-page spinner
+      fetchPost(true);
+    } catch (err) {
+      setSubmitError((err as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Clean up the success timer on unmount
+  useEffect(() => () => { if (successTimer.current) clearTimeout(successTimer.current); }, []);
 
   // ── Loading ──
   if (loading) {
@@ -322,7 +388,7 @@ export function AdminPostView() {
                 {comments.length === 0 ? (
                   <p className="text-sm text-gray-400 italic text-center py-6">No comments yet.</p>
                 ) : (
-                  <ul className="space-y-3">
+                  <ul className="space-y-3 mb-6">
                     {comments.map((c) => (
                       <li key={c.id} className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
                         <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>
@@ -333,6 +399,57 @@ export function AdminPostView() {
                     ))}
                   </ul>
                 )}
+
+                {/* ── Add comment form ── */}
+                <form
+                  onSubmit={handleAddComment}
+                  className={`pt-4 ${comments.length > 0 ? 'border-t border-gray-100' : ''}`}
+                >
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+                    Add a Comment
+                  </label>
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    disabled={submitting}
+                    placeholder="Write your comment here…"
+                    rows={3}
+                    className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50"
+                  />
+
+                  {/* Error / success feedback */}
+                  {submitError && (
+                    <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {submitError}
+                    </p>
+                  )}
+                  {submitSuccess && (
+                    <p className="mt-2 text-xs font-semibold text-emerald-600">
+                      ✓ Comment posted!
+                    </p>
+                  )}
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={submitting || !commentText.trim()}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Posting…
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          Comment
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
 
