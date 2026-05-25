@@ -10,7 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 // GetXENPosts fetch posts (all that were posted) where status of post is
 // Pending_XEN PENDING_AE PENDING_JE Resolved_JE Resolved Closed
 func (h *AdminHandler) GetXENPosts (c *gin.Context) {
@@ -122,7 +121,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 	var centreheadPosts []models.CentreHeadPost
 
 	// fetch faculty posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
 	Find(&facultyPosts)
@@ -132,7 +131,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 	}
 
 	// fetch warden posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
 	Find(&wardenPosts)
@@ -142,7 +141,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 	}
 
 	// fetch centrehead posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
 	Find(&centreheadPosts)
@@ -197,7 +196,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 	var centreheadPosts []models.CentreHeadPost
 
 	// fetch faculty posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
 	Find(&facultyPosts)
@@ -207,7 +206,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 	}
 
 	// fetch warden posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
 	Find(&wardenPosts)
@@ -217,7 +216,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 	}
 
 	// fetch centrehead posts
-	result = h.DB.Select("id, title, type_of_post, status, assigned_je").
+	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
 	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
 	Find(&centreheadPosts)
