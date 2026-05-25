@@ -82,5 +82,5 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		true,
 	)
 
-	c.JSON(200, gin.H{"success": "logged in successfully!"})
+	c.JSON(200, gin.H{"success": "logged in successfully!", "position": admin.Position})
 }
