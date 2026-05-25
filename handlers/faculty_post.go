@@ -135,3 +135,29 @@ func (h *PostHandler) FacultyPostDelete (c *gin.Context) {
 
 	c.JSON(200, gin.H{"success": "post deleted successfully"})
 }
+
+
+// GetFacultyPosts fetch the posts of the faculty member along with their status and comments
+func (h *PostHandler) GetFacultyPosts (c *gin.Context) {
+	email, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "unauthenticated user"})
+		return
+	}
+
+	var faculty models.Faculty
+	result := h.DB.Where("email = ?", email).Take(&faculty)
+	if result.Error != nil {
+		c.JSON(401, gin.H{"error": "user not found"})
+		return
+	}
+
+	var posts []models.FacultyPost
+	result = h.DB.Joins("Author").Where(`"Author".email = ?`, email).Find(&posts)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch posts at the moment"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": "posts fetched successfully", "posts": posts})
+}

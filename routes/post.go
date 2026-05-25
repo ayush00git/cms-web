@@ -19,4 +19,8 @@ func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
 	e.DELETE("/api/post/faculty/delete/:post_id", middleware.IsAuthenticated(), h.FacultyPostDelete)
 	e.DELETE("/api/post/warden/delete/:post_id", middleware.IsAuthenticated(), h.WardenPostDelete)
 	e.DELETE("/api/post/centre_head/delete/:post_id", middleware.IsAuthenticated(), h.CentreHeadPostDelete)
+
+	e.GET("/api/post/faculty", middleware.IsAuthenticated(), h.GetFacultyPosts)
+	e.GET("/api/post/warden", middleware.IsAuthenticated(), h.GetWardenPosts)
+	e.GET("/api/post/centre_head", middleware.IsAuthenticated(), h.GetCentreHeadPosts)
 }

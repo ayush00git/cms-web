@@ -1,7 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Phone, Home, Building, ShieldCheck, LogOut, PlusCircle, AlertCircle, Edit3, UserCheck, Inbox } from 'lucide-react';
+import { Mail, Phone, Home, Building, ShieldCheck, LogOut, PlusCircle, AlertCircle, Edit3, UserCheck, Inbox, Zap, Hammer, ServerCrash } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const STATUS_STYLES: Record<string, string> = {
+  Pending_XEN: 'bg-amber-50 text-amber-700 border-amber-200',
+  Pending_AE:  'bg-blue-50 text-blue-700 border-blue-200',
+  Pending_JE:  'bg-indigo-50 text-indigo-700 border-indigo-200',
+  Resolved_JE: 'bg-teal-50 text-teal-700 border-teal-200',
+  Resolved:    'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Closed:      'bg-red-50 text-red-600 border-red-200',
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 
 export function Profile() {
   const [profile, setProfile] = useState<any>(null);
@@ -9,12 +24,14 @@ export function Profile() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const [posts, setPosts] = useState<any[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetch('/api/profile')
+    fetch('/api/profile', { credentials: 'include' })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch profile. Please login.');
-        }
+        if (!res.ok) throw new Error('Failed to fetch profile. Please login.');
         return res.json();
       })
       .then((data) => {
@@ -24,11 +41,36 @@ export function Profile() {
       .catch((err) => {
         setError(err.message);
         setLoading(false);
-        setTimeout(() => {
-          navigate('/');
-        }, 3000);
+        setTimeout(() => navigate('/'), 3000);
       });
   }, [navigate]);
+
+  // Once profile is known, pick the right posts endpoint by role
+  useEffect(() => {
+    if (!profile) return;
+
+    let endpoint = '';
+    if ('department' in profile)   endpoint = '/api/post/faculty';
+    else if ('hostel' in profile)  endpoint = '/api/post/warden';
+    else if ('building' in profile) endpoint = '/api/post/centre_head';
+    else return;
+
+    setPostsLoading(true);
+    setPostsError(null);
+    fetch(endpoint, { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Server error (${res.status})`);
+        return res.json();
+      })
+      .then((data) => {
+        setPosts(data.posts ?? []);
+        setPostsLoading(false);
+      })
+      .catch((err: Error) => {
+        setPostsError(err.message);
+        setPostsLoading(false);
+      });
+  }, [profile]);
 
   if (loading) {
     return (
@@ -231,13 +273,76 @@ export function Profile() {
 
           {/* Complaints Status Section */}
           <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-800 pb-4 border-b border-gray-100 mb-6 flex items-center">
-              <Inbox className="w-5 h-5 text-gray-500 mr-2" /> Your Complaints and their Status
+            <h3 className="text-lg font-bold text-gray-800 pb-4 border-b border-gray-100 mb-6 flex items-center gap-2">
+              <Inbox className="w-5 h-5 text-gray-500" /> Your Complaints and their Status
+              {!postsLoading && (
+                <span className="ml-auto bg-gray-100 text-gray-500 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  {posts.length}
+                </span>
+              )}
             </h3>
-            <div className="flex flex-col items-center justify-center py-10 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-              <span className="text-sm font-semibold">No active complaints found</span>
-              <span className="text-xs text-gray-400 mt-1">// Coming soon: Tracking dashboard for your submitted complaints will list here.</span>
-            </div>
+
+            {/* Posts loading */}
+            {postsLoading && (
+              <div className="flex items-center justify-center py-10 gap-3 text-gray-400">
+                <div className="w-5 h-5 border-2 border-[#ff9900] border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-semibold">Fetching your complaints…</span>
+              </div>
+            )}
+
+            {/* Posts error */}
+            {!postsLoading && postsError && (
+              <div className="flex flex-col items-center justify-center py-10 gap-2 text-gray-400">
+                <ServerCrash className="w-8 h-8" />
+                <span className="text-sm font-semibold text-red-500">{postsError}</span>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!postsLoading && !postsError && posts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                <Inbox className="w-8 h-8 mb-2 opacity-40" />
+                <span className="text-sm font-semibold">No complaints filed yet.</span>
+                <span className="text-xs mt-1">Use "Register a Complaint" to file your first one.</span>
+              </div>
+            )}
+
+            {/* Posts list */}
+            {!postsLoading && !postsError && posts.length > 0 && (
+              <ul className="divide-y divide-gray-100">
+                {posts.map((post: any) => {
+                  const statusCls = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
+                  return (
+                    <li key={post.id} className="flex flex-col sm:flex-row sm:items-center gap-3 py-4 first:pt-0 last:pb-0">
+                      {/* ID */}
+                      <span className="shrink-0 text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded self-start">
+                        #{post.id}
+                      </span>
+
+                      {/* Title + date */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{post.title}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{formatDate(post.created_at)}</p>
+                      </div>
+
+                      {/* Type badge */}
+                      <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded self-start sm:self-auto">
+                        {post.type_of_post === 'Electrical'
+                          ? <Zap className="w-3 h-3" />
+                          : <Hammer className="w-3 h-3" />
+                        }
+                        {post.type_of_post}
+                      </span>
+
+                      {/* Status badge */}
+                      <span className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full border self-start sm:self-auto ${statusCls}`}>
+                        {post.status.replace('_', ' ')}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       </div>

@@ -132,3 +132,29 @@ func (h *PostHandler) WardenPostDelete (c *gin.Context) {
 
 	c.JSON(200, gin.H{"success": "post deleted successfully"})
 }
+
+
+// GetWardenPosts fetch the posts of the warden member along with their status and comments
+func (h *PostHandler) GetWardenPosts (c *gin.Context) {
+	email, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "unauthenticated user"})
+		return
+	}
+
+	var warden models.Warden
+	result := h.DB.Where("email = ?", email).Take(&warden)
+	if result.Error != nil {
+		c.JSON(401, gin.H{"error": "user not found"})
+		return
+	}
+
+	var posts []models.WardenPost
+	result = h.DB.Joins("Author").Where(`"Author".email = ?`, email).Find(&posts)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch posts at the moment"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": "posts fetched successfully", "posts": posts})
+}

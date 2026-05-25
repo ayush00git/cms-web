@@ -133,5 +133,5 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 		true,						// set to false during deployment (httpOnly bool)
 	)
 
-	c.JSON(200, gin.H{"success": "logged in successfully"})
+	c.JSON(200, gin.H{"success": "logged in successfully", "role": "faculty"})
 }

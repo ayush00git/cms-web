@@ -118,5 +118,5 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 		true,
 	)
 	
-	c.JSON(200, gin.H{"success": "logged in successfully!"})
+	c.JSON(200, gin.H{"success": "logged in successfully!", "role": "centrehead"})
 }
