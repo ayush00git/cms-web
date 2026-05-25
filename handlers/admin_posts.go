@@ -11,12 +11,6 @@ import (
 )
 
 
-//////////////////////////////////////////////
-// More apis to integrate - GetAEPosts GetJEPosts
-//////////////////////////////////////////////
-
-
-
 // GetXENPosts fetch posts (all that were posted) where status of post is
 // Pending_XEN PENDING_AE PENDING_JE Resolved_JE Resolved Closed
 func (h *AdminHandler) GetXENPosts (c *gin.Context) {
@@ -242,6 +236,22 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 
 // for now we treat 404 and 500 during fetching post the same
 func (h *AdminHandler) AdminGetPost (c *gin.Context) {
+
+	// get email from gin context
+	email, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "access denied"})
+		return
+	}
+
+	// check if logged in user is admin?
+	var admin models.Admin
+	result := h.DB.Where("email = ?", email).Take(&admin)
+	if result.Error != nil {
+		c.JSON(403, gin.H{"error": "access denied"})
+		return
+	}
+
 	// get role and post_id from query parameters
 	role := c.Param("role")
 
