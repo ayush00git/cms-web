@@ -24,6 +24,8 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	posts := e.Group("/api/admin")
 	{
 		posts.GET("xen/posts", middleware.IsAuthenticated(), h.GetXENPosts)
+		posts.GET("ae/posts", middleware.IsAuthenticated(), h.GetAEPosts)
+		posts.GET("je/posts", middleware.IsAuthenticated(), h.GetJEPosts)
 	}
 
 	// for any post
