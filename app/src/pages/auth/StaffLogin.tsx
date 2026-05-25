@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 
+function dashboardFor(position: string): string {
+  if (position.startsWith('XEN')) return '/admin/xen';
+  if (position.startsWith('AE'))  return '/admin/ae';
+  if (position.startsWith('JE'))  return '/admin/je';
+  return '/';
+}
+
 export function StaffLogin() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,8 +38,13 @@ export function StaffLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        setStatus('success');
-        setMessage(data.success || 'Logged in successfully!');
+        const dest = dashboardFor(data.position ?? '');
+        if (dest === '/') {
+          setStatus('error');
+          setMessage(`Unknown position "${data.position}" — contact admin.`);
+        } else {
+          navigate(dest);
+        }
       } else {
         setStatus('error');
         const errorMsg = data.error || data.email || Object.values(data)[0] || 'An error occurred';
