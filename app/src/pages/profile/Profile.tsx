@@ -5,6 +5,7 @@ import {
   Inbox, Zap, Hammer, ServerCrash, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
+import { POST_PLACES } from '../../constants/models';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -407,11 +408,16 @@ export function Profile() {
                           {isFaculty && (
                             <div>
                               <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Area / Place</label>
-                              <input
+                              <select
                                 value={editForm.place}
                                 onChange={(e) => setEditForm((f) => ({ ...f, place: e.target.value }))}
                                 className="w-full text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900]"
-                              />
+                              >
+                                <option value="" disabled>Select Area</option>
+                                {POST_PLACES.map(p => (
+                                  <option key={p.value} value={p.value}>{p.label}</option>
+                                ))}
+                              </select>
                             </div>
                           )}
                           {isWarden && (

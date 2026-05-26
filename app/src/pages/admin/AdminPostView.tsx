@@ -19,7 +19,10 @@ import {
   GraduationCap,
   BookOpen,
   Home,
-  Send,
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  RefreshCcw,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
@@ -122,6 +125,61 @@ const STATUS_STYLES: Record<string, string> = {
   Closed:      'bg-red-50 text-red-600 border-red-200',
 };
 
+// Maps URL role param → API segment for the status endpoint
+const ROLE_TO_STATUS_API: Record<string, string> = {
+  faculty:    'faculty_posts',
+  warden:     'warden_posts',
+  centrehead: 'centre_head_posts',
+};
+
+// Maps URL role param → API segment for the comment endpoint
+const ROLE_TO_COMMENT_API: Record<string, string> = {
+  faculty:    'faculty_posts',
+  warden:     'wardens_posts',
+  centrehead: 'centreheads_posts',
+};
+
+// Back-link per admin type
+const ADMIN_BACK: Record<string, string> = {
+  xen: '/admin/xen',
+  ae:  '/admin/ae',
+  je:  '/admin/je',
+};
+
+// ── Action button definitions ──────────────────────────────────────────────────
+
+interface ActionButton {
+  label: string;
+  review: string;
+  icon: React.ReactNode;
+}
+
+// Buttons derived directly from handler logic in admin_status.go
+function getActionButtons(adminType: string, status: string): ActionButton[] {
+  if (adminType === 'xen') {
+    if (status === 'Pending_XEN') return [
+      { label: 'Send to AE', review: 'to_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Close Post',  review: 'close',  icon: <XCircle      className="w-3.5 h-3.5" /> },
+    ];
+    if (status === 'Closed') return [
+      { label: 'Reopen Post', review: 'open', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
+    ];
+  }
+  if (adminType === 'ae') {
+    if (status === 'Pending_AE') return [
+      { label: 'Assign to JE',    review: 'to_je',          icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to XEN', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    ];
+  }
+  if (adminType === 'je') {
+    if (status === 'Pending_JE') return [
+      { label: 'Mark Resolved',  review: 'resolved',        icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to AE', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    ];
+  }
+  return [];
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -142,29 +200,21 @@ function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-// Maps URL role param → API :type param
-const ROLE_TO_TYPE: Record<string, string> = {
-  faculty:     'faculty_posts',
-  warden:      'wardens_posts',
-  centrehead:  'centreheads_posts',
-};
-
 export function AdminPostView() {
-  const { role, post_id } = useParams<{ role: string; post_id: string }>();
+  const { adminType, role, post_id } = useParams<{ adminType: string; role: string; post_id: string }>();
   const navigate = useNavigate();
 
-  const [post, setPost] = useState<Post | null>(null);
+  const [post, setPost]     = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<{ message: string; status?: number } | null>(null);
+  const [error, setError]   = useState<{ message: string; status?: number } | null>(null);
 
-  // Comment form state
+  // Combined comment + status action state
   const [commentText, setCommentText] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [acting, setActing]           = useState(false);
+  const [actError, setActError]       = useState<string | null>(null);
+  const [actSuccess, setActSuccess]   = useState<string | null>(null);
+  const actTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // `silent` = background refresh after comment post (no full-page spinner)
   const fetchPost = useCallback((silent = false) => {
     if (!silent) setLoading(true);
     fetch(`/api/admin/posts/${role}/${post_id}`, { credentials: 'include' })
@@ -192,51 +242,62 @@ export function AdminPostView() {
   }, [role, post_id, navigate]);
 
   useEffect(() => { fetchPost(); }, [fetchPost]);
+  useEffect(() => () => { if (actTimer.current) clearTimeout(actTimer.current); }, []);
 
-  async function handleAddComment(e: React.FormEvent) {
-    e.preventDefault();
+  // ── Combined handler: post comment THEN update status ──
+  async function handleAction(review: string) {
     const trimmed = commentText.trim();
-    if (!trimmed) return;
+    if (!trimmed) return; // guard — buttons are disabled too, but just in case
 
-    const postType = ROLE_TO_TYPE[role ?? ''];
-    if (!postType) {
-      setSubmitError('Unknown role — cannot post comment.');
+    const commentApi = ROLE_TO_COMMENT_API[role ?? ''];
+    const statusApi  = ROLE_TO_STATUS_API[role ?? ''];
+    if (!commentApi || !statusApi) {
+      setActError('Unknown post type.');
       return;
     }
 
-    setSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+    setActing(true);
+    setActError(null);
+    setActSuccess(null);
 
     try {
-      const res = await fetch(`/api/admin/comment/${postType}/${post_id}`, {
+      // 1. Post the comment first
+      const commentRes = await fetch(`/api/admin/comment/${commentApi}/${post_id}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ Content: trimmed }),
       });
+      if (!commentRes.ok) {
+        let msg = `Failed to post comment (${commentRes.status})`;
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
 
-      if (!res.ok) {
-        let msg = `Failed to post comment (${res.status})`;
-        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+      // 2. Update status
+      const statusRes = await fetch(`/api/admin/${statusApi}/status/${post_id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Review: review }),
+      });
+      if (!statusRes.ok) {
+        let msg = `Comment posted but status update failed (${statusRes.status})`;
+        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch {}
         throw new Error(msg);
       }
 
       setCommentText('');
-      setSubmitSuccess(true);
-      if (successTimer.current) clearTimeout(successTimer.current);
-      successTimer.current = setTimeout(() => setSubmitSuccess(false), 3000);
-      // Silent re-fetch so the new comment appears without a full-page spinner
+      setActSuccess('Comment posted & status updated!');
+      if (actTimer.current) clearTimeout(actTimer.current);
+      actTimer.current = setTimeout(() => setActSuccess(null), 3000);
       fetchPost(true);
     } catch (err) {
-      setSubmitError((err as Error).message);
+      setActError((err as Error).message);
     } finally {
-      setSubmitting(false);
+      setActing(false);
     }
   }
-
-  // Clean up the success timer on unmount
-  useEffect(() => () => { if (successTimer.current) clearTimeout(successTimer.current); }, []);
 
   // ── Loading ──
   if (loading) {
@@ -288,11 +349,14 @@ export function AdminPostView() {
   const wp = isWarden     ? (post as WardenPost)      : null;
   const cp = isCentrehead ? (post as CentreHeadPost)  : null;
 
-  const comments = post.comments ?? [];
-
+  const comments   = post.comments ?? [];
   const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
   const statusCls  = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+  const backPath   = ADMIN_BACK[adminType ?? ''] ?? '/';
+  const actionBtns = getActionButtons(adminType ?? '', post.status);
+  const canAct     = actionBtns.length > 0;
+  const disabled   = acting || !commentText.trim();
 
   return (
     <MainLayout>
@@ -305,7 +369,7 @@ export function AdminPostView() {
           {/* Back + breadcrumb */}
           <div className="mb-6 flex items-center gap-3">
             <Link
-              to="/admin/xen"
+              to={backPath}
               className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
@@ -316,18 +380,16 @@ export function AdminPostView() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-            {/* ── Left: post detail (2/3) ── */}
+            {/* ── Left: post detail + comments (2/3) ── */}
             <div className="xl:col-span-2 flex flex-col gap-6">
 
               {/* Title card */}
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="bg-[#2d2d2d] px-6 py-5">
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    {/* Role chip */}
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 bg-white/10 px-2.5 py-1 rounded-full">
                       <RoleIcon className="w-3.5 h-3.5" /> {roleLabel} Complaint
                     </span>
-                    {/* Type chip */}
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 bg-white/10 px-2.5 py-1 rounded-full">
                       {post.type_of_post === 'Electrical'
                         ? <Zap className="w-3.5 h-3.5" />
@@ -340,7 +402,6 @@ export function AdminPostView() {
                 </div>
 
                 <div className="p-6">
-                  {/* Status + meta row */}
                   <div className="flex flex-wrap items-center gap-3 mb-5 pb-5 border-b border-gray-100">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusCls}`}>
                       {post.status.replace('_', ' ')}
@@ -352,7 +413,6 @@ export function AdminPostView() {
                     <span className="ml-auto text-xs text-gray-400">Post #{post.id}</span>
                   </div>
 
-                  {/* Description */}
                   <div className="mb-6">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5" /> Description
@@ -360,7 +420,6 @@ export function AdminPostView() {
                     <p className="text-sm text-gray-700 leading-relaxed">{post.description}</p>
                   </div>
 
-                  {/* Meta grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 pt-5 border-t border-gray-100">
                     {fp && (
                       <MetaRow icon={<MapPin className="w-4 h-4" />} label="Area" value={fp.place} />
@@ -368,14 +427,14 @@ export function AdminPostView() {
                     {wp && (
                       <MetaRow icon={<BedDouble className="w-4 h-4" />} label="Room" value={wp.room_number} />
                     )}
-                    <MetaRow icon={<Calendar className="w-4 h-4" />} label="Filed On" value={formatDate(post.created_at)} />
+                    <MetaRow icon={<Calendar className="w-4 h-4" />} label="Filed On"     value={formatDate(post.created_at)} />
                     <MetaRow icon={<Calendar className="w-4 h-4" />} label="Last Updated" value={formatDate(post.updated_at)} />
-                    <MetaRow icon={<Hash className="w-4 h-4" />} label="Post ID" value={`#${post.id}`} />
+                    <MetaRow icon={<Hash className="w-4 h-4" />}     label="Post ID"      value={`#${post.id}`} />
                   </div>
                 </div>
               </div>
 
-              {/* Comments */}
+              {/* ── Comments + action card ── */}
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
                 <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                   <MessageSquare className="w-4 h-4 text-gray-400" />
@@ -385,6 +444,7 @@ export function AdminPostView() {
                   </span>
                 </h3>
 
+                {/* Comment list */}
                 {comments.length === 0 ? (
                   <p className="text-sm text-gray-400 italic text-center py-6">No comments yet.</p>
                 ) : (
@@ -400,56 +460,53 @@ export function AdminPostView() {
                   </ul>
                 )}
 
-                {/* ── Add comment form ── */}
-                <form
-                  onSubmit={handleAddComment}
-                  className={`pt-4 ${comments.length > 0 ? 'border-t border-gray-100' : ''}`}
-                >
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                    Add a Comment
-                  </label>
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    disabled={submitting}
-                    placeholder="Write your comment here…"
-                    rows={3}
-                    className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50"
-                  />
+                {/* ── Comment + action area (only when this admin has applicable actions) ── */}
+                {canAct && (
+                  <div className={`pt-4 ${comments.length > 0 ? 'border-t border-gray-100' : ''}`}>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+                      Comment &amp; Update Status
+                    </label>
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      disabled={acting}
+                      placeholder="Add a comment before updating the status…"
+                      rows={3}
+                      className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50"
+                    />
 
-                  {/* Error / success feedback */}
-                  {submitError && (
-                    <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      {submitError}
-                    </p>
-                  )}
-                  {submitSuccess && (
-                    <p className="mt-2 text-xs font-semibold text-emerald-600">
-                      ✓ Comment posted!
-                    </p>
-                  )}
+                    {/* Feedback */}
+                    {actError && (
+                      <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        {actError}
+                      </p>
+                    )}
+                    {actSuccess && (
+                      <p className="mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        {actSuccess}
+                      </p>
+                    )}
 
-                  <div className="mt-3 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={submitting || !commentText.trim()}
-                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      {submitting ? (
-                        <>
-                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Posting…
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-3.5 h-3.5" />
-                          Comment
-                        </>
-                      )}
-                    </button>
+                    {/* Action buttons — same dark-gray, side by side with each other */}
+                    <div className="mt-3 flex flex-wrap justify-end gap-2">
+                      {actionBtns.map((btn) => (
+                        <button
+                          key={btn.review}
+                          onClick={() => handleAction(btn.review)}
+                          disabled={disabled}
+                          className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          {acting ? (
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : btn.icon}
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </form>
+                )}
               </div>
             </div>
 
@@ -460,32 +517,27 @@ export function AdminPostView() {
               </h3>
 
               <div className="flex flex-col gap-4">
-                {/* Faculty author */}
                 {fp && fp.Author && (
                   <>
-                    <MetaRow icon={<User className="w-4 h-4" />}       label="Name"        value={fp.Author.name} />
-                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"       value={fp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"       value={fp.Author.phone_number} />
-                    <MetaRow icon={<BookOpen className="w-4 h-4" />}   label="Department"  value={fp.Author.department} />
-                    <MetaRow icon={<Home className="w-4 h-4" />}       label="Residence"   value={`House ${fp.Author.house_number}, Block ${fp.Author.block} (Type ${fp.Author.type})`} />
+                    <MetaRow icon={<User className="w-4 h-4" />}       label="Name"       value={fp.Author.name} />
+                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"      value={fp.Author.email} />
+                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"      value={fp.Author.phone_number} />
+                    <MetaRow icon={<BookOpen className="w-4 h-4" />}   label="Department" value={fp.Author.department} />
+                    <MetaRow icon={<Home className="w-4 h-4" />}       label="Residence"  value={`House ${fp.Author.house_number}, Block ${fp.Author.block} (Type ${fp.Author.type})`} />
                   </>
                 )}
-
-                {/* Warden author */}
                 {wp && wp.Author && (
                   <>
-                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"   value={wp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"   value={wp.Author.phone_number} />
-                    <MetaRow icon={<BedDouble className="w-4 h-4" />}  label="Hostel"  value={wp.Author.hostel} />
+                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"  value={wp.Author.email} />
+                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"  value={wp.Author.phone_number} />
+                    <MetaRow icon={<BedDouble className="w-4 h-4" />}  label="Hostel" value={wp.Author.hostel} />
                   </>
                 )}
-
-                {/* Centre head author */}
                 {cp && cp.Author && (
                   <>
-                    <MetaRow icon={<Mail className="w-4 h-4" />}      label="Email"     value={cp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}     label="Phone"     value={cp.Author.phone_number} />
-                    <MetaRow icon={<Building2 className="w-4 h-4" />} label="Building"  value={cp.Author.building} />
+                    <MetaRow icon={<Mail className="w-4 h-4" />}      label="Email"    value={cp.Author.email} />
+                    <MetaRow icon={<Phone className="w-4 h-4" />}     label="Phone"    value={cp.Author.phone_number} />
+                    <MetaRow icon={<Building2 className="w-4 h-4" />} label="Building" value={cp.Author.building} />
                   </>
                 )}
               </div>

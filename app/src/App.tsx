@@ -37,7 +37,7 @@ function App() {
         <Route path="/admin/xen" element={<XENPostView />} />
         <Route path="/admin/ae" element={<AEPostView />} />
         <Route path="/admin/je" element={<JEPostView />} />
-        <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+        <Route path="/admin/:adminType/posts/:role/:post_id" element={<AdminPostView />} />
       </Routes>
     </Router>
   );
