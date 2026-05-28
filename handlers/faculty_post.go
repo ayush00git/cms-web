@@ -15,7 +15,7 @@ type PostHandler struct {
 	DB *gorm.DB
 }
 
-// FacultyPostEdit
+// FacultyPostEditType
 type FacultyPostEditType struct {
 	Place			string		`json:"place"`
 	Title			string		`json:"title"`
@@ -23,11 +23,18 @@ type FacultyPostEditType struct {
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
+// FacultyPostType
+type FacultyPostType struct {
+	Place			string		`json:"place"`
+	TypeOfPost		string		`json:"type_of_post"`
+	Title			string		`json:"title"`
+	Description		string		`json:"description"`
+}
 
 // FacultyPost registers the post of faculty members.
 // forwards the post to the associated XEN.
 func (h *PostHandler) FacultyPost (c *gin.Context) {
-	var inputs models.FacultyPost
+	var inputs FacultyPostType
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -40,18 +47,37 @@ func (h *PostHandler) FacultyPost (c *gin.Context) {
 		c.JSON(401, gin.H{"error": "unauthenticated access"})
 		return
 	}
-	inputs.FacultyID = facultyId.(uint)
+	email, _ := c.Get(middleware.EmailKey)
 
-	inputs.CreatedAt = time.Now()
-	inputs.UpdatedAt = time.Now()
+	// read db for this email exists or not
+	var faculty models.Faculty
+	result := h.DB.Where("email = ?", email).Take(&faculty)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(401, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch at the moment"})
+		return
+	}
 
-	result := h.DB.Create(&inputs)
+	post := models.FacultyPost{
+		FacultyID: facultyId.(uint),
+		Place: models.PostPlace(inputs.Place),
+		TypeOfPost: models.PostType(inputs.TypeOfPost),
+		Title: inputs.Title,
+		Description: inputs.Description,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result = h.DB.Create(&post)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
 	
-	c.JSON(201, gin.H{"success": "post submitted successfully", "post": inputs})
+	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
 
 

@@ -18,11 +18,17 @@ type CentreHeadPostEditType struct {
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
+// CentreHeadPostType
+type CentreHeadPostType struct {
+	Title			string		`json:"title"`
+	Description		string		`json:"description"`
+	TypeOfPost		string		`json:"type_of_post"`
+}
 
 // CentreHeadPost registers the post of centre-head members.
 // forwards the post to the associated XEN.
 func (h *PostHandler) CentreHeadPost (c *gin.Context) {
-	var inputs models.CentreHeadPost
+	var inputs CentreHeadPostType
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -35,19 +41,36 @@ func (h *PostHandler) CentreHeadPost (c *gin.Context) {
 		c.JSON(401, gin.H{"error": "unauthenticated access"})
 		return
 	}
-	inputs.CentreHeadID = centreheadId.(uint)
+	email, _ := c.Get(middleware.EmailKey)
 
-	// set default values
-	inputs.CreatedAt = time.Now()
-	inputs.UpdatedAt = time.Now()
+	// read db for this email exists or not
+	var head models.CentreHead
+	result := h.DB.Where("email = ?", email).Take(&head)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(401, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch at the moment"})
+		return
+	}
 
-	result := h.DB.Create(&inputs)
+	post := models.CentreHeadPost{
+		CentreHeadID: centreheadId.(uint),
+		TypeOfPost: models.PostType(inputs.TypeOfPost),
+		Title: inputs.Title,
+		Description: inputs.Description,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result = h.DB.Create(&post)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
 
-	c.JSON(201, gin.H{"success": "post submitted successfully", "post": inputs})
+	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
 
 
