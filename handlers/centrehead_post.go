@@ -149,7 +149,10 @@ func (h *PostHandler) GetCentreHeadPosts (c *gin.Context) {
 	}
 
 	var posts []models.CentreHeadPost
-	result = h.DB.Joins("Author").Where(`"Author".email = ?`, email).Find(&posts)
+	result = h.DB.
+	Preload("Comments").
+	Where("centre_head_id = ?", head.ID).
+	Find(&posts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch posts at the moment"})
 		return

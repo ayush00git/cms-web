@@ -2,25 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShieldCheck, LogOut, PlusCircle, AlertCircle, Edit3, UserCheck,
-  Inbox, Zap, Hammer, ServerCrash, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
+  Inbox, ServerCrash,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
-import { POST_PLACES } from '../../constants/models';
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-const STATUS_STYLES: Record<string, string> = {
-  Pending_XEN: 'bg-amber-50 text-amber-700 border-amber-200',
-  Pending_AE:  'bg-blue-50 text-blue-700 border-blue-200',
-  Pending_JE:  'bg-indigo-50 text-indigo-700 border-indigo-200',
-  Resolved_JE: 'bg-teal-50 text-teal-700 border-teal-200',
-  Resolved:    'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Closed:      'bg-red-50 text-red-600 border-red-200',
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+import { ComplaintCard } from '../../components/ComplaintCard';
+import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -30,13 +16,13 @@ export function Profile() {
   const [error, setError]     = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const [posts, setPosts]           = useState<any[]>([]);
+  const [posts, setPosts]           = useState<ComplaintPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
 
   // Edit state
   const [editingId, setEditingId]   = useState<number | null>(null);
-  const [editForm, setEditForm]     = useState<{ title: string; description: string; place: string; room_number: string }>({
+  const [editForm, setEditForm]     = useState<EditForm>({
     title: '', description: '', place: '', room_number: '',
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -113,9 +99,10 @@ export function Profile() {
   let roleLabel     = 'User';
   let roleBadgeCls  = 'bg-gray-100 text-gray-800 border-gray-200';
   let registerRoute = '/';
-  if (isFaculty)    { roleLabel = 'Faculty Member'; roleBadgeCls = 'bg-emerald-50 text-emerald-700 border-emerald-200'; registerRoute = '/faculty/post'; }
-  else if (isWarden)     { roleLabel = 'Hostel Warden';  roleBadgeCls = 'bg-indigo-50 text-indigo-700 border-indigo-200';  registerRoute = '/warden/post'; }
-  else if (isCentreHead) { roleLabel = 'Centre Head';    roleBadgeCls = 'bg-amber-50 text-amber-700 border-amber-200';    registerRoute = '/centre-head/post'; }
+  let role: Role    = 'centre_head';
+  if (isFaculty)    { roleLabel = 'Faculty Member'; roleBadgeCls = 'bg-emerald-50 text-emerald-700 border-emerald-200'; registerRoute = '/faculty/post'; role = 'faculty'; }
+  else if (isWarden)     { roleLabel = 'Hostel Warden';  roleBadgeCls = 'bg-indigo-50 text-indigo-700 border-indigo-200';  registerRoute = '/warden/post'; role = 'warden'; }
+  else if (isCentreHead) { roleLabel = 'Centre Head';    roleBadgeCls = 'bg-amber-50 text-amber-700 border-amber-200';    registerRoute = '/centre-head/post'; role = 'centre_head'; }
 
   // ── API base paths ──
   const editBase   = isFaculty ? '/api/post/faculty/edit'       : isWarden ? '/api/post/warden/edit'       : '/api/post/centre_head/edit';
@@ -127,7 +114,7 @@ export function Profile() {
     window.location.href = '/';
   };
 
-  function startEdit(post: any) {
+  function startEdit(post: ComplaintPost) {
     setEditingId(post.id);
     setEditForm({
       title:       post.title       ?? '',
@@ -329,148 +316,21 @@ export function Profile() {
           {/* Cards grid */}
           {!postsLoading && !postsError && posts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {posts.map((post: any) => {
-                const isEditing   = editingId === post.id;
-                const isBusy      = actionLoading === post.id;
-                const statusCls   = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
-
-                return (
-                  <div key={post.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-
-                    {/* Card top bar */}
-                    <div className="bg-[#2d2d2d] px-4 py-3 flex items-center gap-2">
-                      <span className="text-[11px] font-mono font-bold text-zinc-400">#{post.id}</span>
-                      {/* type badge */}
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-300 bg-white/10 px-2 py-0.5 rounded-full">
-                        {post.type_of_post === 'Electrical' ? <Zap className="w-3 h-3" /> : <Hammer className="w-3 h-3" />}
-                        {post.type_of_post}
-                      </span>
-                      {/* status badge */}
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusCls}`}>
-                        {post.status.replace('_', ' ')}
-                      </span>
-                      {/* action buttons */}
-                      <div className="ml-auto flex items-center gap-1.5">
-                        {!isEditing && (
-                          <button
-                            onClick={() => startEdit(post)}
-                            disabled={isBusy}
-                            title="Edit"
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40 cursor-pointer"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        {isEditing && (
-                          <>
-                            <button
-                              onClick={() => handleSaveEdit(post.id)}
-                              disabled={isBusy}
-                              title="Save"
-                              className="p-1.5 rounded-lg text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors disabled:opacity-40 cursor-pointer"
-                            >
-                              {isBusy ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              disabled={isBusy}
-                              title="Cancel"
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40 cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </>
-                        )}
-                        <button
-                          onClick={() => handleDelete(post.id)}
-                          disabled={isBusy}
-                          title="Delete"
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 cursor-pointer"
-                        >
-                          {isBusy && !isEditing ? <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card body */}
-                    <div className="p-5 flex flex-col gap-3 flex-1">
-                      {isEditing ? (
-                        /* ── Edit form ── */
-                        <div className="flex flex-col gap-3">
-                          <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Title</label>
-                            <input
-                              value={editForm.title}
-                              onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                              className="w-full text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900]"
-                            />
-                          </div>
-                          {isFaculty && (
-                            <div>
-                              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Area / Place</label>
-                              <select
-                                value={editForm.place}
-                                onChange={(e) => setEditForm((f) => ({ ...f, place: e.target.value }))}
-                                className="w-full text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900]"
-                              >
-                                <option value="" disabled>Select Area</option>
-                                {POST_PLACES.map(p => (
-                                  <option key={p.value} value={p.value}>{p.label}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-                          {isWarden && (
-                            <div>
-                              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Room Number</label>
-                              <input
-                                value={editForm.room_number}
-                                onChange={(e) => setEditForm((f) => ({ ...f, room_number: e.target.value }))}
-                                className="w-full text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900]"
-                              />
-                            </div>
-                          )}
-                          <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Description</label>
-                            <textarea
-                              rows={4}
-                              value={editForm.description}
-                              onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                              className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900]"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* ── View mode ── */
-                        <>
-                          <h4 className="text-base font-bold text-gray-900 leading-snug">{post.title}</h4>
-                          <p className="text-sm text-gray-600 leading-relaxed flex-1">{post.description}</p>
-
-                          {/* Meta row */}
-                          <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-gray-100">
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                              <Calendar className="w-3.5 h-3.5" /> {formatDate(post.created_at)}
-                            </span>
-                            {isFaculty && post.place && (
-                              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                                <MapPin className="w-3.5 h-3.5" /> {post.place}
-                              </span>
-                            )}
-                            {isWarden && post.room_number && (
-                              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                                <BedDouble className="w-3.5 h-3.5" /> Room {post.room_number}
-                              </span>
-                            )}
-                            <span className={`inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
-                              {post.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {posts.map((post) => (
+                <ComplaintCard
+                  key={post.id}
+                  post={post}
+                  role={role}
+                  isEditing={editingId === post.id}
+                  isBusy={actionLoading === post.id}
+                  editForm={editForm}
+                  onEditFormChange={(patch) => setEditForm((f) => ({ ...f, ...patch }))}
+                  onStartEdit={startEdit}
+                  onCancelEdit={() => setEditingId(null)}
+                  onSaveEdit={handleSaveEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
             </div>
           )}
         </div>

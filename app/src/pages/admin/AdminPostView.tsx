@@ -186,6 +186,12 @@ function formatDate(iso: string) {
   });
 }
 
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+  });
+}
+
 function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3">
@@ -448,13 +454,14 @@ export function AdminPostView() {
                 {comments.length === 0 ? (
                   <p className="text-sm text-gray-400 italic text-center py-6">No comments yet.</p>
                 ) : (
-                  <ul className="space-y-3 mb-6">
+                  <ul className="space-y-2 mb-6">
                     {comments.map((c) => (
-                      <li key={c.id} className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                      <li key={c.id} className="flex flex-col gap-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-gray-700">Admin #{c.author_id}</span>
+                          <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
+                        </div>
                         <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>
-                        <p className="text-[11px] text-gray-400 mt-1.5">
-                          By Author #{c.author_id} · {formatDate(c.created_at)}
-                        </p>
                       </li>
                     ))}
                   </ul>
