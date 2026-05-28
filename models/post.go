@@ -96,6 +96,7 @@ type Comment struct {
 	CommentableType string      	`gorm:"not null"`
 	Content     	string    		`gorm:"type:text;not null" json:"comment_text"`
 	AuthorID		uint			`gorm:"not null" json:"author_id"`
+	Author			Admin			`gorm:"foreignKey:AuthorID"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt		time.Time		`json:"updated_at"`
 }
