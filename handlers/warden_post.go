@@ -150,7 +150,10 @@ func (h *PostHandler) GetWardenPosts (c *gin.Context) {
 	}
 
 	var posts []models.WardenPost
-	result = h.DB.Joins("Author").Where(`"Author".email = ?`, email).Find(&posts)
+	result = h.DB.
+	Preload("Comments").
+	Where("warden_id = ?", warden.ID).
+	Find(&posts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch posts at the moment"})
 		return

@@ -55,8 +55,8 @@ func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 	// picks up parameter from url to fetch the particular table type
 	tableMap := map[string]interface{} {
 		"faculty_posts": &models.FacultyPost{},
-		"wardens_posts": &models.WardenPost{},
-		"centreheads_posts": &models.CentreHeadPost{},
+		"warden_posts": &models.WardenPost{},
+		"centre_head_posts": &models.CentreHeadPost{},
 	}
 
 	postType := c.Param("type")
