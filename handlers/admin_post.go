@@ -269,7 +269,11 @@ func (h *AdminHandler) AdminGetPost (c *gin.Context) {
 		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
 			return db.Select("id, email, name, house_number, department, phone_number, block, type")
 		}).
-		Preload("Comments").
+		Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
+			return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
+				return d.Select("id, email, position")
+			})
+		}).
 		Where("id = ?", postID).Take(&post)
 		if result.Error != nil {
 			c.JSON(404, gin.H{"error": "failed to fetch the post"})
@@ -281,7 +285,11 @@ func (h *AdminHandler) AdminGetPost (c *gin.Context) {
 		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
 			return db.Select("id, email, hostel, phone_number")
 		}).
-		Preload("Comments").
+		Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
+			return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
+				return d.Select("id, email, position")
+			})
+		}).
 		Where("id = ?", postID).Take(&post)
 		if result.Error != nil {
 			c.JSON(404, gin.H{"error": "failed to fetch the post"})
@@ -293,7 +301,11 @@ func (h *AdminHandler) AdminGetPost (c *gin.Context) {
 		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
 			return db.Select("id, email, building, phone_number")
 		}).
-		Preload("Comments").
+		Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
+			return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
+				return d.Select("id, email, position")
+			})
+		}).
 		Where("id = ?", postID).Take(&post)
 		if result.Error != nil {
 			c.JSON(404, gin.H{"error": "failed to fetch the post"})

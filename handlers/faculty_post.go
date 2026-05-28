@@ -158,7 +158,11 @@ func (h *PostHandler) GetFacultyPosts (c *gin.Context) {
 	// return posts where author is faculty (the logged in user)
 	var posts []models.FacultyPost
 	result = h.DB.
-	Preload("Comments").
+	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
+		return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
+			return d.Select("id, email, position")
+		})
+	}).
 	Where("faculty_id = ?", faculty.ID).
 	Find(&posts)
 	if result.Error != nil {

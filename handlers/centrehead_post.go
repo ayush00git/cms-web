@@ -150,7 +150,11 @@ func (h *PostHandler) GetCentreHeadPosts (c *gin.Context) {
 
 	var posts []models.CentreHeadPost
 	result = h.DB.
-	Preload("Comments").
+	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
+		return db.Preload("Author", func (d *gorm.DB) (*gorm.DB) {
+			return d.Select("id, email, position")
+		})
+	}).
 	Where("centre_head_id = ?", head.ID).
 	Find(&posts)
 	if result.Error != nil {
