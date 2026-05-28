@@ -53,10 +53,17 @@ interface CentreHeadAuthor {
   phone_number: string;
 }
 
+interface CommentAuthor {
+  id: number;
+  email: string;
+  position: string;
+}
+
 interface Comment {
   id: number;
   comment_text: string;
   author_id: number;
+  Author?: CommentAuthor;
   created_at: string;
 }
 
@@ -458,7 +465,9 @@ export function AdminPostView() {
                     {comments.map((c) => (
                       <li key={c.id} className="flex flex-col gap-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-bold text-gray-700">Admin #{c.author_id}</span>
+                          <span className="text-xs font-bold text-gray-700">
+                            {c.Author?.position ? c.Author.position.replace(/_/g, ' ') : `Admin #${c.author_id}`}
+                          </span>
                           <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
                         </div>
                         <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>

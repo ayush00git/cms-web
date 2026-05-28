@@ -9,10 +9,17 @@ import { POST_PLACES } from '../constants/models';
 
 export type Role = 'faculty' | 'warden' | 'centre_head';
 
+export interface CommentAuthor {
+  id: number;
+  email: string;
+  position: string;
+}
+
 export interface ComplaintComment {
   id: number;
   comment_text: string;
   author_id: number;
+  Author?: CommentAuthor;
   created_at: string;
 }
 
@@ -292,7 +299,9 @@ export function ComplaintCard({
               {comments.map((c) => (
                 <li key={c.id} className="flex flex-col gap-0.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-bold text-gray-700">Admin #{c.author_id}</span>
+                    <span className="text-[11px] font-bold text-gray-700">
+                      {c.Author?.position ? c.Author.position.replace(/_/g, ' ') : `Admin #${c.author_id}`}
+                    </span>
                     <span className="text-[10px] text-gray-400">{formatDateTime(c.created_at)}</span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed">{c.comment_text}</p>
