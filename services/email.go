@@ -69,6 +69,42 @@ func SendVerificationMail(userId uint, email, role string) (error) {
 	if err != nil {
 		return err
 	}
-	log.Printf("Email sent to %s", email)
+	log.Printf("Account Verification Email sent to %s", email)
+	return nil
+}
+
+// SendPasswordResetMail send an email to reset the password for an account
+func SendPasswordResetMail(userID uint, email, role string) error {
+	token, err := helpers.GenerateToken(userID, email, role)
+	if err != nil {
+		return err
+	}
+	resetURL := fmt.Sprintf(`http://localhost:5173/account/reset-password?user=%s`, token)
+
+	// send the email
+	mail := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="utf-8">
+			<style>
+				body { font-family: sans-serif; line-height: 1.5; color: #333333; }
+				.button { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+			</style>
+		</head>
+		<body>
+			<h2>Reset your password</h2>
+			<p>
+				<a href="%s" class="button" style="color: white;">Reset!</a>
+			</p>
+		</body>
+		</html>
+		`, resetURL)
+
+	err = SendMail(email, "Reset cms account password", mail)
+	if err != nil {
+		return nil
+	}
+	log.Printf("Password reset link sent to %s", email)
 	return nil
 }
