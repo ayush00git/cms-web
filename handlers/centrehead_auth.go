@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
+
 // CentreHeadSignup registers the head of adminstrations.
 // On success, sends a verification email with a JWT token link.
 func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
@@ -98,7 +99,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 
 	err := bcrypt.CompareHashAndPassword([]byte(head.Password), []byte(inputs.Password))
 	if err != nil {
-		c.JSON(500, gin.H{"error": "incorrect password"})
+		c.JSON(403, gin.H{"error": "incorrect password"})
 		return
 	}
 
@@ -119,4 +120,80 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 	)
 	
 	c.JSON(200, gin.H{"success": "logged in successfully!", "role": "centrehead"})
+}
+
+
+// CentreHeadForgetPassword sends an password reset email to the user
+func (h* AuthHandler) CentreHeadForgetPassword(c *gin.Context) {
+	var input ForgetPassword
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	var head models.CentreHead
+	result := h.DB.Where("email = ?", input.Email).Take(&head)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	if head.IsVerified != true {
+		c.JSON(403, gin.H{"error": "account isn't verified yet"})
+		return
+	}
+
+	if err := services.SendPasswordResetMail(head.ID, head.Email, "centrehead"); err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	
+	c.JSON(200, gin.H{"success": "password reset mail sent!"})
+}
+
+
+// CentreHeadResetPassword resets the password of the user
+func (h *AuthHandler) CentreHeadResetPassword(c *gin.Context) {
+	// get the user from query parameters
+	userToken := c.Query("user")
+
+	claims, err := helpers.VerifyToken(userToken)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var head models.CentreHead
+	result := h.DB.Where("email = ?", claims.Email).Take(&head)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var inputs ResetPassword
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	
+	newHash, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to hash at the moment"})
+		return
+	}
+
+	head.Password = string(newHash)
+	result = h.DB.Model(&head).Updates(head)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to reset password at the moment"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "password changed successfully", "role": "centrehead"})
 }

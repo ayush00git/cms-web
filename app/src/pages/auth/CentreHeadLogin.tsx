@@ -115,15 +115,19 @@ export function CentreHeadLogin() {
             </div>
 
             <div className="pt-4 border-t border-gray-100">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>
-            
+
+            <p className="text-center text-sm mt-2">
+              <Link to="/centre-head/forgot-password" className="text-[#ff9900] hover:underline cursor-pointer">Forgot Password?</Link>
+            </p>
+
             <p className="text-center text-sm text-gray-600 mt-4">
               Don't have an account? <Link to="/centre-head/signup" className="text-[#4a4a4a] font-semibold hover:underline cursor-pointer">Register here</Link>
             </p>

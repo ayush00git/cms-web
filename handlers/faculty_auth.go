@@ -17,6 +17,15 @@ type AuthHandler struct {
 	DB *gorm.DB
 }
 
+type ResetPassword struct {
+	Password	string		`json:"password" binding:"required"`
+}
+
+type ForgetPassword struct {
+	Email		string		`json:"email" binding:"required"`
+}
+
+
 // FacultySignup registers a new faculty member.
 // On success, sends a verification email with a JWT token link.
 func (h *AuthHandler) FacultySignup (c *gin.Context) {
@@ -134,4 +143,80 @@ func (h *AuthHandler) FacultyLogin (c *gin.Context) {
 	)
 
 	c.JSON(200, gin.H{"success": "logged in successfully", "role": "faculty"})
+}
+
+
+// FacultyForgetPassword sends an password reset email to the user
+func (h* AuthHandler) FacultyForgetPassword(c *gin.Context) {
+	var input ForgetPassword
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	var faculty models.Faculty
+	result := h.DB.Where("email = ?", input.Email).Take(&faculty)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	if faculty.IsVerified != true {
+		c.JSON(403, gin.H{"error": "account isn't verified yet"})
+		return
+	}
+
+	if err := services.SendPasswordResetMail(faculty.ID, faculty.Email, "faculty"); err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	
+	c.JSON(200, gin.H{"success": "password reset mail sent!"})
+}
+
+
+// FacultyResetPassword resets the password of the user
+func (h *AuthHandler) FacultyResetPassword(c *gin.Context) {
+	// get the user from query parameters
+	userToken := c.Query("user")
+
+	claims, err := helpers.VerifyToken(userToken)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var faculty models.Faculty
+	result := h.DB.Where("email = ?", claims.Email).Take(&faculty)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var inputs ResetPassword
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	
+	newHash, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to hash at the moment"})
+		return
+	}
+
+	faculty.Password = string(newHash)
+	result = h.DB.Model(&faculty).Updates(faculty)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to reset password at the moment"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "password changed successfully", "role": "faculty"})
 }

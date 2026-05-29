@@ -121,3 +121,80 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 
 	c.JSON(200, gin.H{"success": "logged in successfully!", "role": "warden"})
 }
+
+
+
+// WardenForgetPassword sends an password reset email to the user
+func (h* AuthHandler) WardenForgetPassword(c *gin.Context) {
+	var input ForgetPassword
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	var warden models.Warden
+	result := h.DB.Where("email = ?", input.Email).Take(&warden)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	if warden.IsVerified != true {
+		c.JSON(403, gin.H{"error": "account isn't verified yet"})
+		return
+	}
+
+	if err := services.SendPasswordResetMail(warden.ID, warden.Email, "warden"); err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	
+	c.JSON(200, gin.H{"success": "password reset mail sent!"})
+}
+
+
+// WardenResetPassword resets the password of the user
+func (h *AuthHandler) WardenResetPassword(c *gin.Context) {
+	// get the user from query parameters
+	userToken := c.Query("user")
+
+	claims, err := helpers.VerifyToken(userToken)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var warden models.Warden
+	result := h.DB.Where("email = ?", claims.Email).Take(&warden)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var inputs ResetPassword
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	
+	newHash, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to hash at the moment"})
+		return
+	}
+
+	warden.Password = string(newHash)
+	result = h.DB.Model(&warden).Updates(warden)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to reset password at the moment"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "password changed successfully", "role": "warden"})
+}
