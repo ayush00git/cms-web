@@ -11,11 +11,15 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 	{
 		faculty.POST("/signup", h.FacultySignup)
 		faculty.POST("/login", h.FacultyLogin)
+		faculty.POST("/forget-password", h.FacultyForgetPassword)
+		faculty.PATCH("/reset-password", h.FacultyResetPassword)
 	}
 	warden := e.Group("/api/auth/warden")
 	{
 		warden.POST("/signup", h.WardenSignup)
 		warden.POST("/login", h.WardenLogin)
+		warden.POST("/forget-password", h.WardenForgetPassword)
+		warden.PATCH("/reset-password", h.WardenResetPassword)
 	}
 	centrehead := e.Group("/api/auth/centre_head")
 	{

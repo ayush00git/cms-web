@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
@@ -13,14 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
-
-type ResetPassword struct {
-	Password	string		`json:"password" binding:"required"`
-}
-
-type ForgetPassword struct {
-	Email		string		`json:"email" binding:"required"`
-}
 
 
 // CentreHeadSignup registers the head of adminstrations.
@@ -132,14 +123,13 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 }
 
 
-// CentreHeadResetPassword sends an password reset email to the user
+// CentreHeadForgetPassword sends an password reset email to the user
 func (h* AuthHandler) CentreHeadForgetPassword(c *gin.Context) {
 	var input ForgetPassword
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
-	fmt.Printf("nigg crossed body binded")
 	var head models.CentreHead
 	result := h.DB.Where("email = ?", input.Email).Take(&head)
 	if result.Error != nil {
@@ -147,16 +137,14 @@ func (h* AuthHandler) CentreHeadForgetPassword(c *gin.Context) {
 			c.JSON(404, gin.H{"error": "user not found"})
 			return
 		}
-		c.JSON(500, gin.H{"error": "internal nig server error"})
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
-	fmt.Printf("nigg crossed user found")
 
 	if head.IsVerified != true {
 		c.JSON(403, gin.H{"error": "account isn't verified yet"})
 		return
 	}
-	fmt.Printf("nigg crossed verified")
 
 	if err := services.SendPasswordResetMail(head.ID, head.Email, "centrehead"); err != nil {
 		c.JSON(500, gin.H{"error": "internal server error"})
