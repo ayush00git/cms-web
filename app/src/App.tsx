@@ -6,6 +6,10 @@ import { CentreHeadSignup } from './pages/auth/CentreHeadSignup';
 import { FacultyLogin } from './pages/auth/FacultyLogin';
 import { WardenLogin } from './pages/auth/WardenLogin';
 import { CentreHeadLogin } from './pages/auth/CentreHeadLogin';
+import { FacultyForgotPassword } from './pages/auth/FacultyForgotPassword';
+import { WardenForgotPassword } from './pages/auth/WardenForgotPassword';
+import { CentreHeadForgotPassword } from './pages/auth/CentreHeadForgotPassword';
+import { AccountResetPass } from './pages/auth/AccountResetPass';
 import { StaffLogin } from './pages/auth/StaffLogin';
 import { VerifyAccount } from './pages/auth/VerifyAccount';
 import { FacultyPost } from './pages/post/FacultyPost';
@@ -28,6 +32,10 @@ function App() {
         <Route path="/faculty/login" element={<FacultyLogin />} />
         <Route path="/warden/login" element={<WardenLogin />} />
         <Route path="/centre-head/login" element={<CentreHeadLogin />} />
+        <Route path="/faculty/forgot-password" element={<FacultyForgotPassword />} />
+        <Route path="/warden/forgot-password" element={<WardenForgotPassword />} />
+        <Route path="/centre-head/forgot-password" element={<CentreHeadForgotPassword />} />
+        <Route path="/account/reset-password" element={<AccountResetPass />} />
         <Route path="/staff/login" element={<StaffLogin />} />
         <Route path="/faculty/post" element={<FacultyPost />} />
         <Route path="/warden/post" element={<WardenPost />} />
