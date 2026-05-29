@@ -227,6 +227,19 @@ func doRequest(t *testing.T, e *gin.Engine, method, path string, body any) *http
 	return rec
 }
 
+// doRequestRaw is like doRequest but sends the body verbatim, letting tests
+// drive malformed-JSON branches that ShouldBindJSON should reject.
+func doRequestRaw(t *testing.T, e *gin.Engine, method, path, body string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := httptest.NewRequest(method, path, bytes.NewReader([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	return rec
+}
+
 // decodeBody unmarshals a JSON response body into a generic map for assertions.
 func decodeBody(t *testing.T, rec *httptest.ResponseRecorder) map[string]any {
 	t.Helper()
