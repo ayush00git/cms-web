@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"fmt"
+	"log"
 	"time"
 	"errors"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -27,7 +30,7 @@ type CentreheadPostType struct {
 
 // CentreheadPost registers the post of centre-head members.
 // forwards the post to the associated XEN.
-func (h *PostHandler) CentreheadPost (c *gin.Context) {
+func (h *PostHandler) CentreheadPost(c *gin.Context) {
 	var inputs CentreheadPostType
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -70,13 +73,36 @@ func (h *PostHandler) CentreheadPost (c *gin.Context) {
 		return
 	}
 
+	// send the mail to the corresponding xen
+    // <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, head.Role, post.ID)
+	go func() {
+		var position models.PositionType
+		if post.TypeOfPost == "Civil" {
+			position = models.TypeXENCivil
+		} else {
+			position = models.TypeXENElectrical
+		}
+		// through type of post send the mail to the corresponding civil/electrical XEN
+		var xen models.Admin
+		result := h.DB.Where("position = ?", position).Take(&xen)
+		if result.Error != nil {
+       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
+			return
+		}
+		// send mail to that user
+		if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+        	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
+		}
+	}()
+	
 	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
 
 
 // CentreheadPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *PostHandler) CentreheadPostEdit (c *gin.Context) {
+func (h *PostHandler) CentreheadPostEdit(c *gin.Context) {
 	// get the id of the user from gin context
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -121,7 +147,7 @@ func (h *PostHandler) CentreheadPostEdit (c *gin.Context) {
 
 // CentreheadPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *PostHandler) CentreheadPostDelete (c *gin.Context) {
+func (h *PostHandler) CentreheadPostDelete(c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -157,7 +183,7 @@ func (h *PostHandler) CentreheadPostDelete (c *gin.Context) {
 
 
 // GetCentreheadPosts fetch the posts of the centre head member along with their status and comments
-func (h *PostHandler) GetCentreheadPosts (c *gin.Context) {
+func (h *PostHandler) GetCentreheadPosts(c *gin.Context) {
 	email, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "unauthenticated user"})

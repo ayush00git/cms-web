@@ -55,10 +55,10 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		return
 	}
 
-	// if admin.IsVerified == false {
-	// 	c.JSON(401, gin.H{"error": "unverified user"})
-	// 	return
-	// }
+	if admin.IsVerified == false {
+		c.JSON(401, gin.H{"error": "unverified user"})
+		return
+	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(inputs.Password))
 	if err != nil {
