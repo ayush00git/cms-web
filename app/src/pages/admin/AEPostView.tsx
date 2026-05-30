@@ -71,7 +71,7 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
           {posts.map((post) => (
             <li key={post.id}>
               <Link
-                to={`/admin/ae/posts/${role}/${post.id}`}
+                to={`/admin/posts/${role}/${post.id}`}
                 className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 {/* ID chip */}
