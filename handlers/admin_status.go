@@ -16,7 +16,7 @@ type AdminReview struct {
 }
 
 // AdminFacultyPostStatus sets the stage of the faculty posts
-func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
+func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})
@@ -135,7 +135,7 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 }
 
 // AdminWardenPostStatus sets the stage of the warden posts
-func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
+func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})
@@ -251,7 +251,7 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 }
 
 // AdminCentreHeadPostStatus sets the stage of the centre_head posts
-func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
+func (h *AdminHandler) AdminCentreHeadPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})

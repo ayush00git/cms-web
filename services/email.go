@@ -108,3 +108,32 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 	log.Printf("Password reset link sent to %s", email)
 	return nil
 }
+
+func SendPostMail(email, postURL string) error {
+	// send the email
+	mail := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="utf-8">
+			<style>
+				body { font-family: sans-serif; line-height: 1.5; color: #333333; }
+				.button { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+			</style>
+		</head>
+		<body>
+			<h2>Reset your password</h2>
+			<p>
+				<a href="%s" class="button" style="color: white;">Reset!</a>
+			</p>
+		</body>
+		</html>
+		`, postURL)
+
+	err := SendMail(email, "New complaint recieved", mail)
+	if err != nil {
+		return err
+	}
+	log.Printf("complaint mail was sent to %s", email)
+	return nil
+}
