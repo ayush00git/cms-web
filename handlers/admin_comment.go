@@ -56,7 +56,7 @@ func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 	tableMap := map[string]interface{} {
 		"faculty_posts": &models.FacultyPost{},
 		"warden_posts": &models.WardenPost{},
-		"centre_head_posts": &models.CentreHeadPost{},
+		"centrehead_posts": &models.CentreheadPost{},
 	}
 
 	postType := c.Param("type")

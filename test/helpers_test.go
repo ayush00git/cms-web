@@ -83,10 +83,10 @@ func newTestDB(t *testing.T) *gorm.DB {
 		&models.Admin{},
 		&models.Faculty{},
 		&models.Warden{},
-		&models.CentreHead{},
+		&models.Centrehead{},
 		&models.FacultyPost{},
 		&models.WardenPost{},
-		&models.CentreHeadPost{},
+		&models.CentreheadPost{},
 		&models.Comment{},
 	); err != nil {
 		t.Fatalf("failed to migrate schema: %v", err)
@@ -130,19 +130,19 @@ func newPostRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 
 	e.POST("/api/post/faculty", auth, h.FacultyPost)
 	e.POST("/api/post/warden", auth, h.WardenPost)
-	e.POST("/api/post/centre_head", auth, h.CentreHeadPost)
+	e.POST("/api/post/centrehead", auth, h.CentreheadPost)
 
 	e.PATCH("/api/post/faculty/edit/:post_id", auth, h.FacultyPostEdit)
 	e.PATCH("/api/post/warden/edit/:post_id", auth, h.WardenPostEdit)
-	e.PATCH("/api/post/centre_head/edit/:post_id", auth, h.CentreHeadPostEdit)
+	e.PATCH("/api/post/centrehead/edit/:post_id", auth, h.CentreheadPostEdit)
 
 	e.DELETE("/api/post/faculty/delete/:post_id", auth, h.FacultyPostDelete)
 	e.DELETE("/api/post/warden/delete/:post_id", auth, h.WardenPostDelete)
-	e.DELETE("/api/post/centre_head/delete/:post_id", auth, h.CentreHeadPostDelete)
+	e.DELETE("/api/post/centrehead/delete/:post_id", auth, h.CentreheadPostDelete)
 
 	e.GET("/api/post/faculty", auth, h.GetFacultyPosts)
 	e.GET("/api/post/warden", auth, h.GetWardenPosts)
-	e.GET("/api/post/centre_head", auth, h.GetCentreHeadPosts)
+	e.GET("/api/post/centrehead", auth, h.GetCentreheadPosts)
 
 	return e
 }
@@ -167,7 +167,7 @@ func newAuthRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e := gin.New()
 	h := &handlers.AuthHandler{DB: db}
 
-	for _, role := range []string{"faculty", "warden", "centre_head"} {
+	for _, role := range []string{"faculty", "warden", "centrehead"} {
 		g := e.Group("/api/auth/" + role)
 		switch role {
 		case "faculty":
@@ -180,11 +180,11 @@ func newAuthRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 			g.POST("/login", h.WardenLogin)
 			g.POST("/forget-password", h.WardenForgetPassword)
 			g.PATCH("/reset-password", h.WardenResetPassword)
-		case "centre_head":
-			g.POST("/signup", h.CentreHeadSignup)
-			g.POST("/login", h.CentreHeadLogin)
-			g.POST("/forget-password", h.CentreHeadForgetPassword)
-			g.PATCH("/reset-password", h.CentreHeadResetPassword)
+		case "centrehead":
+			g.POST("/signup", h.CentreheadSignup)
+			g.POST("/login", h.CentreheadLogin)
+			g.POST("/forget-password", h.CentreheadForgetPassword)
+			g.PATCH("/reset-password", h.CentreheadResetPassword)
 		}
 	}
 
@@ -287,9 +287,9 @@ func seedWarden(t *testing.T, db *gorm.DB, email string) models.Warden {
 	return w
 }
 
-func seedCentreHead(t *testing.T, db *gorm.DB, email string) models.CentreHead {
+func seedCentrehead(t *testing.T, db *gorm.DB, email string) models.Centrehead {
 	t.Helper()
-	ch := models.CentreHead{
+	ch := models.Centrehead{
 		Email:       email,
 		Password:    testPasswordHash,
 		Building:    models.LHC,

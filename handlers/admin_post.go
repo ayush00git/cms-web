@@ -43,7 +43,7 @@ func (h *AdminHandler) GetXENPosts (c *gin.Context) {
 
 	var facultyPosts []models.FacultyPost
 	var wardenPosts []models.WardenPost
-	var centreheadPosts []models.CentreHeadPost
+	var centreheadPosts []models.CentreheadPost
 
 	// fetch faculty posts
 	// this api only returns the fields that are required at the
@@ -79,7 +79,7 @@ func (h *AdminHandler) GetXENPosts (c *gin.Context) {
 		"success": "posts fetched successfully",
 		"faculty_posts": facultyPosts,
 		"warden_posts": wardenPosts,
-		"centre_head_posts": centreheadPosts,
+		"centrehead_posts": centreheadPosts,
 	})
 }
 
@@ -118,7 +118,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 
 	var facultyPosts []models.FacultyPost
 	var wardenPosts []models.WardenPost
-	var centreheadPosts []models.CentreHeadPost
+	var centreheadPosts []models.CentreheadPost
 
 	// fetch faculty posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
@@ -154,7 +154,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 		"success": "posts fetched successfully",
 		"faculty_posts": facultyPosts,
 		"warden_posts": wardenPosts,
-		"centre_head_posts": centreheadPosts,
+		"centrehead_posts": centreheadPosts,
 	})
 }
 
@@ -193,7 +193,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 
 	var facultyPosts []models.FacultyPost
 	var wardenPosts []models.WardenPost
-	var centreheadPosts []models.CentreHeadPost
+	var centreheadPosts []models.CentreheadPost
 
 	// fetch faculty posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
@@ -229,7 +229,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 		"success": "posts fetched successfully",
 		"faculty_posts": facultyPosts,
 		"warden_posts": wardenPosts,
-		"centre_head_posts": centreheadPosts,
+		"centrehead_posts": centreheadPosts,
 	})
 }
 
@@ -297,7 +297,7 @@ func (h *AdminHandler) AdminGetPost (c *gin.Context) {
 		}
 		reqPost = post
 	case "centrehead":
-		var post models.CentreHeadPost
+		var post models.CentreheadPost
 		result := h.DB.Preload("Author", func (db *gorm.DB) (*gorm.DB) {
 			return db.Select("id, email, building, phone_number")
 		}).

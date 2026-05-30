@@ -250,8 +250,8 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "status updated"})
 }
 
-// AdminCentreHeadPostStatus sets the stage of the centre_head posts
-func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
+// AdminCentreheadPostStatus sets the stage of the centrehead posts
+func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})
@@ -277,7 +277,7 @@ func (h *AdminHandler) AdminCentreHeadPostStatus (c *gin.Context) {
 	}
 
 	// see if this post exists
-	var post models.CentreHeadPost
+	var post models.CentreheadPost
 	result = h.DB.Where("id = ?", uint(postID)).Take(&post)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

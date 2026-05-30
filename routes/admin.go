@@ -17,7 +17,7 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	{
 		stage.PATCH("/faculty_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminFacultyPostStatus)
 		stage.PATCH("/warden_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminWardenPostStatus)
-		stage.PATCH("/centre_head_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreHeadPostStatus)
+		stage.PATCH("/centrehead_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreheadPostStatus)
 	}
 
 	// get the posts according to the status

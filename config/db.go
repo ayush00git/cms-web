@@ -32,10 +32,10 @@ func ConnectDB() {
 		&models.Admin{},
 		&models.Faculty{},
 		&models.Warden{},
-		&models.CentreHead{},
+		&models.Centrehead{},
 		&models.FacultyPost{},
 		&models.WardenPost{},
-		&models.CentreHeadPost{},
+		&models.CentreheadPost{},
 		&models.Comment{},
 	)
 

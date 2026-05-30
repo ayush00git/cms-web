@@ -16,7 +16,7 @@ interface JEPostsResponse {
   success: string;
   faculty_posts: BasePost[] | BasePost | null;
   warden_posts: BasePost[] | BasePost | null;
-  centre_head_posts: BasePost[] | BasePost | null;
+  centrehead_posts: BasePost[] | BasePost | null;
 }
 
 function normalise(val: BasePost[] | BasePost | null | undefined): BasePost[] {
@@ -184,7 +184,7 @@ export function JEPostView() {
     );
   }
 
-  const { faculty_posts: fp, warden_posts: wp, centre_head_posts: cp } = data!;
+  const { faculty_posts: fp, warden_posts: wp, centrehead_posts: cp } = data!;
 
   return (
     <MainLayout>

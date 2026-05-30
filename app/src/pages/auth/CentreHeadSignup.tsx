@@ -28,7 +28,7 @@ export function CentreHeadSignup() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/auth/centre_head/signup', {
+      const response = await fetch('/api/auth/centrehead/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

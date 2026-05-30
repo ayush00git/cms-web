@@ -43,7 +43,7 @@ func (h *AuthHandler) VerifyAccount (c *gin.Context) {
 	case "warden":
 		h.DB.Model(&models.Warden{}).Where("email = ?", claims.Email).Update("is_verified", true)
 	case "centrehead":
-		h.DB.Model(&models.CentreHead{}).Where("email = ?", claims.Email).Update("is_verified", true)
+		h.DB.Model(&models.Centrehead{}).Where("email = ?", claims.Email).Update("is_verified", true)
 	default:
 		c.JSON(400, gin.H{"error": "role not defined"})
 		return
@@ -81,7 +81,7 @@ func (h *AuthHandler) UserProfile (c *gin.Context) {
 		}
 		userProfile = profile
 	case "centrehead":
-		var profile models.CentreHead
+		var profile models.Centrehead
 		result := h.DB.Where("email = ?", email).Take(&profile)
 		if result.Error != nil {
 			c.JSON(500, gin.H{"error": "failed to fetch user profile"})

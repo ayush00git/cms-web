@@ -27,7 +27,7 @@ const (
 	ShoppingComplex      BuildingName = "Shopping Complex (near residential area)"
 )
 
-type CentreHead struct {
+type Centrehead struct {
 	ID          uint         `gorm:"primaryKey;autoIncrement" json:"id"`
 	Email       string       `gorm:"uniqueIndex;not null" json:"email"`
 	Password    string       `gorm:"not null" json:"password"`
@@ -37,14 +37,14 @@ type CentreHead struct {
 	CreatedAt   time.Time	 `json:"created_at"`
 }
 
-type CentreHeadSignup struct {
+type CentreheadSignup struct {
 	Email       string       `json:"email" binding:"required"`
 	Password    string       `json:"password" binding:"required"`
 	Building    BuildingName `json:"building" binding:"required"`
 	PhoneNumber string       `json:"phone_number" binding:"required"`
 }
 
-type CentreHeadLogin struct {
+type CentreheadLogin struct {
 	Email       string       `json:"email" binding:"required"`
 	Password    string       `json:"password" binding:"required"`
 }

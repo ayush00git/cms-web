@@ -16,7 +16,7 @@ export function CentreHeadForgotPassword() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/auth/centre_head/forget-password', {
+      const response = await fetch('/api/auth/centrehead/forget-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

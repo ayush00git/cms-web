@@ -9,18 +9,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// --- CentreHeadSignup -------------------------------------------------------
+// --- CentreheadSignup -------------------------------------------------------
 
-func TestCentreHeadSignup_InvalidBody(t *testing.T) {
+func TestCentreheadSignup_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/signup", []string{"bad"})
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/signup", []string{"bad"})
 	assertStatus(t, rec, 400)
 }
 
-func TestCentreHeadSignup_AlreadyRegistered(t *testing.T) {
+func TestCentreheadSignup_AlreadyRegistered(t *testing.T) {
 	db := newTestDB(t)
-	seedCentreHead(t, db, "ch.dup@iit.ac.in")
+	seedCentrehead(t, db, "ch.dup@iit.ac.in")
 
 	e := newAuthRouter(db, noAuth())
 	body := map[string]any{
@@ -29,18 +29,18 @@ func TestCentreHeadSignup_AlreadyRegistered(t *testing.T) {
 		"building":     string(models.LHC),
 		"phone_number": "7777777777",
 	}
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/signup", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/signup", body)
 	assertStatus(t, rec, 409)
 }
 
-// --- CentreHeadLogin --------------------------------------------------------
+// --- CentreheadLogin --------------------------------------------------------
 
-func TestCentreHeadLogin_Success(t *testing.T) {
+func TestCentreheadLogin_Success(t *testing.T) {
 	db := newTestDB(t)
-	ch := seedCentreHead(t, db, "ch.login@iit.ac.in")
+	ch := seedCentrehead(t, db, "ch.login@iit.ac.in")
 
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/login", map[string]any{
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/login", map[string]any{
 		"email":    ch.Email,
 		"password": testPassword,
 	})
@@ -52,117 +52,117 @@ func TestCentreHeadLogin_Success(t *testing.T) {
 	}
 }
 
-func TestCentreHeadLogin_InvalidBody(t *testing.T) {
+func TestCentreheadLogin_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/login", []string{"bad"})
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/login", []string{"bad"})
 	assertStatus(t, rec, 400)
 }
 
-func TestCentreHeadLogin_UserNotFound(t *testing.T) {
+func TestCentreheadLogin_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/login", map[string]any{
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/login", map[string]any{
 		"email":    "ghost@iit.ac.in",
 		"password": testPassword,
 	})
 	assertStatus(t, rec, 404)
 }
 
-func TestCentreHeadLogin_Unverified(t *testing.T) {
+func TestCentreheadLogin_Unverified(t *testing.T) {
 	db := newTestDB(t)
-	ch := models.CentreHead{Email: "ch.unv@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
+	ch := models.Centrehead{Email: "ch.unv@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
 	db.Create(&ch)
 
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/login", map[string]any{
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/login", map[string]any{
 		"email":    ch.Email,
 		"password": testPassword,
 	})
 	assertStatus(t, rec, 403)
 }
 
-// CentreHeadLogin returns 403 (not 401) on a bad password — locking in the
+// CentreheadLogin returns 403 (not 401) on a bad password — locking in the
 // handler's current behaviour.
-func TestCentreHeadLogin_WrongPassword(t *testing.T) {
+func TestCentreheadLogin_WrongPassword(t *testing.T) {
 	db := newTestDB(t)
-	ch := seedCentreHead(t, db, "ch.wrongpw@iit.ac.in")
+	ch := seedCentrehead(t, db, "ch.wrongpw@iit.ac.in")
 
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/login", map[string]any{
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/login", map[string]any{
 		"email":    ch.Email,
 		"password": "nope",
 	})
 	assertStatus(t, rec, 401)
 }
 
-// --- CentreHeadForgetPassword -----------------------------------------------
+// --- CentreheadForgetPassword -----------------------------------------------
 
-func TestCentreHeadForgetPassword_InvalidBody(t *testing.T) {
+func TestCentreheadForgetPassword_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/forget-password", []string{"bad"})
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/forget-password", []string{"bad"})
 	assertStatus(t, rec, 400)
 }
 
-func TestCentreHeadForgetPassword_UserNotFound(t *testing.T) {
+func TestCentreheadForgetPassword_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/forget-password", map[string]any{"email": "ghost@iit.ac.in"})
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/forget-password", map[string]any{"email": "ghost@iit.ac.in"})
 	assertStatus(t, rec, 404)
 }
 
-func TestCentreHeadForgetPassword_Unverified(t *testing.T) {
+func TestCentreheadForgetPassword_Unverified(t *testing.T) {
 	db := newTestDB(t)
-	ch := models.CentreHead{Email: "ch.fpunv@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
+	ch := models.Centrehead{Email: "ch.fpunv@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
 	db.Create(&ch)
 
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPost, "/api/auth/centre_head/forget-password", map[string]any{"email": ch.Email})
+	rec := doRequest(t, e, http.MethodPost, "/api/auth/centrehead/forget-password", map[string]any{"email": ch.Email})
 	assertStatus(t, rec, 403)
 }
 
-// --- CentreHeadResetPassword ------------------------------------------------
+// --- CentreheadResetPassword ------------------------------------------------
 
-func TestCentreHeadResetPassword_Success(t *testing.T) {
+func TestCentreheadResetPassword_Success(t *testing.T) {
 	db := newTestDB(t)
-	ch := seedCentreHead(t, db, "ch.reset@iit.ac.in")
+	ch := seedCentrehead(t, db, "ch.reset@iit.ac.in")
 	token := genToken(t, ch.ID, ch.Email, "centrehead")
 
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centre_head/reset-password?user="+token, map[string]any{
+	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centrehead/reset-password?user="+token, map[string]any{
 		"password": "BrandNewPass1",
 	})
 
 	assertStatus(t, rec, 200)
 
-	var updated models.CentreHead
+	var updated models.Centrehead
 	db.First(&updated, ch.ID)
 	if err := bcrypt.CompareHashAndPassword([]byte(updated.Password), []byte("BrandNewPass1")); err != nil {
 		t.Fatalf("password was not updated: %v", err)
 	}
 }
 
-func TestCentreHeadResetPassword_InvalidToken(t *testing.T) {
+func TestCentreheadResetPassword_InvalidToken(t *testing.T) {
 	db := newTestDB(t)
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centre_head/reset-password?user=garbage", map[string]any{"password": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centrehead/reset-password?user=garbage", map[string]any{"password": "x"})
 	assertStatus(t, rec, 500)
 }
 
-func TestCentreHeadResetPassword_UserNotFound(t *testing.T) {
+func TestCentreheadResetPassword_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	token := genToken(t, 1, "ghost@iit.ac.in", "centrehead")
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centre_head/reset-password?user="+token, map[string]any{"password": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centrehead/reset-password?user="+token, map[string]any{"password": "x"})
 	assertStatus(t, rec, 403)
 }
 
-func TestCentreHeadResetPassword_InvalidBody(t *testing.T) {
+func TestCentreheadResetPassword_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
-	ch := seedCentreHead(t, db, "ch.resetbad@iit.ac.in")
+	ch := seedCentrehead(t, db, "ch.resetbad@iit.ac.in")
 	token := genToken(t, ch.ID, ch.Email, "centrehead")
 	e := newAuthRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centre_head/reset-password?user="+token, []string{"bad"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/auth/centrehead/reset-password?user="+token, []string{"bad"})
 	assertStatus(t, rec, 400)
 }
