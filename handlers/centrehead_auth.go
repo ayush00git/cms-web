@@ -16,7 +16,7 @@ import (
 
 // CentreHeadSignup registers the head of adminstrations.
 // On success, sends a verification email with a JWT token link.
-func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
+func (h *AuthHandler) CentreHeadSignup(c *gin.Context) {
 	var inputs models.CentreHeadSignup
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -73,7 +73,7 @@ func (h *AuthHandler) CentreHeadSignup (c *gin.Context) {
 
 // CentreHeadLogin authenticates the head of administrations using email and password.
 // On success, signs a JWT and stores it in an httpOnly cookie.
-func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
+func (h *AuthHandler) CentreHeadLogin(c *gin.Context) {
 	var inputs models.CentreHeadLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -88,7 +88,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 			c.JSON(404, gin.H{"error": "user not found"})
 			return
 		}
-		c.JSON(404, gin.H{"error": "internal server error"})
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -99,7 +99,7 @@ func (h *AuthHandler) CentreHeadLogin (c *gin.Context) {
 
 	err := bcrypt.CompareHashAndPassword([]byte(head.Password), []byte(inputs.Password))
 	if err != nil {
-		c.JSON(403, gin.H{"error": "incorrect password"})
+		c.JSON(401, gin.H{"error": "incorrect password"})
 		return
 	}
 
