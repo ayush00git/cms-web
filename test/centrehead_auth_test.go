@@ -93,7 +93,7 @@ func TestCentreHeadLogin_WrongPassword(t *testing.T) {
 		"email":    ch.Email,
 		"password": "nope",
 	})
-	assertStatus(t, rec, 403)
+	assertStatus(t, rec, 401)
 }
 
 // --- CentreHeadForgetPassword -----------------------------------------------
