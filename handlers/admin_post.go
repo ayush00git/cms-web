@@ -113,7 +113,7 @@ func (h* AdminHandler) GetAEPosts (c *gin.Context) {
 	if strings.Contains(string(admin.Position), "Civil") {
 		postType = "Civil"
 	} else {
-		postType = "Electical"
+		postType = "Electrical"
 	}
 
 	var facultyPosts []models.FacultyPost
@@ -188,7 +188,7 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 	if strings.Contains(string(admin.Position), "Civil") {
 		postType = "Civil"
 	} else {
-		postType = "Electical"
+		postType = "Electrical"
 	}
 
 	var facultyPosts []models.FacultyPost
