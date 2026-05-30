@@ -16,7 +16,7 @@ func TestGetXENPosts_Success(t *testing.T) {
 	// In-scope: Civil + a status the XEN view cares about.
 	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: models.StatusPendingXEN})
 	db.Create(&models.WardenPost{WardenID: 1, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "war", Description: "d", Status: models.StatusResolved})
-	db.Create(&models.CentreHeadPost{CentreHeadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusRejected})
+	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusRejected})
 	// Out-of-scope: Electrical type should be filtered out for a Civil XEN.
 	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeElectrical, Title: "elec", Description: "d", Status: models.StatusPendingXEN})
 
@@ -31,7 +31,7 @@ func TestGetXENPosts_Success(t *testing.T) {
 	if wp := out["warden_posts"].([]any); len(wp) != 1 {
 		t.Fatalf("expected 1 civil warden post, got %d", len(wp))
 	}
-	if cp := out["centre_head_posts"].([]any); len(cp) != 1 {
+	if cp := out["centrehead_posts"].([]any); len(cp) != 1 {
 		t.Fatalf("expected 1 civil centre head post, got %d", len(cp))
 	}
 }
@@ -106,7 +106,7 @@ func TestGetJEPosts_Success(t *testing.T) {
 	admin := seedAdmin(t, db, "je.civil2@iit.ac.in", models.TypeJECivil)
 
 	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: models.StatusPendingJE})
-	db.Create(&models.CentreHeadPost{CentreHeadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusResolvedJE})
+	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusResolvedJE})
 	// Out-of-scope status for the JE view.
 	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "x", Description: "d", Status: models.StatusPendingXEN})
 
@@ -118,7 +118,7 @@ func TestGetJEPosts_Success(t *testing.T) {
 	if fp := out["faculty_posts"].([]any); len(fp) != 1 {
 		t.Fatalf("expected 1 in-scope faculty post, got %d", len(fp))
 	}
-	if cp := out["centre_head_posts"].([]any); len(cp) != 1 {
+	if cp := out["centrehead_posts"].([]any); len(cp) != 1 {
 		t.Fatalf("expected 1 in-scope centre head post, got %d", len(cp))
 	}
 }
@@ -169,11 +169,11 @@ func TestAdminGetPost_Warden(t *testing.T) {
 	assertStatus(t, rec, 200)
 }
 
-func TestAdminGetPost_CentreHead(t *testing.T) {
+func TestAdminGetPost_Centrehead(t *testing.T) {
 	db := newTestDB(t)
 	admin := seedAdmin(t, db, "admin.getc@iit.ac.in", models.TypeXENCivil)
-	ch := seedCentreHead(t, db, "ch.adminget@iit.ac.in")
-	post := models.CentreHeadPost{CentreHeadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	ch := seedCentrehead(t, db, "ch.adminget@iit.ac.in")
+	post := models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
 	db.Create(&post)
 
 	e := newAdminRouter(db, authAs(admin.ID, admin.Email))

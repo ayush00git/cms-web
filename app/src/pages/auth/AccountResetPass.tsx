@@ -6,7 +6,7 @@ import { MainLayout } from '../../components/layout/MainLayout';
 const roleToApi: Record<string, string> = {
   faculty: '/api/auth/faculty/reset-password',
   warden: '/api/auth/warden/reset-password',
-  centrehead: '/api/auth/centre_head/reset-password',
+  centrehead: '/api/auth/centrehead/reset-password',
 };
 
 const roleToLoginPath: Record<string, string> = {

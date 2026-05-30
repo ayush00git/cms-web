@@ -8,7 +8,7 @@ type PostSource string
 const (
 	SourceFaculty    PostSource = "Faculty"
 	SourceWarden     PostSource = "Warden"
-	SourceCentreHead PostSource = "CentreHead"
+	SourceCentrehead PostSource = "Centrehead"
 )
 
 type PostPlace string
@@ -74,10 +74,10 @@ type WardenPost struct {
 	Comments 		[]Comment 		`gorm:"polymorphic:Commentable;" json:"comments"`
 }
 
-type CentreHeadPost struct {
+type CentreheadPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
-	CentreHeadID    uint        	`gorm:"not null" json:"centre_head_id"`
-	Author			CentreHead		`gorm:"foreignKey:CentreHeadID"`
+	CentreheadID    uint        	`gorm:"not null" json:"centrehead_id"`
+	Author			Centrehead		`gorm:"foreignKey:CentreheadID"`
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`

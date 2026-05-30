@@ -26,7 +26,7 @@ export function CentreHeadPost() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/post/centre_head', {
+      const response = await fetch('/api/post/centrehead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

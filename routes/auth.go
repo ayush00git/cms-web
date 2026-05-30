@@ -21,12 +21,12 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 		warden.POST("/forget-password", h.WardenForgetPassword)
 		warden.PATCH("/reset-password", h.WardenResetPassword)
 	}
-	centrehead := e.Group("/api/auth/centre_head")
+	centrehead := e.Group("/api/auth/centrehead")
 	{
-		centrehead.POST("/signup", h.CentreHeadSignup)
-		centrehead.POST("/login", h.CentreHeadLogin)
-		centrehead.POST("/forget-password", h.CentreHeadForgetPassword)
-		centrehead.PATCH("/reset-password", h.CentreHeadResetPassword)
+		centrehead.POST("/signup", h.CentreheadSignup)
+		centrehead.POST("/login", h.CentreheadLogin)
+		centrehead.POST("/forget-password", h.CentreheadForgetPassword)
+		centrehead.PATCH("/reset-password", h.CentreheadResetPassword)
 	}
 	e.POST("/api/auth/logout", h.Logout)
 

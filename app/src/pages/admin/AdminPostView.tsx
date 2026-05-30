@@ -101,7 +101,7 @@ interface WardenPost {
 
 interface CentreHeadPost {
   id: number;
-  centre_head_id: number;
+  centrehead_id: number;
   Author: CentreHeadAuthor;
   type_of_post: string;
   title: string;
@@ -136,14 +136,14 @@ const STATUS_STYLES: Record<string, string> = {
 const ROLE_TO_STATUS_API: Record<string, string> = {
   faculty:    'faculty_posts',
   warden:     'warden_posts',
-  centrehead: 'centre_head_posts',
+  centrehead: 'centrehead_posts',
 };
 
 // Maps URL role param → API segment for the comment endpoint
 const ROLE_TO_COMMENT_API: Record<string, string> = {
   faculty:    'faculty_posts',
   warden:     'wardens_posts',
-  centrehead: 'centreheads_posts',
+  centrehead: 'centrehead_posts',
 };
 
 // Back-link per admin type

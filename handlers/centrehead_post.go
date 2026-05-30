@@ -11,24 +11,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// CentreHeadPostEditType
-type CentreHeadPostEditType struct {
+// CentreheadPostEditType
+type CentreheadPostEditType struct {
 	Title			string		`json:"title"`
 	Description		string		`json:"description"`
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
-// CentreHeadPostType
-type CentreHeadPostType struct {
+// CentreheadPostType
+type CentreheadPostType struct {
 	Title			string		`json:"title"`
 	Description		string		`json:"description"`
 	TypeOfPost		string		`json:"type_of_post"`
 }
 
-// CentreHeadPost registers the post of centre-head members.
+// CentreheadPost registers the post of centre-head members.
 // forwards the post to the associated XEN.
-func (h *PostHandler) CentreHeadPost (c *gin.Context) {
-	var inputs CentreHeadPostType
+func (h *PostHandler) CentreheadPost (c *gin.Context) {
+	var inputs CentreheadPostType
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -44,7 +44,7 @@ func (h *PostHandler) CentreHeadPost (c *gin.Context) {
 	email, _ := c.Get(middleware.EmailKey)
 
 	// read db for this email exists or not
-	var head models.CentreHead
+	var head models.Centrehead
 	result := h.DB.Where("email = ?", email).Take(&head)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -55,8 +55,8 @@ func (h *PostHandler) CentreHeadPost (c *gin.Context) {
 		return
 	}
 
-	post := models.CentreHeadPost{
-		CentreHeadID: centreheadId.(uint),
+	post := models.CentreheadPost{
+		CentreheadID: centreheadId.(uint),
 		TypeOfPost: models.PostType(inputs.TypeOfPost),
 		Title: inputs.Title,
 		Description: inputs.Description,
@@ -74,9 +74,9 @@ func (h *PostHandler) CentreHeadPost (c *gin.Context) {
 }
 
 
-// CentreHeadPostEdit let's the author of the post edit it.
+// CentreheadPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *PostHandler) CentreHeadPostEdit (c *gin.Context) {
+func (h *PostHandler) CentreheadPostEdit (c *gin.Context) {
 	// get the id of the user from gin context
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -84,7 +84,7 @@ func (h *PostHandler) CentreHeadPostEdit (c *gin.Context) {
 		return
 	}
 
-	var post models.CentreHeadPost
+	var post models.CentreheadPost
 	postID := c.Param("post_id")
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
@@ -97,12 +97,12 @@ func (h *PostHandler) CentreHeadPostEdit (c *gin.Context) {
 	}
 
 	// verifying is it the author trying to edit
-	if post.CentreHeadID != userID.(uint) {
+	if post.CentreheadID != userID.(uint) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
 		return
 	}
 
-	var inputs CentreHeadPostEditType
+	var inputs CentreheadPostEditType
 	inputs.UpdatedAt = time.Now()
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -119,9 +119,9 @@ func (h *PostHandler) CentreHeadPostEdit (c *gin.Context) {
 }
 
 
-// CentreHeadPostDelete lets the author delete his post.
+// CentreheadPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *PostHandler) CentreHeadPostDelete (c *gin.Context) {
+func (h *PostHandler) CentreheadPostDelete (c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -131,7 +131,7 @@ func (h *PostHandler) CentreHeadPostDelete (c *gin.Context) {
 
 	// get postID from parameters and fetch the post
 	postID := c.Param("post_id")
-	var post models.CentreHeadPost
+	var post models.CentreheadPost
 	result := h.DB.Where("id = ?", postID).Take(&post)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -142,7 +142,7 @@ func (h *PostHandler) CentreHeadPostDelete (c *gin.Context) {
 		return
 	}
 
-	if post.CentreHeadID != userID.(uint) {
+	if post.CentreheadID != userID.(uint) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
 		return
 	}
@@ -156,29 +156,29 @@ func (h *PostHandler) CentreHeadPostDelete (c *gin.Context) {
 }
 
 
-// GetCentreHeadPosts fetch the posts of the centre head member along with their status and comments
-func (h *PostHandler) GetCentreHeadPosts (c *gin.Context) {
+// GetCentreheadPosts fetch the posts of the centre head member along with their status and comments
+func (h *PostHandler) GetCentreheadPosts (c *gin.Context) {
 	email, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "unauthenticated user"})
 		return
 	}
 
-	var head models.CentreHead
+	var head models.Centrehead
 	result := h.DB.Where("email = ?", email).Take(&head)
 	if result.Error != nil {
 		c.JSON(401, gin.H{"error": "user not found"})
 		return
 	}
 
-	var posts []models.CentreHeadPost
+	var posts []models.CentreheadPost
 	result = h.DB.
 	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
 		return db.Preload("Author", func (d *gorm.DB) (*gorm.DB) {
 			return d.Select("id, email, position")
 		})
 	}).
-	Where("centre_head_id = ?", head.ID).
+	Where("centrehead_id = ?", head.ID).
 	Find(&posts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch posts at the moment"})

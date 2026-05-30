@@ -58,9 +58,9 @@ func TestVerifyAccount_Warden(t *testing.T) {
 	}
 }
 
-func TestVerifyAccount_CentreHead(t *testing.T) {
+func TestVerifyAccount_Centrehead(t *testing.T) {
 	db := newTestDB(t)
-	ch := models.CentreHead{Email: "ch.verify@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
+	ch := models.Centrehead{Email: "ch.verify@iit.ac.in", Password: testPasswordHash, Building: models.LHC, PhoneNumber: "7777777777", IsVerified: false}
 	db.Create(&ch)
 	token := genToken(t, ch.ID, ch.Email, "centrehead")
 
@@ -68,7 +68,7 @@ func TestVerifyAccount_CentreHead(t *testing.T) {
 	rec := doRequest(t, e, http.MethodGet, "/api/auth/verify?token="+token, nil)
 
 	assertStatus(t, rec, 200)
-	var updated models.CentreHead
+	var updated models.Centrehead
 	db.First(&updated, ch.ID)
 	if !updated.IsVerified {
 		t.Fatalf("expected centre head to be marked verified")
@@ -115,9 +115,9 @@ func TestUserProfile_Warden(t *testing.T) {
 	assertStatus(t, rec, 200)
 }
 
-func TestUserProfile_CentreHead(t *testing.T) {
+func TestUserProfile_Centrehead(t *testing.T) {
 	db := newTestDB(t)
-	ch := seedCentreHead(t, db, "ch.profile@iit.ac.in")
+	ch := seedCentrehead(t, db, "ch.profile@iit.ac.in")
 
 	e := newAuthRouter(db, authAsRole(ch.ID, ch.Email, "centrehead"))
 	rec := doRequest(t, e, http.MethodGet, "/api/profile", nil)

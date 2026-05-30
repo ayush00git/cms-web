@@ -17,7 +17,7 @@ interface XENPostsResponse {
   // API may return an array, a single object, or null depending on the backend
   faculty_posts: BasePost[] | BasePost | null;
   warden_posts: BasePost[] | BasePost | null;
-  centre_head_posts: BasePost[] | BasePost | null;
+  centrehead_posts: BasePost[] | BasePost | null;
 }
 
 // Handles every shape the Go backend might send:
@@ -192,7 +192,7 @@ export function XENPostView() {
     );
   }
 
-  const { faculty_posts: fp, warden_posts: wp, centre_head_posts: cp } = data!;
+  const { faculty_posts: fp, warden_posts: wp, centrehead_posts: cp } = data!;
 
   return (
     <MainLayout>

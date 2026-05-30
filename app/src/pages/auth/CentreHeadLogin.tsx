@@ -19,7 +19,7 @@ export function CentreHeadLogin() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/auth/centre_head/login', {
+      const response = await fetch('/api/auth/centrehead/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

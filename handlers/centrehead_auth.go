@@ -14,10 +14,10 @@ import (
 )
 
 
-// CentreHeadSignup registers the head of adminstrations.
+// CentreheadSignup registers the head of adminstrations.
 // On success, sends a verification email with a JWT token link.
-func (h *AuthHandler) CentreHeadSignup(c *gin.Context) {
-	var inputs models.CentreHeadSignup
+func (h *AuthHandler) CentreheadSignup(c *gin.Context) {
+	var inputs models.CentreheadSignup
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
@@ -32,7 +32,7 @@ func (h *AuthHandler) CentreHeadSignup(c *gin.Context) {
 
 	inputs.Password = string(hashedPass)
 
-	centrehead := models.CentreHead{
+	centrehead := models.Centrehead{
 		Email: inputs.Email,
 		Password: inputs.Password,
 		Building: inputs.Building,
@@ -41,7 +41,7 @@ func (h *AuthHandler) CentreHeadSignup(c *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 	
-	var existingUser models.CentreHead
+	var existingUser models.Centrehead
 	result := h.DB.Where("email = ?", centrehead.Email).Take(&existingUser)
 	if result.Error == nil {
 		if !existingUser.IsVerified {
@@ -71,17 +71,17 @@ func (h *AuthHandler) CentreHeadSignup(c *gin.Context) {
 }
 
 
-// CentreHeadLogin authenticates the head of administrations using email and password.
+// CentreheadLogin authenticates the head of administrations using email and password.
 // On success, signs a JWT and stores it in an httpOnly cookie.
-func (h *AuthHandler) CentreHeadLogin(c *gin.Context) {
-	var inputs models.CentreHeadLogin
+func (h *AuthHandler) CentreheadLogin(c *gin.Context) {
+	var inputs models.CentreheadLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	var head models.CentreHead
+	var head models.Centrehead
 	result := h.DB.Where("email = ?", inputs.Email).Take(&head)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -123,14 +123,14 @@ func (h *AuthHandler) CentreHeadLogin(c *gin.Context) {
 }
 
 
-// CentreHeadForgetPassword sends an password reset email to the user
-func (h* AuthHandler) CentreHeadForgetPassword(c *gin.Context) {
+// CentreheadForgetPassword sends an password reset email to the user
+func (h* AuthHandler) CentreheadForgetPassword(c *gin.Context) {
 	var input ForgetPassword
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
-	var head models.CentreHead
+	var head models.Centrehead
 	result := h.DB.Where("email = ?", input.Email).Take(&head)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -155,8 +155,8 @@ func (h* AuthHandler) CentreHeadForgetPassword(c *gin.Context) {
 }
 
 
-// CentreHeadResetPassword resets the password of the user
-func (h *AuthHandler) CentreHeadResetPassword(c *gin.Context) {
+// CentreheadResetPassword resets the password of the user
+func (h *AuthHandler) CentreheadResetPassword(c *gin.Context) {
 	// get the user from query parameters
 	userToken := c.Query("user")
 
@@ -166,7 +166,7 @@ func (h *AuthHandler) CentreHeadResetPassword(c *gin.Context) {
 		return
 	}
 
-	var head models.CentreHead
+	var head models.Centrehead
 	result := h.DB.Where("email = ?", claims.Email).Take(&head)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

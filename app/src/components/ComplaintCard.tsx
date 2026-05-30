@@ -7,7 +7,7 @@ import { POST_PLACES } from '../constants/models';
 
 // ── Types ────────────────────────────────────────────────────────────────────────
 
-export type Role = 'faculty' | 'warden' | 'centre_head';
+export type Role = 'faculty' | 'warden' | 'centrehead';
 
 export interface CommentAuthor {
   id: number;

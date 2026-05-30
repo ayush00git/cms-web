@@ -60,15 +60,15 @@ func TestAdminPostComment_Warden(t *testing.T) {
 	assertStatus(t, rec, 201)
 }
 
-func TestAdminPostComment_CentreHead(t *testing.T) {
+func TestAdminPostComment_Centrehead(t *testing.T) {
 	db := newTestDB(t)
 	admin := seedAdmin(t, db, "admin.commentc@iit.ac.in", models.TypeXENCivil)
-	ch := seedCentreHead(t, db, "ch.comment@iit.ac.in")
-	post := models.CentreHeadPost{CentreHeadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	ch := seedCentrehead(t, db, "ch.comment@iit.ac.in")
+	post := models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
 	db.Create(&post)
 
 	e := newAdminCommentRouter(db, authAs(admin.ID, admin.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/admin/comment/centre_head_posts/1", handlers.CommentType{Content: "noted"})
+	rec := doRequest(t, e, http.MethodPost, "/api/admin/comment/centrehead_posts/1", handlers.CommentType{Content: "noted"})
 	assertStatus(t, rec, 201)
 }
 

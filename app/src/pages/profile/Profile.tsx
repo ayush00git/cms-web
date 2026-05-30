@@ -48,7 +48,7 @@ export function Profile() {
     let endpoint = '';
     if ('department' in profile)    endpoint = '/api/post/faculty';
     else if ('hostel' in profile)   endpoint = '/api/post/warden';
-    else if ('building' in profile) endpoint = '/api/post/centre_head';
+    else if ('building' in profile) endpoint = '/api/post/centrehead';
     else return;
 
     setPostsLoading(true);
@@ -99,14 +99,14 @@ export function Profile() {
   let roleLabel     = 'User';
   let roleBadgeCls  = 'bg-gray-100 text-gray-800 border-gray-200';
   let registerRoute = '/';
-  let role: Role    = 'centre_head';
+  let role: Role    = 'centrehead';
   if (isFaculty)    { roleLabel = 'Faculty Member'; roleBadgeCls = 'bg-emerald-50 text-emerald-700 border-emerald-200'; registerRoute = '/faculty/post'; role = 'faculty'; }
   else if (isWarden)     { roleLabel = 'Hostel Warden';  roleBadgeCls = 'bg-indigo-50 text-indigo-700 border-indigo-200';  registerRoute = '/warden/post'; role = 'warden'; }
-  else if (isCentreHead) { roleLabel = 'Centre Head';    roleBadgeCls = 'bg-amber-50 text-amber-700 border-amber-200';    registerRoute = '/centre-head/post'; role = 'centre_head'; }
+  else if (isCentreHead) { roleLabel = 'Centre Head';    roleBadgeCls = 'bg-amber-50 text-amber-700 border-amber-200';    registerRoute = '/centre-head/post'; role = 'centrehead'; }
 
   // ── API base paths ──
-  const editBase   = isFaculty ? '/api/post/faculty/edit'       : isWarden ? '/api/post/warden/edit'       : '/api/post/centre_head/edit';
-  const deleteBase = isFaculty ? '/api/post/faculty/delete'     : isWarden ? '/api/post/warden/delete'     : '/api/post/centre_head/delete';
+  const editBase   = isFaculty ? '/api/post/faculty/edit'       : isWarden ? '/api/post/warden/edit'       : '/api/post/centrehead/edit';
+  const deleteBase = isFaculty ? '/api/post/faculty/delete'     : isWarden ? '/api/post/warden/delete'     : '/api/post/centrehead/delete';
 
   // ── Handlers ──
   const handleLogout = async () => {
