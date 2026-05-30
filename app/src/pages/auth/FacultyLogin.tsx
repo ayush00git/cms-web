@@ -4,12 +4,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
 export function FacultyLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]           = useState('');
+  const [password, setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<'success' | 'error' | null>(null);
-  const [message, setMessage] = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [status, setStatus]         = useState<'success' | 'error' | null>(null);
+  const [message, setMessage]       = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,9 +21,7 @@ export function FacultyLogin() {
     try {
       const response = await fetch('/api/auth/faculty/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
         credentials: 'include',
       });
@@ -33,15 +31,13 @@ export function FacultyLogin() {
       if (response.ok) {
         setStatus('success');
         setMessage(data.success || 'Logged in successfully!');
-        setTimeout(() => {
-          navigate('/profile');
-        }, 1000);
+        setTimeout(() => navigate('/profile'), 1000);
       } else {
         setStatus('error');
         const errorMsg = data.error || data.email || Object.values(data)[0] || 'An error occurred';
         setMessage(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Failed to connect to the server. Please try again.');
     } finally {
@@ -49,90 +45,126 @@ export function FacultyLogin() {
     }
   };
 
+  const inputCls = 'w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] placeholder-[#999999] bg-white transition-colors';
+  const labelCls = 'block text-sm font-semibold text-[#111111] mb-1.5';
+
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div className="w-full max-w-md bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-          <div className="bg-[#2d2d2d] text-white px-6 py-4">
-            <h2 className="text-xl font-bold">Faculty Login</h2>
-            <p className="text-sm text-zinc-300 mt-1">Access your complaint dashboard.</p>
-          </div>
+      <div className="flex-grow flex flex-col">
 
-          {message && (
-            <div className={`mx-6 mt-6 p-4 rounded-md border text-sm flex items-start space-x-2 transition-all duration-300 ${
-              status === 'success' 
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                : 'bg-rose-50 text-rose-800 border-rose-200'
-            }`}>
+        {/* Header strip */}
+        <div className="border-b border-[#E5E5E5] py-5">
+          <div className="max-w-6xl mx-auto w-full px-8">
+            <h1 className="text-xl font-bold text-[#111111]">Faculty Login</h1>
+            <p className="text-sm text-[#666666] mt-0.5">Access your complaint dashboard.</p>
+          </div>
+        </div>
+
+        {/* Status banner */}
+        {message && (
+          <div className={`border-b text-sm ${status === 'success' ? 'bg-[#E6F7ED] border-[#bbf0d0] text-[#15803d]' : 'bg-[#FCEBEA] border-[#f5c6c4] text-[#b91c1c]'}`}>
+            <div className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center gap-2.5">
               {status === 'success' ? (
-                <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               )}
               <span className="font-medium">{message}</span>
             </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Email Address</label>
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#ff9900]" 
-                  placeholder="faculty@nith.ac.in" 
-                  required 
-                />
-              </div>
+          </div>
+        )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Password</label>
-                <div className="relative">
+        {/* Form area */}
+        <div className="flex-grow flex items-start justify-center px-8 py-12">
+          <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Credentials</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelCls}>Email Address</label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#ff9900]"
-                    placeholder="••••••••"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className={inputCls}
+                    placeholder="faculty@nith.ac.in"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 cursor-pointer"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-[#111111]">Password</label>
+                    <Link to="/faculty/forgot-password" className="text-xs font-medium text-[#666666] hover:text-[#111111] transition-colors cursor-pointer">
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className={`${inputCls} pr-10`}
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-[#666666] hover:text-[#111111] cursor-pointer transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
+            <div className="border-t border-[#CCCCCC]" />
+
+            <div className="flex items-center gap-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
+                className={`inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2.5 px-8 rounded-lg transition-colors duration-200 text-sm active:scale-[0.98] ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading && (
+                  <svg className="animate-spin w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                )}
+                {loading ? 'Logging in…' : 'Login'}
               </button>
+              <Link to="/faculty/signup" className="text-sm text-[#666666] hover:text-[#111111] transition-colors cursor-pointer">
+                Don't have an account? Register
+              </Link>
             </div>
 
-            <p className="text-center text-sm mt-2">
-              <Link to="/faculty/forgot-password" className="text-[#ff9900] hover:underline cursor-pointer">Forgot Password?</Link>
-            </p>
+            <div className="border-t border-[#CCCCCC]" />
 
-            <p className="text-center text-sm text-gray-600 mt-4">
-              Don't have an account? <Link to="/faculty/signup" className="text-[#4a4a4a] font-semibold hover:underline cursor-pointer">Register here</Link>
-            </p>
+            {/* Other roles */}
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Other Roles</h2>
+              <div className="flex gap-2">
+                <Link to="/warden/login" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors cursor-pointer">
+                  Login as Warden
+                </Link>
+                <Link to="/centre-head/login" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors cursor-pointer">
+                  Login as Centre Head
+                </Link>
+              </div>
+            </div>
+
           </form>
         </div>
+
       </div>
     </MainLayout>
   );

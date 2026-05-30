@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  ShieldCheck, LogOut, PlusCircle, AlertCircle, Edit3, UserCheck,
+  ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil, UserCheck,
   Inbox, ServerCrash,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
 import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
-
-// ── Component ──────────────────────────────────────────────────────────────────
 
 export function Profile() {
   const [profile, setProfile] = useState<any>(null);
@@ -16,18 +14,16 @@ export function Profile() {
   const [error, setError]     = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const [posts, setPosts]           = useState<ComplaintPost[]>([]);
+  const [posts, setPosts]               = useState<ComplaintPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
-  const [postsError, setPostsError] = useState<string | null>(null);
+  const [postsError, setPostsError]     = useState<string | null>(null);
 
-  // Edit state
   const [editingId, setEditingId]   = useState<number | null>(null);
   const [editForm, setEditForm]     = useState<EditForm>({
     title: '', description: '', place: '', room_number: '',
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-  // ── Fetch profile ──
   useEffect(() => {
     fetch('/api/profile', { credentials: 'include' })
       .then((res) => {
@@ -42,7 +38,6 @@ export function Profile() {
       });
   }, [navigate]);
 
-  // ── Fetch posts once profile known ──
   useEffect(() => {
     if (!profile) return;
     let endpoint = '';
@@ -62,14 +57,13 @@ export function Profile() {
       .catch((err: Error) => { setPostsError(err.message); setPostsLoading(false); });
   }, [profile]);
 
-  // ── Loading / Error states ──
   if (loading) {
     return (
       <MainLayout>
-        <div className="flex-grow flex items-center justify-center bg-gray-50 py-12">
+        <div className="flex-grow flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 font-semibold">Loading profile data...</p>
+            <div className="w-12 h-12 border-4 border-[#111111] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-[#666666] font-semibold text-sm">Loading profile data…</p>
           </div>
         </div>
       </MainLayout>
@@ -79,36 +73,32 @@ export function Profile() {
   if (error) {
     return (
       <MainLayout>
-        <div className="flex-grow flex items-center justify-center bg-gray-50 py-12">
-          <div className="max-w-md w-full mx-4 bg-white border border-red-200 rounded-xl p-6 shadow-md text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-gray-800 mb-2">Access Denied</h3>
-            <p className="text-sm text-gray-600 mb-4">{error}</p>
-            <p className="text-xs text-gray-500">Redirecting to Homepage...</p>
+        <div className="flex-grow flex items-center justify-center py-12">
+          <div className="max-w-md w-full mx-4 bg-white border border-[#E5E5E5] border-t-2 border-t-[#111111] rounded-lg p-6 shadow-sm text-center">
+            <AlertCircle className="w-10 h-10 text-[#111111] mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-[#111111] mb-2">Access Denied</h3>
+            <p className="text-sm text-[#666666] mb-4">{error}</p>
+            <p className="text-xs text-[#666666]">Redirecting to Homepage…</p>
           </div>
         </div>
       </MainLayout>
     );
   }
 
-  // ── Derive role ──
   const isFaculty    = 'department' in profile;
   const isWarden     = 'hostel' in profile;
   const isCentreHead = 'building' in profile;
 
-  let roleLabel     = 'User';
-  let roleBadgeCls  = 'bg-gray-100 text-gray-800 border-gray-200';
+  let roleLabel    = 'User';
   let registerRoute = '/';
-  let role: Role    = 'centrehead';
-  if (isFaculty)    { roleLabel = 'Faculty Member'; roleBadgeCls = 'bg-emerald-50 text-emerald-700 border-emerald-200'; registerRoute = '/faculty/post'; role = 'faculty'; }
-  else if (isWarden)     { roleLabel = 'Hostel Warden';  roleBadgeCls = 'bg-indigo-50 text-indigo-700 border-indigo-200';  registerRoute = '/warden/post'; role = 'warden'; }
-  else if (isCentreHead) { roleLabel = 'Centre Head';    roleBadgeCls = 'bg-amber-50 text-amber-700 border-amber-200';    registerRoute = '/centre-head/post'; role = 'centrehead'; }
+  let role: Role   = 'centrehead';
+  if (isFaculty)         { roleLabel = 'Faculty Member'; registerRoute = '/faculty/post';      role = 'faculty'; }
+  else if (isWarden)     { roleLabel = 'Hostel Warden';  registerRoute = '/warden/post';       role = 'warden'; }
+  else if (isCentreHead) { roleLabel = 'Centre Head';    registerRoute = '/centre-head/post';  role = 'centrehead'; }
 
-  // ── API base paths ──
-  const editBase   = isFaculty ? '/api/post/faculty/edit'       : isWarden ? '/api/post/warden/edit'       : '/api/post/centrehead/edit';
-  const deleteBase = isFaculty ? '/api/post/faculty/delete'     : isWarden ? '/api/post/warden/delete'     : '/api/post/centrehead/delete';
+  const editBase   = isFaculty ? '/api/post/faculty/edit'   : isWarden ? '/api/post/warden/edit'   : '/api/post/centrehead/edit';
+  const deleteBase = isFaculty ? '/api/post/faculty/delete' : isWarden ? '/api/post/warden/delete' : '/api/post/centrehead/delete';
 
-  // ── Handlers ──
   const handleLogout = async () => {
     try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
     window.location.href = '/';
@@ -169,151 +159,128 @@ export function Profile() {
     }
   }
 
-  // ── Render ──
   return (
     <MainLayout>
-      <div className="flex-grow bg-gray-50 relative overflow-hidden">
-        {/* Grid bg */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+      <div className="flex-grow relative">
+        <div className="container mx-auto px-6 pt-12 pb-16 max-w-7xl">
 
-        {/* ── Profile section (constrained) ── */}
-        <div className="container mx-auto px-6 pt-12 relative z-10 max-w-7xl">
-
-          {/* Header row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
+          {/* ── Header ── */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#E5E5E5]">
             <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">User Dashboard</h2>
-              <p className="text-sm text-gray-500 mt-1">Manage and view your credentials, residency, and portal access details.</p>
-            </div>
-            <button
-              onClick={() => alert('Edit profile functionality coming soon')}
-              className="bg-[#2d2d2d] hover:bg-[#4a4a4a] text-white border border-[#2d2d2d] px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center shadow-sm w-fit shrink-0 cursor-pointer"
-            >
-              <Edit3 className="w-4 h-4 mr-2" /> Edit Profile Details
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile info (2/3) */}
-            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-800 pb-4 border-b border-gray-100 mb-6 flex items-center">
-                <UserCheck className="w-5 h-5 text-gray-500 mr-2" /> Profile Information Sheet
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</span>
-                  <span className="block text-base font-semibold text-gray-900">{profile.name || profile.email.split('@')[0]}</span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Verification Status</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border ${roleBadgeCls}`}>
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> {roleLabel}
-                    </span>
-                    {profile.is_verified && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Verified</span>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</span>
-                  <span className="block text-base font-semibold text-gray-800">{profile.email}</span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Number</span>
-                  <span className="block text-base font-semibold text-gray-800">{profile.phone_number || 'N/A'}</span>
-                </div>
-                {isFaculty && (
-                  <>
-                    <div className="space-y-1.5">
-                      <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Academic Department</span>
-                      <span className="block text-base font-semibold text-gray-800">{profile.department}</span>
-                    </div>
-                    <div className="space-y-1.5">
-                      <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Residence Allotment</span>
-                      <span className="block text-base font-semibold text-gray-800">House No. {profile.house_number}, Block {profile.block} (Type {profile.type})</span>
-                    </div>
-                  </>
-                )}
-                {isWarden && (
-                  <div className="space-y-1.5 col-span-1 md:col-span-2">
-                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Hostel Jurisdiction</span>
-                    <span className="block text-base font-semibold text-gray-800">{profile.hostel}</span>
-                  </div>
-                )}
-                {isCentreHead && (
-                  <div className="space-y-1.5 col-span-1 md:col-span-2">
-                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Centre Jurisdiction</span>
-                    <span className="block text-base font-semibold text-gray-800">{profile.building}</span>
-                  </div>
-                )}
-              </div>
+              <h2 className="text-2xl font-bold text-[#111111] tracking-tight">User Dashboard</h2>
+              <p className="text-sm text-[#666666] mt-1">Manage your credentials, residency, and portal access details.</p>
             </div>
 
-            {/* Quick actions (1/3) */}
-            <div className="space-y-6">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-800 tracking-wider uppercase mb-4 pb-2 border-b border-gray-100">Quick Portal Actions</h3>
-                <div className="space-y-3">
-                  <Link to={registerRoute} className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center shadow-md shadow-orange-500/10 text-sm cursor-pointer">
-                    <PlusCircle className="w-4 h-4 mr-2" /> Register a Complaint
-                  </Link>
-                  <button onClick={handleLogout} className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all flex items-center justify-center text-sm cursor-pointer">
-                    <LogOut className="w-4 h-4 mr-2" /> End Session / Logout
-                  </button>
-                </div>
-              </div>
-              <div className="bg-gray-100 border border-gray-200 rounded-2xl p-6">
-                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Need Assistance?</h4>
-                <p className="text-xs text-gray-500 leading-relaxed mb-3">
-                  If any profile information above is incorrect, please select "Edit Profile Details" or email the Estate Office administration directly.
-                </p>
-                <a href="#" className="text-xs text-gray-600 hover:text-gray-900 font-bold underline flex items-center cursor-pointer">
-                  Read Complaint Filing Manual →
-                </a>
-              </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                to={registerRoute}
+                className="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 active:scale-[0.98] cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" /> Register Complaint
+              </Link>
+              <button
+                onClick={() => alert('Edit profile functionality coming soon')}
+                className="inline-flex items-center gap-2 bg-[#222222] hover:bg-[#000000] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
+                <Pencil className="w-4 h-4" /> Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" /> Logout
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* ── Complaints section (full-width) ── */}
-        <div className="mt-10 px-6 pb-12 relative z-10">
+          {/* ── Profile info card ── */}
+          <div className="bg-white border border-[#E5E5E5] rounded-lg mb-10">
+            {/* Identity row */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
+              <div>
+                <p className="text-base font-bold text-[#111111]">{profile.name || profile.email.split('@')[0]}</p>
+                <p className="text-sm text-[#666666] mt-0.5">{profile.email}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#111111] bg-[#F5F5F5] text-xs font-bold text-[#111111] uppercase tracking-wide">
+                  <ShieldCheck className="w-3 h-3" /> {roleLabel}
+                </span>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-bold uppercase tracking-wide ${
+                  profile.is_verified ? 'bg-[#E6F7ED] border-[#111111] text-[#111111]' : 'bg-[#FCEBEA] border-[#111111] text-[#111111]'
+                }`}>
+                  {profile.is_verified ? 'Verified' : 'Unverified'}
+                </span>
+              </div>
+            </div>
 
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
-            <Inbox className="w-5 h-5 text-gray-500" />
-            <h3 className="text-lg font-bold text-gray-900 tracking-tight">Your Complaints</h3>
+            {/* Details grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-[#E5E5E5]">
+              <div className="px-6 py-4">
+                <p className="text-xs text-[#666666] mb-1">Phone</p>
+                <p className="text-sm font-semibold text-[#111111]">{profile.phone_number || 'N/A'}</p>
+              </div>
+              {isFaculty && (
+                <>
+                  <div className="px-6 py-4">
+                    <p className="text-xs text-[#666666] mb-1">Department</p>
+                    <p className="text-sm font-semibold text-[#111111]">{profile.department}</p>
+                  </div>
+                  <div className="px-6 py-4">
+                    <p className="text-xs text-[#666666] mb-1">House / Block</p>
+                    <p className="text-sm font-semibold text-[#111111]">No. {profile.house_number}, Block {profile.block}</p>
+                  </div>
+                  <div className="px-6 py-4">
+                    <p className="text-xs text-[#666666] mb-1">Type</p>
+                    <p className="text-sm font-semibold text-[#111111]">{profile.type}</p>
+                  </div>
+                </>
+              )}
+              {isWarden && (
+                <div className="px-6 py-4">
+                  <p className="text-xs text-[#666666] mb-1">Hostel</p>
+                  <p className="text-sm font-semibold text-[#111111]">{profile.hostel}</p>
+                </div>
+              )}
+              {isCentreHead && (
+                <div className="px-6 py-4">
+                  <p className="text-xs text-[#666666] mb-1">Centre</p>
+                  <p className="text-sm font-semibold text-[#111111]">{profile.building}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Complaints ── */}
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#E5E5E5]">
+            <Inbox className="w-4 h-4 text-[#666666]" />
+            <h3 className="text-sm font-bold text-[#111111] uppercase tracking-widest">Your Complaints</h3>
             {!postsLoading && (
-              <span className="bg-gray-200 text-gray-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{posts.length}</span>
+              <span className="bg-[#F5F5F5] border border-[#E5E5E5] text-[#666666] text-xs font-bold px-2 py-0.5 rounded-lg">{posts.length}</span>
             )}
           </div>
 
-          {/* Loading */}
           {postsLoading && (
-            <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
-              <div className="w-5 h-5 border-2 border-[#ff9900] border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center justify-center py-16 gap-3 text-[#666666]">
+              <div className="w-5 h-5 border-2 border-[#111111] border-t-transparent rounded-full animate-spin" />
               <span className="text-sm font-semibold">Fetching your complaints…</span>
             </div>
           )}
 
-          {/* Error */}
           {!postsLoading && postsError && (
-            <div className="flex flex-col items-center justify-center py-16 gap-2 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 gap-2 text-[#666666]">
               <ServerCrash className="w-8 h-8" />
-              <span className="text-sm font-semibold text-red-500">{postsError}</span>
+              <span className="text-sm font-semibold text-[#111111]">{postsError}</span>
             </div>
           )}
 
-          {/* Empty */}
           {!postsLoading && !postsError && posts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
-              <Inbox className="w-10 h-10 mb-3 opacity-30" />
-              <span className="text-sm font-semibold">No complaints filed yet.</span>
-              <span className="text-xs mt-1 text-gray-400">Use "Register a Complaint" above to file your first one.</span>
+            <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-dashed border-[#E5E5E5]">
+              <Inbox className="w-10 h-10 mb-3 text-[#E5E5E5]" />
+              <span className="text-sm font-semibold text-[#111111]">No complaints filed yet.</span>
+              <span className="text-xs mt-1 text-[#666666]">Use "Register Complaint" above to file your first one.</span>
             </div>
           )}
 
-          {/* Cards grid */}
           {!postsLoading && !postsError && posts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {posts.map((post) => (
@@ -333,6 +300,7 @@ export function Profile() {
               ))}
             </div>
           )}
+
         </div>
       </div>
     </MainLayout>

@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 
 export function CentreHeadForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail]         = useState('');
+  const [loading, setLoading]     = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [status, setStatus] = useState<'success' | 'error' | null>(null);
-  const [message, setMessage] = useState('');
+  const [status, setStatus]       = useState<'success' | 'error' | null>(null);
+  const [message, setMessage]     = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,62 +41,75 @@ export function CentreHeadForgotPassword() {
     }
   };
 
+  const inputCls = 'w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] placeholder-[#999999] bg-white transition-colors';
+
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div className="w-full max-w-md bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-          <div className="bg-[#2d2d2d] text-white px-6 py-4">
-            <h2 className="text-xl font-bold">Forgot Password</h2>
-            <p className="text-sm text-zinc-300 mt-1">Enter your email to receive a reset link.</p>
-          </div>
+      <div className="flex-grow flex flex-col">
 
-          {message && (
-            <div className={`mx-6 mt-6 p-4 rounded-md border text-sm flex items-start space-x-2 ${
-              status === 'success'
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border-rose-200'
-            }`}>
+        <div className="border-b border-[#E5E5E5] py-5">
+          <div className="max-w-6xl mx-auto w-full px-8">
+            <h1 className="text-xl font-bold text-[#111111]">Forgot Password</h1>
+            <p className="text-sm text-[#666666] mt-0.5">Enter your email to receive a reset link.</p>
+          </div>
+        </div>
+
+        {message && (
+          <div className={`border-b text-sm ${status === 'success' ? 'bg-[#E6F7ED] border-[#bbf0d0] text-[#15803d]' : 'bg-[#FCEBEA] border-[#f5c6c4] text-[#b91c1c]'}`}>
+            <div className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center gap-2.5">
               {status === 'success' ? (
-                <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               )}
               <span className="font-medium">{message}</span>
             </div>
-          )}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Email Address</label>
+        <div className="flex-grow flex items-start justify-center px-8 py-12">
+          <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Email Address</h2>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#ff9900]"
-                placeholder="centrehead@nith.ac.in"
+                onChange={e => setEmail(e.target.value)}
+                className={inputCls}
+                placeholder="head@nith.ac.in"
                 required
               />
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
+            <div className="border-t border-[#CCCCCC]" />
+
+            <div className="flex items-center gap-4">
               <button
                 type="submit"
                 disabled={loading || submitted}
-                className="w-full bg-[#ff9900] hover:bg-orange-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 cursor-pointer"
+                className={`inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2.5 px-8 rounded-lg transition-colors duration-200 text-sm active:scale-[0.98] ${(loading || submitted) ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                {loading ? 'Sending...' : submitted ? 'Link Sent' : 'Send Reset Link'}
+                {loading && (
+                  <svg className="animate-spin w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                )}
+                {loading ? 'Sending…' : submitted ? 'Link Sent' : 'Send Reset Link'}
               </button>
+              <Link to="/centre-head/login" className="text-sm text-[#666666] hover:text-[#111111] transition-colors cursor-pointer">
+                Back to Login
+              </Link>
             </div>
 
-            <p className="text-center text-sm text-gray-600 mt-4">
-              Remembered? <Link to="/centre-head/login" className="text-[#4a4a4a] font-semibold hover:underline cursor-pointer">Back to Login</Link>
-            </p>
           </form>
         </div>
+
       </div>
     </MainLayout>
   );
