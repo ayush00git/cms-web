@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"fmt"
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -16,7 +19,8 @@ type AdminReview struct {
 }
 
 // AdminFacultyPostStatus sets the stage of the faculty posts
-func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
+// Sends email to the corresponding post using goroutines
+func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})
@@ -65,8 +69,18 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 		return
 	}
 
+	// create the postURL
+	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "faculty", post.ID)
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
@@ -74,8 +88,26 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 		}
 		if review.Review == "to_ae" {
 			post.Status = "Pending_AE"
-		} else if review.Review == "open" {
-			post.Status = "Pending_XEN"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "close" {
 			post.Status = "Closed"
 		} else {
@@ -90,8 +122,48 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 		}
 		if review.Review == "to_je" {
 			post.Status = "Pending_JE"
+			// send mail to je
+			go func() {
+				// search for email of je
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeJECivil
+				} else {
+					position = models.TypeJEElectrical
+				}
+				var je models.Admin
+				result := h.DB.Where("position = ?", position).Take(&je)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_XEN"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -104,8 +176,48 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 		}
 		if review.Review == "resolved" {
 			post.Status = "Resolved_JE"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_AE"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -134,8 +246,10 @@ func (h *AdminHandler) AdminFacultyPostStatus (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "status updated"})
 }
 
+
 // AdminWardenPostStatus sets the stage of the warden posts
-func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
+// Sends email to the corresponding post using goroutines
+func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
 		c.JSON(401, gin.H{"error": "permission denied"})
@@ -181,8 +295,18 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 		return
 	}
 
+	// create the postURL
+	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "warden", post.ID)
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
@@ -190,8 +314,26 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 		}
 		if review.Review == "to_ae" {
 			post.Status = "Pending_AE"
-		} else if review.Review == "open" {
-			post.Status = "Pending_XEN"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "close" {
 			post.Status = "Closed"
 		} else {
@@ -206,8 +348,48 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 		}
 		if review.Review == "to_je" {
 			post.Status = "Pending_JE"
+			// send mail to je
+			go func() {
+				// search for email of je
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeJECivil
+				} else {
+					position = models.TypeJEElectrical
+				}
+				var je models.Admin
+				result := h.DB.Where("position = ?", position).Take(&je)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_XEN"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -220,8 +402,48 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 		}
 		if review.Review == "resolved" {
 			post.Status = "Resolved_JE"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_AE"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -250,7 +472,9 @@ func (h *AdminHandler) AdminWardenPostStatus (c *gin.Context) {
 	c.JSON(200, gin.H{"success": "status updated"})
 }
 
+
 // AdminCentreheadPostStatus sets the stage of the centrehead posts
+// Sends email to the corresponding post using goroutines
 func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
@@ -297,8 +521,18 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		return
 	}
 
+	// create the postURL
+	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "centrehead", post.ID)
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
@@ -306,8 +540,26 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		}
 		if review.Review == "to_ae" {
 			post.Status = "Pending_AE"
-		} else if review.Review == "open" {
-			post.Status = "Pending_XEN"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "close" {
 			post.Status = "Closed"
 		} else {
@@ -322,8 +574,48 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		}
 		if review.Review == "to_je" {
 			post.Status = "Pending_JE"
+			// send mail to je
+			go func() {
+				// search for email of je
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeJECivil
+				} else {
+					position = models.TypeJEElectrical
+				}
+				var je models.Admin
+				result := h.DB.Where("position = ?", position).Take(&je)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_XEN"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -336,8 +628,48 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		}
 		if review.Review == "resolved" {
 			post.Status = "Resolved_JE"
+			// send mail to xen
+			go func() {
+				// search for email of xen
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeXENCivil
+				} else {
+					position = models.TypeXENElectrical
+				}
+				var xen models.Admin
+				result := h.DB.Where("position = ?", position).Take(&xen)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == "require_review" {
 			post.Status = "Pending_AE"
+			// send mail to ae
+			go func() {
+				// search for email of ae
+				var position models.PositionType
+				if post.TypeOfPost == "Civil" {
+					position = models.TypeAECivil
+				} else {
+					position = models.TypeAEElectrical
+				}
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
+				if result.Error != nil {
+		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+					return
+				}
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
+		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return

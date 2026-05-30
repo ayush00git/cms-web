@@ -27,6 +27,7 @@ type Warden struct {
 	Password			string			`gorm:"not null" json:"password"`
 	Hostel				HostelName		`gorm:"type:varchar(30);not null" json:"hostel"`
 	PhoneNumber			string			`gorm:"type:char(10);not null" json:"phone_number"`
+	Role				string			`gorm:"default:warden" json:"role"`
 	IsVerified			bool			`gorm:"default:false" json:"is_verified"`
 	CreatedAt			time.Time		`json:"created_at"`
 }

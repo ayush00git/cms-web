@@ -233,8 +233,10 @@ func (h* AdminHandler) GetJEPosts (c *gin.Context) {
 	})
 }
 
-// for now we treat 404 and 500 during fetching post the same
-func (h *AdminHandler) AdminGetPost (c *gin.Context) {
+
+// AdminGetPost fetches the whole post page for any admin
+// (for now we treat 404 and 500 during fetching post the same)
+func (h *AdminHandler) AdminGetPost(c *gin.Context) {
 
 	// get email from gin context
 	email, exists := c.Get(middleware.EmailKey)

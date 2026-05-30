@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"time"
 	"errors"
+	"fmt"
+	"log"
+	"time"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +36,7 @@ type FacultyPostType struct {
 
 // FacultyPost registers the post of faculty members.
 // forwards the post to the associated XEN.
-func (h *PostHandler) FacultyPost (c *gin.Context) {
+func (h *PostHandler) FacultyPost(c *gin.Context) {
 	var inputs FacultyPostType
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -76,14 +79,37 @@ func (h *PostHandler) FacultyPost (c *gin.Context) {
 		c.JSON(500, gin.H{"error": "failed inserting to table"})
 		return
 	}
-	
+
+	// send the mail to the corresponding xen
+    // <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, faculty.Role, post.ID)
+	go func() {
+		var position models.PositionType
+		if post.TypeOfPost == "Civil" {
+			position = models.TypeXENCivil
+		} else {
+			position = models.TypeXENElectrical
+		}
+		// through type of post send the mail to the corresponding civil/electrical XEN
+		var xen models.Admin
+		result := h.DB.Where("position = ?", position).Take(&xen)
+		if result.Error != nil {
+       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
+			return
+		}
+		// send mail to that user
+		if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+        	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
+		}
+	}()
+
 	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
 
 
 // FacultyPostEdit let's the author of the post edit it.
 // Match is the author trying to edit.
-func (h *PostHandler) FacultyPostEdit (c *gin.Context) {
+func (h *PostHandler) FacultyPostEdit(c *gin.Context) {
 	// who is trying to edit the post
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -128,7 +154,7 @@ func (h *PostHandler) FacultyPostEdit (c *gin.Context) {
 
 // FacultyPostDelete lets the author delete his post.
 // Matches is the author trying to delete.
-func (h *PostHandler) FacultyPostDelete (c *gin.Context) {
+func (h *PostHandler) FacultyPostDelete(c *gin.Context) {
 	// get userID from gin context
 	userID, exists := c.Get(middleware.UserIDKey);
 	if !exists {
@@ -165,7 +191,7 @@ func (h *PostHandler) FacultyPostDelete (c *gin.Context) {
 
 // GetFacultyPosts fetch the posts of the faculty member along with their status and comments
 // This API returns all the posts collectively
-func (h *PostHandler) GetFacultyPosts (c *gin.Context) {
+func (h *PostHandler) GetFacultyPosts(c *gin.Context) {
 	// get email of the logged in user
 	email, exists := c.Get(middleware.EmailKey)
 	if !exists {

@@ -214,7 +214,9 @@ function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export function AdminPostView() {
-  const { adminType, role, post_id } = useParams<{ adminType: string; role: string; post_id: string }>();
+  const { role, post_id } = useParams<{ role: string; post_id: string }>();
+  const adminPosition = sessionStorage.getItem('adminPosition') ?? '';
+  const adminType = adminPosition.startsWith('XEN') ? 'xen' : adminPosition.startsWith('AE') ? 'ae' : adminPosition.startsWith('JE') ? 'je' : '';
   const navigate = useNavigate();
 
   const [post, setPost]     = useState<Post | null>(null);
