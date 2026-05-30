@@ -19,6 +19,7 @@ type AdminReview struct {
 }
 
 // AdminFacultyPostStatus sets the stage of the faculty posts
+// Sends email to the corresponding post using goroutines
 func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
@@ -247,6 +248,7 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 
 
 // AdminWardenPostStatus sets the stage of the warden posts
+// Sends email to the corresponding post using goroutines
 func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
@@ -472,6 +474,7 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 
 
 // AdminCentreheadPostStatus sets the stage of the centrehead posts
+// Sends email to the corresponding post using goroutines
 func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 	adminEmail, exists := c.Get(middleware.EmailKey)
 	if !exists {
