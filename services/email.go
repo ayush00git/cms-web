@@ -109,7 +109,7 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 	return nil
 }
 
-func SendPostMail(email, postURL string) error {
+func SendPostMailToAdmins(email, postURL string) error {
 	// send the email
 	mail := fmt.Sprintf(`
 		<!DOCTYPE html>
