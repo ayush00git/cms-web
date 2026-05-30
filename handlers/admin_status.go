@@ -72,6 +72,14 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "faculty", post.ID)
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
@@ -286,6 +294,14 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
@@ -402,6 +418,14 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 
 
 	switch post.Status {
+	case "Resolved_JE":
+		if !strings.Contains(string(admin.Position), "XEN") {
+			c.JSON(403, gin.H{"error": "permissions denied"})
+			return
+		}
+		if review.Review == "close" {
+			post.Status = "Closed"
+		}
 	case "Pending_XEN" :
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
