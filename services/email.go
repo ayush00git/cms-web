@@ -103,7 +103,7 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 
 	err = SendMail(email, "Reset cms account password", mail)
 	if err != nil {
-		return nil
+		return err
 	}
 	log.Printf("Password reset link sent to %s", email)
 	return nil
