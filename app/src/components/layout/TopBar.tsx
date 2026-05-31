@@ -1,22 +1,18 @@
 export function TopBar() {
   return (
-    <div className="bg-[#2d2d2d] text-white py-1 px-4 text-xs">
+    <div className="bg-[#222222] border-b border-[#333333] py-1.5 px-4 text-xs text-[#999999]">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex space-x-4">
-          <a href="#" className="hover:text-[#ff9900]">Grey Scale</a>
-          <span className="text-gray-400">|</span>
-          <a href="#" className="hover:text-[#ff9900]">Light Mode</a>
-          <span className="text-gray-400">|</span>
-          <a href="#" className="hover:text-[#ff9900]">Intranet</a>
-          <span className="text-gray-400">|</span>
-          <a href="#" className="hover:text-[#ff9900]">eOffice</a>
-          <span className="text-gray-400">|</span>
-          <a href="#" className="hover:text-[#ff9900]">Webmail</a>
+        <div className="flex items-center space-x-4">
+          <a href="#" className="hover:text-white transition-colors">Intranet</a>
+          <span className="text-[#444444]">|</span>
+          <a href="#" className="hover:text-white transition-colors">eOffice</a>
+          <span className="text-[#444444]">|</span>
+          <a href="#" className="hover:text-white transition-colors">Webmail</a>
         </div>
-        <div className="flex space-x-4">
-          <a href="#" className="hover:text-[#ff9900]">Directory</a>
-          <span className="text-gray-400">|</span>
-          <a href="#" className="hover:text-[#ff9900]">Contact Us</a>
+        <div className="flex items-center space-x-4">
+          <a href="#" className="hover:text-white transition-colors">Directory</a>
+          <span className="text-[#444444]">|</span>
+          <a href="#" className="hover:text-white transition-colors">Contact Us</a>
         </div>
       </div>
     </div>

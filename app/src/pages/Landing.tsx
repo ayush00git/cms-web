@@ -1,175 +1,224 @@
-import { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 
+type Profile = { department?: string; hostel?: string; building?: string } | null;
+
+function getPostRoute(profile: NonNullable<Profile>): string {
+  if ('department' in profile) return '/faculty/post';
+  if ('hostel' in profile)     return '/warden/post';
+  return '/centre-head/post';
+}
+
 export function Landing() {
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const [profile, setProfile]           = useState<Profile>(null);
+  const [isAuth, setIsAuth]             = useState<boolean | null>(null);
+  const [showLoginMenu, setShowLoginMenu] = useState(false);
+  const [trackId, setTrackId]           = useState('');
+  const menuRef                         = useRef<HTMLDivElement>(null);
+  const navigate                        = useNavigate();
 
   useEffect(() => {
     fetch('/api/profile', { credentials: 'include' })
-      .then(res => setIsAuth(res.ok))
+      .then(res => {
+        if (!res.ok) { setIsAuth(false); return null; }
+        return res.json();
+      })
+      .then(data => { if (data) { setProfile(data); setIsAuth(true); } })
       .catch(() => setIsAuth(false));
   }, []);
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowLoginMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleComplaintClick() {
+    if (isAuth === null) return;
+    if (isAuth && profile) {
+      navigate(getPostRoute(profile));
+    } else {
+      setShowLoginMenu(prev => !prev);
+    }
+  }
+
   return (
     <MainLayout>
-      {/* Hero Section */}
-      <div className="w-full h-[200px] relative bg-[#2d2d2d] border-b-4 border-[#ff9900] overflow-hidden flex items-center">
-        {/* Sleek Solid Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-        
-        <div className="container mx-auto px-6 relative z-10 w-full">
-          {/* Left Content */}
-          <div className="flex flex-col max-w-2xl">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ff9900]/10 text-[#ff9900] border border-[#ff9900]/20 w-fit mb-2">
-              ESTATE OFFICE PORTAL
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Complaint Management System
-            </h2>
-            <p className="text-sm md:text-base text-zinc-300 mt-1.5 font-medium">
-              National Institute of Technology Hamirpur
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* Quick Tracking Bar */}
-      <div className="bg-gray-50 border-b border-gray-200 shadow-sm py-3">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-center gap-4">
-          <div className="text-xs font-bold text-[#2d2d2d] tracking-wider uppercase">Quick Track:</div>
-          <div className="flex w-full md:w-1/2 max-w-xl relative bg-white border border-gray-200 focus-within:border-[#ff9900] focus-within:ring-4 focus-within:ring-[#ff9900]/10 rounded-full p-1 transition-all duration-300 shadow-sm">
-            <input 
-              type="text" 
-              placeholder="Enter Complaint ID (e.g. CMS-1042)" 
-              className="w-full pl-5 pr-3 py-2 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
-            />
-            <button className="bg-[#ff9900] hover:bg-orange-500 text-white font-bold text-xs uppercase tracking-wider px-6 py-2 rounded-full transition-all duration-300 flex items-center whitespace-nowrap shadow-sm">
-              <Search className="w-3.5 h-3.5 mr-1.5" /> Track Status
+      {/* Hero */}
+      <section className="relative bg-white border-b border-[#E5E5E5]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1111111a_1px,transparent_1px),linear-gradient(to_bottom,#1111111a_1px,transparent_1px)] bg-[size:32px_32px]" />
+        <div className="relative z-10 container mx-auto px-6 py-16 flex flex-col items-center text-center">
+          <div className="inline-flex items-center border border-[#111111] rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#111111] mb-6">
+            Estate Office Portal
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] leading-tight tracking-tight mb-4 max-w-2xl">
+            Campus Complaint<br />Management System
+          </h1>
+          <p className="text-[#666666] text-base leading-relaxed max-w-xl mb-8">
+            A unified platform for NIT Hamirpur faculty, wardens, and centre heads to file,
+            track, and resolve campus maintenance complaints efficiently.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={handleComplaintClick}
+                className="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
+                Lodge a Complaint <ArrowRight className="w-4 h-4" />
+              </button>
+              <div
+                className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#222222] border border-[#333333] rounded-lg shadow-xl overflow-hidden z-50 min-w-[190px] transition-all duration-200 origin-top ${
+                  showLoginMenu ? 'opacity-100 scale-y-100 pointer-events-auto' : 'opacity-0 scale-y-95 pointer-events-none'
+                }`}
+              >
+                <Link to="/faculty/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
+                  Login as Faculty
+                </Link>
+                <Link to="/warden/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
+                  Login as Warden
+                </Link>
+                <Link to="/centre-head/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors cursor-pointer">
+                  Login as Centre Head
+                </Link>
+              </div>
+            </div>
+            <button className="inline-flex items-center gap-2 border border-[#16a34a] text-[#16a34a] hover:bg-[#E6F7ED] text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
+              Track Status <Search className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main Content Grid */}
-      <main className="container mx-auto px-4 py-12 flex-grow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Estate Office Notices */}
-          <div className="col-span-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col h-[400px]">
-            <div className="bg-[#2d2d2d] text-white px-4 py-2 font-semibold flex justify-between items-center">
-              <span>Estate Office Notices</span>
-              <button className="text-xs bg-[#ff9900] px-2 py-1 rounded">View All</button>
+      {/* Track Bar */}
+      <section className="bg-[#F5F5F5] border-b border-[#E5E5E5] py-4">
+        <div className="container mx-auto px-6 flex flex-col sm:flex-row items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#666666] whitespace-nowrap">Quick Track</span>
+          <div className="flex flex-1 max-w-xl border border-[#111111] rounded-lg overflow-hidden bg-white">
+            <input
+              type="text"
+              value={trackId}
+              onChange={e => setTrackId(e.target.value)}
+              placeholder="Enter Complaint ID — e.g. CMS-1042"
+              className="flex-1 px-4 py-2.5 text-sm text-[#111111] placeholder-[#999999] outline-none bg-transparent"
+            />
+            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold uppercase tracking-wider px-5 flex items-center gap-1.5 transition-colors duration-200 cursor-pointer">
+              <Search className="w-3.5 h-3.5" /> Track
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-12 flex-grow">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* Notices */}
+          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3 flex items-center justify-between">
+              <span className="text-sm font-bold">Estate Office Notices</span>
+              <button className="text-xs border border-white/30 hover:border-white px-2.5 py-1 rounded-lg transition-colors">
+                View All
+              </button>
             </div>
-            <div className="p-4 overflow-y-auto flex-grow">
-              <ul className="space-y-4">
-                <li className="border-b border-gray-100 pb-2">
-                  <span className="text-xs text-red-500 font-bold block mb-1">Urgent</span>
-                  <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium leading-tight block">
-                    Scheduled Power Outage in Main Admin Block due to HT panel maintenance.
-                  </a>
-                  <span className="text-xs text-gray-500 block mt-1">20 May, 2026</span>
-                </li>
-                <li className="border-b border-gray-100 pb-2">
-                  <span className="text-xs text-[#ff9900] font-bold block mb-1">New</span>
-                  <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium leading-tight block">
-                    Water supply disruption expected in Kailash Boys Hostel for pipe repair.
-                  </a>
-                  <span className="text-xs text-gray-500 block mt-1">18 May, 2026</span>
-                </li>
-                <li className="border-b border-gray-100 pb-2">
-                  <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium leading-tight block">
-                    Annual AC servicing schedule released for Departmental Buildings.
-                  </a>
-                  <span className="text-xs text-gray-500 block mt-1">15 May, 2026</span>
-                </li>
-              </ul>
+            <div className="p-5 flex-grow overflow-y-auto space-y-4">
+              {[
+                { tag: 'Urgent', tagBg: '#FCEBEA', title: 'Scheduled power outage in Main Admin Block due to HT panel maintenance.', date: '20 May 2026' },
+                { tag: 'New', tagBg: '#E6F7ED', title: 'Water supply disruption in Kailash Boys Hostel for pipe repair work.', date: '18 May 2026' },
+                { tag: 'Info', tagBg: '#E8F4F9', title: 'Annual AC servicing schedule released for Departmental Buildings.', date: '15 May 2026' },
+                { tag: 'Notice', tagBg: '#F5F5F5', title: 'Road resurfacing work to begin near Admin block from June 1st.', date: '12 May 2026' },
+              ].map(({ tag, tagBg, title, date }) => (
+                <div key={title} className="border-b border-[#E5E5E5] pb-4 last:border-0 last:pb-0">
+                  <span
+                    className="inline-flex items-center border border-[#111111] rounded-lg px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#111111] mb-1.5"
+                    style={{ backgroundColor: tagBg }}
+                  >
+                    {tag}
+                  </span>
+                  <p className="text-sm text-[#111111] font-medium leading-snug mb-1">{title}</p>
+                  <span className="text-xs text-[#666666]">{date}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Guidelines & Manuals */}
-          <div className="col-span-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col h-[400px]">
-            <div className="bg-[#2d2d2d] text-white px-4 py-2 font-semibold flex justify-between items-center">
-              <span>Filing Guidelines</span>
+          {/* Filing Guidelines */}
+          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3">
+              <span className="text-sm font-bold">Filing Guidelines</span>
             </div>
-            <div className="p-4 overflow-y-auto flex-grow">
-              <ul className="space-y-4">
-                <li className="border-b border-gray-100 pb-3">
-                  <div className="flex space-x-3 items-start">
-                    <div className="bg-gray-100 text-gray-800 rounded px-2 py-1 text-xs font-bold mt-1">1</div>
-                    <div>
-                      <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium block">
-                        Select correct category (Civil/Electrical) to avoid delays.
-                      </a>
-                    </div>
-                  </div>
-                </li>
-                <li className="border-b border-gray-100 pb-3">
-                  <div className="flex space-x-3 items-start">
-                    <div className="bg-gray-100 text-gray-800 rounded px-2 py-1 text-xs font-bold mt-1">2</div>
-                    <div>
-                      <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium block">
-                        Provide accurate location (Building/Room No) in the description.
-                      </a>
-                    </div>
-                  </div>
-                </li>
-                <li className="border-b border-gray-100 pb-3">
-                  <div className="flex space-x-3 items-start">
-                    <div className="bg-gray-100 text-gray-800 rounded px-2 py-1 text-xs font-bold mt-1">3</div>
-                    <div>
-                      <a href="#" className="text-sm text-gray-700 hover:text-[#4a4a4a] font-medium block">
-                        Only Wardens can file complaints for hostel common areas.
-                      </a>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-[#4a4a4a] hover:underline font-bold block mt-2">
-                    Read Complete Manual &rarr;
-                  </a>
-                </li>
-              </ul>
+            <div className="p-5 flex-grow space-y-4">
+              {[
+                { step: '01', text: 'Select the correct category — Civil or Electrical — to ensure proper routing.' },
+                { step: '02', text: 'Provide the exact building and room number in the complaint description.' },
+                { step: '03', text: 'Only Wardens may file complaints for hostel common areas.' },
+                { step: '04', text: 'Attach relevant photos to help the team assess the issue faster.' },
+                { step: '05', text: 'Do not file duplicate complaints for the same issue.' },
+              ].map(({ step, text }) => (
+                <div key={step} className="flex gap-4 items-start">
+                  <span className="flex-shrink-0 text-xs font-bold text-[#666666] w-6 pt-0.5">{step}</span>
+                  <p className="text-sm text-[#111111] leading-snug">{text}</p>
+                </div>
+              ))}
+              <a href="#" className="inline-flex items-center gap-1 text-sm font-bold text-[#111111] hover:underline mt-2">
+                Read Complete Manual <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          {/* Quick Links & Portal Access */}
-          <div className="col-span-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
-            <div className="bg-[#2d2d2d] text-white px-4 py-2 font-semibold flex justify-between items-center">
-              <span>Portal Access</span>
+          {/* Portal Access */}
+          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3">
+              <span className="text-sm font-bold">Portal Access</span>
             </div>
-            <div className="p-6 flex-grow flex flex-col space-y-4">
+            <div className="p-5 flex-grow flex flex-col gap-3">
 
-              {/* Profile section */}
               {isAuth === true && (
                 <Link
                   to="/profile"
-                  className="w-full bg-[#ff9900] hover:bg-orange-500 text-white py-3 rounded text-sm font-semibold transition-colors text-center block"
+                  className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
                 >
                   My Profile
                 </Link>
               )}
               {isAuth === false && (
-                <p className="text-xs text-center text-gray-400 py-1">
-                  <span className="font-semibold text-[#4a4a4a]">New here?</span> Signup to create a profile.
+                <p className="text-xs text-[#666666] text-center pb-1">
+                  <span className="font-semibold text-[#111111]">New here?</span> Sign up to create your profile.
                 </p>
               )}
 
-              <Link to="/faculty/login" className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white py-3 rounded text-sm font-semibold transition-colors text-center block">
+              <Link
+                to="/faculty/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
                 Login as Faculty
               </Link>
-              <Link to="/warden/login" className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white py-3 rounded text-sm font-semibold transition-colors text-center block">
+              <Link
+                to="/warden/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
                 Login as Warden
               </Link>
-              <Link to="/centre-head/login" className="w-full bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white py-3 rounded text-sm font-semibold transition-colors text-center block">
+              <Link
+                to="/centre-head/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
                 Login as Centre Head
               </Link>
-              
-              <div className="mt-auto pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-500 mb-2">Estate Office Administration</p>
-                <Link to="/staff/login" className="w-full border border-[#4a4a4a] text-[#4a4a4a] hover:bg-gray-50 py-2 rounded text-sm font-semibold transition-colors text-center block">
-                  Staff Login (XEN / AE / JE)
+
+              <div className="mt-auto pt-4 border-t border-[#E5E5E5]">
+                <p className="text-xs text-[#666666] mb-2 font-medium">Estate Office Administration</p>
+                <Link
+                  to="/staff/login"
+                  className="w-full bg-[#222222] hover:bg-[#000000] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200 block"
+                >
+                  Staff Login — XEN / AE / JE
                 </Link>
               </div>
             </div>
@@ -177,6 +226,7 @@ export function Landing() {
 
         </div>
       </main>
+
     </MainLayout>
   );
 }

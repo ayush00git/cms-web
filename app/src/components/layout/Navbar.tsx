@@ -1,38 +1,53 @@
-import { Search, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Navbar() {
   return (
-    <nav className="bg-[#4a4a4a] text-white shadow-md sticky top-0 z-30">
-      <div className="container mx-auto px-4">
-        <ul className="flex flex-wrap items-center justify-center text-sm md:text-base font-semibold">
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer">
-            <Link to="/">Home</Link>
+    <nav className="bg-[#111111] text-white sticky top-0 z-30">
+      <div className="container mx-auto px-6">
+        <ul className="flex items-center text-sm font-medium">
+          <li>
+            <Link to="/" className="block px-4 py-3 hover:bg-white/10 transition-colors">
+              Home
+            </Link>
           </li>
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer flex items-center group relative">
-            Lodge Complaint <ChevronDown className="ml-1 w-4 h-4" />
-            <div className="absolute top-full left-0 hidden group-hover:block bg-white text-gray-800 shadow-lg min-w-[200px] rounded-b border border-gray-100">
-              <Link to="/faculty/signup" className="block px-4 py-2 hover:bg-gray-100">Faculty</Link>
-              <Link to="/warden/signup" className="block px-4 py-2 hover:bg-gray-100">Warden</Link>
-              <Link to="/centre-head/signup" className="block px-4 py-2 hover:bg-gray-100">Centre Head</Link>
+
+          <li className="relative group">
+            <button className="flex items-center gap-1 px-4 py-3 hover:bg-white/10 transition-colors w-full">
+              Lodge Complaint <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            </button>
+            <div className="absolute top-full left-0 hidden group-hover:block bg-white text-[#111111] shadow-lg border border-[#E5E5E5] rounded-b-lg min-w-[180px] z-50">
+              <Link to="/faculty/signup" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Faculty</Link>
+              <Link to="/warden/signup" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Warden</Link>
+              <Link to="/centre-head/signup" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Centre Head</Link>
             </div>
           </li>
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer">Track Status</li>
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer flex items-center">
-            Estate Office Administration <ChevronDown className="ml-1 w-4 h-4" />
+
+          <li>
+            <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+              Track Status
+            </button>
           </li>
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer">Guidelines</li>
-          <li className="px-4 py-1.5 hover:bg-[#2d2d2d] cursor-pointer">Contact Us</li>
-          
-          <li className="ml-auto px-4 py-1 flex items-center">
-            <div className="relative flex items-center">
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="pl-9 pr-4 py-1 w-44 text-xs bg-white/10 hover:bg-white/15 focus:bg-white/20 text-white placeholder-gray-300 rounded-full border border-white/10 focus:border-[#ff9900] outline-none transition-all duration-300 focus:w-52"
-              />
-              <Search className="absolute left-3 w-3.5 h-3.5 text-gray-300 pointer-events-none" />
+
+          <li className="relative group">
+            <button className="flex items-center gap-1 px-4 py-3 hover:bg-white/10 transition-colors">
+              Administration <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            </button>
+            <div className="absolute top-full left-0 hidden group-hover:block bg-white text-[#111111] shadow-lg border border-[#E5E5E5] rounded-b-lg min-w-[180px] z-50">
+              <Link to="/staff/login" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Staff Login</Link>
             </div>
+          </li>
+
+          <li>
+            <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+              Guidelines
+            </button>
+          </li>
+
+          <li>
+            <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+              Contact Us
+            </button>
           </li>
         </ul>
       </div>

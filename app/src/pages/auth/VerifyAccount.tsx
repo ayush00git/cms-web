@@ -83,12 +83,18 @@ export function VerifyAccount() {
 
   return (
     <MainLayout>
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 min-h-[60vh]">
+      <div
+        className="flex-1 flex flex-col items-center justify-center px-4 py-16 min-h-[60vh]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(17,17,17,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(17,17,17,0.06) 1px, transparent 1px)`,
+          backgroundSize: '32px 32px',
+        }}
+      >
 
         {/* Loading */}
         {status === 'loading' && (
           <div className="flex flex-col items-center gap-5 text-center">
-            <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-[#ff9900] animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-[#E5E5E5] border-t-[#111111] animate-spin" />
             <p className="text-gray-500 font-medium">Verifying your account, please wait…</p>
           </div>
         )}
@@ -106,7 +112,7 @@ export function VerifyAccount() {
               <p className="text-gray-500 mt-1 text-sm">{message}</p>
             </div>
             <p className="text-sm text-gray-400">
-              Redirecting to login in <span className="font-bold text-[#ff9900]">{countdown}s</span>…
+              Redirecting to login in <span className="font-bold text-[#111111]">{countdown}s</span>…
             </p>
           </div>
         )}
@@ -125,7 +131,7 @@ export function VerifyAccount() {
             </div>
             <Link
               to="/"
-              className="bg-[#4a4a4a] hover:bg-[#2d2d2d] text-white font-bold py-2.5 px-8 rounded transition-colors text-sm"
+              className="bg-[#222222] hover:bg-[#111111] text-white font-bold py-2.5 px-8 rounded-lg transition-colors text-sm"
             >
               Back to Home
             </Link>
