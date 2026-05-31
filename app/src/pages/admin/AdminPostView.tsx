@@ -4,21 +4,12 @@ import {
   AlertCircle,
   ServerCrash,
   ArrowLeft,
-  FileText,
-  User,
-  MapPin,
   BedDouble,
   Building2,
-  Phone,
-  Mail,
-  Hash,
-  Calendar,
   Zap,
   Hammer,
   MessageSquare,
   GraduationCap,
-  BookOpen,
-  Home,
   CheckCircle2,
   XCircle,
   ChevronRight,
@@ -132,6 +123,16 @@ const STATUS_STYLES: Record<string, string> = {
   Closed:      'bg-red-50 text-red-600 border-red-200',
 };
 
+// Solid dot colour per status — mirrors the badge palette for the status pill
+const STATUS_DOT: Record<string, string> = {
+  Pending_XEN: 'bg-amber-500',
+  Pending_AE:  'bg-blue-500',
+  Pending_JE:  'bg-indigo-500',
+  Resolved_JE: 'bg-teal-500',
+  Resolved:    'bg-emerald-500',
+  Closed:      'bg-red-500',
+};
+
 // Maps URL role param → API segment for the status endpoint
 const ROLE_TO_STATUS_API: Record<string, string> = {
   faculty:    'faculty_posts',
@@ -168,6 +169,9 @@ function getActionButtons(adminType: string, status: string): ActionButton[] {
       { label: 'Send to AE', review: 'to_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
       { label: 'Close Post',  review: 'close',  icon: <XCircle      className="w-3.5 h-3.5" /> },
     ];
+    if (status === 'Resolved_JE') return [
+      { label: 'Close Post', review: 'close', icon: <XCircle className="w-3.5 h-3.5" /> },
+    ];
     if (status === 'Closed') return [
       { label: 'Reopen Post', review: 'open', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
     ];
@@ -199,14 +203,12 @@ function formatDateTime(iso: string) {
   });
 }
 
-function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+// A single label/value pair in the "About this post" section
+function Detail({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="text-gray-400 mt-0.5 shrink-0">{icon}</span>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
-        <p className="text-sm font-semibold text-gray-800">{value || '—'}</p>
-      </div>
+    <div>
+      <dt className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">{label}</dt>
+      <dd className="text-sm font-semibold text-gray-800">{value || '—'}</dd>
     </div>
   );
 }
@@ -318,7 +320,7 @@ export function AdminPostView() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="flex-grow flex items-center justify-center bg-gray-50 py-20">
+        <div className="flex-grow flex items-center justify-center bg-white py-20">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-gray-600 font-semibold">Loading post…</p>
@@ -333,8 +335,8 @@ export function AdminPostView() {
     const isAuth = error.status === 401 || error.status === 403;
     return (
       <MainLayout>
-        <div className="flex-grow flex items-center justify-center bg-gray-50 py-20">
-          <div className={`max-w-md w-full mx-4 bg-white rounded-xl p-6 shadow-md text-center border ${isAuth ? 'border-red-200' : 'border-gray-200'}`}>
+        <div className="flex-grow flex items-center justify-center bg-white py-20">
+          <div className="max-w-md w-full mx-4 text-center">
             {isAuth
               ? <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               : <ServerCrash className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -368,21 +370,25 @@ export function AdminPostView() {
   const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
   const statusCls  = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+  const statusDot  = STATUS_DOT[post.status] ?? 'bg-gray-400';
+  const statusText = post.status.replace(/_/g, ' ');
   const backPath   = ADMIN_BACK[adminType ?? ''] ?? '/';
   const actionBtns = getActionButtons(adminType ?? '', post.status);
   const canAct     = actionBtns.length > 0;
   const disabled   = acting || !commentText.trim();
 
+  // Who filed it — faculty have a name, the rest go by email
+  const filedBy = fp?.Author?.name || fp?.Author?.email || wp?.Author?.email || cp?.Author?.email || 'Unknown';
+  const email   = fp?.Author?.email || wp?.Author?.email || cp?.Author?.email;
+  const phone   = fp?.Author?.phone_number || wp?.Author?.phone_number || cp?.Author?.phone_number;
+
   return (
     <MainLayout>
-      <div className="flex-grow bg-gray-50 py-10 relative overflow-hidden">
-        {/* Grid bg */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-
-        <div className="px-6 relative z-10">
+      <div className="flex-grow bg-white py-10">
+        <div className="max-w-3xl mx-auto px-6">
 
           {/* Back + breadcrumb */}
-          <div className="mb-6 flex items-center gap-3">
+          <div className="mb-8 flex items-center gap-3">
             <Link
               to={backPath}
               className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
@@ -393,175 +399,135 @@ export function AdminPostView() {
             <span className="text-xs text-gray-400 font-mono">#{post.id} · {roleLabel}</span>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-            {/* ── Left: post detail + comments (2/3) ── */}
-            <div className="xl:col-span-2 flex flex-col gap-6">
-
-              {/* Title card */}
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="bg-[#2d2d2d] px-6 py-5">
-                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 bg-white/10 px-2.5 py-1 rounded-full">
-                      <RoleIcon className="w-3.5 h-3.5" /> {roleLabel} Complaint
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 bg-white/10 px-2.5 py-1 rounded-full">
-                      {post.type_of_post === 'Electrical'
-                        ? <Zap className="w-3.5 h-3.5" />
-                        : <Hammer className="w-3.5 h-3.5" />
-                      }
-                      {post.type_of_post}
-                    </span>
-                  </div>
-                  <h1 className="text-xl font-extrabold text-white leading-snug">{post.title}</h1>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex flex-wrap items-center gap-3 mb-5 pb-5 border-b border-gray-100">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusCls}`}>
-                      {post.status.replace('_', ' ')}
-                    </span>
-                    <span className="text-xs text-gray-400 font-mono">Stage: {post.stage}</span>
-                    {post.assigned_je_id && (
-                      <span className="text-xs text-gray-400 font-mono">JE #{post.assigned_je_id}</span>
-                    )}
-                    <span className="ml-auto text-xs text-gray-400">Post #{post.id}</span>
-                  </div>
-
-                  <div className="mb-6">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5" /> Description
-                    </p>
-                    <p className="text-sm text-gray-700 leading-relaxed">{post.description}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 pt-5 border-t border-gray-100">
-                    {fp && (
-                      <MetaRow icon={<MapPin className="w-4 h-4" />} label="Area" value={fp.place} />
-                    )}
-                    {wp && (
-                      <MetaRow icon={<BedDouble className="w-4 h-4" />} label="Room" value={wp.room_number} />
-                    )}
-                    <MetaRow icon={<Calendar className="w-4 h-4" />} label="Filed On"     value={formatDate(post.created_at)} />
-                    <MetaRow icon={<Calendar className="w-4 h-4" />} label="Last Updated" value={formatDate(post.updated_at)} />
-                    <MetaRow icon={<Hash className="w-4 h-4" />}     label="Post ID"      value={`#${post.id}`} />
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Comments + action card ── */}
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                  <MessageSquare className="w-4 h-4 text-gray-400" />
-                  Comments
-                  <span className="ml-auto bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">
-                    {comments.length}
-                  </span>
-                </h3>
-
-                {/* Comment list */}
-                {comments.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic text-center py-6">No comments yet.</p>
-                ) : (
-                  <ul className="space-y-2 mb-6">
-                    {comments.map((c) => (
-                      <li key={c.id} className="flex flex-col gap-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-bold text-gray-700">
-                            {c.Author?.position ? c.Author.position.replace(/_/g, ' ') : `Admin #${c.author_id}`}
-                          </span>
-                          <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* ── Comment + action area (only when this admin has applicable actions) ── */}
-                {canAct && (
-                  <div className={`pt-4 ${comments.length > 0 ? 'border-t border-gray-100' : ''}`}>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                      Comment &amp; Update Status
-                    </label>
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      disabled={acting}
-                      placeholder="Add a comment before updating the status…"
-                      rows={3}
-                      className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50"
-                    />
-
-                    {/* Feedback */}
-                    {actError && (
-                      <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {actError}
-                      </p>
-                    )}
-                    {actSuccess && (
-                      <p className="mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        {actSuccess}
-                      </p>
-                    )}
-
-                    {/* Action buttons — same dark-gray, side by side with each other */}
-                    <div className="mt-3 flex flex-wrap justify-end gap-2">
-                      {actionBtns.map((btn) => (
-                        <button
-                          key={btn.review}
-                          onClick={() => handleAction(btn.review)}
-                          disabled={disabled}
-                          className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                        >
-                          {acting ? (
-                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : btn.icon}
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ── Right: author info (1/3) ── */}
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 h-fit">
-              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
-                <User className="w-4 h-4 text-gray-400" /> Filed By
-              </h3>
-
-              <div className="flex flex-col gap-4">
-                {fp && fp.Author && (
-                  <>
-                    <MetaRow icon={<User className="w-4 h-4" />}       label="Name"       value={fp.Author.name} />
-                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"      value={fp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"      value={fp.Author.phone_number} />
-                    <MetaRow icon={<BookOpen className="w-4 h-4" />}   label="Department" value={fp.Author.department} />
-                    <MetaRow icon={<Home className="w-4 h-4" />}       label="Residence"  value={`House ${fp.Author.house_number}, Block ${fp.Author.block} (Type ${fp.Author.type})`} />
-                  </>
-                )}
-                {wp && wp.Author && (
-                  <>
-                    <MetaRow icon={<Mail className="w-4 h-4" />}       label="Email"  value={wp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}      label="Phone"  value={wp.Author.phone_number} />
-                    <MetaRow icon={<BedDouble className="w-4 h-4" />}  label="Hostel" value={wp.Author.hostel} />
-                  </>
-                )}
-                {cp && cp.Author && (
-                  <>
-                    <MetaRow icon={<Mail className="w-4 h-4" />}      label="Email"    value={cp.Author.email} />
-                    <MetaRow icon={<Phone className="w-4 h-4" />}     label="Phone"    value={cp.Author.phone_number} />
-                    <MetaRow icon={<Building2 className="w-4 h-4" />} label="Building" value={cp.Author.building} />
-                  </>
-                )}
-              </div>
-            </div>
-
+          {/* ── Post ── */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
+              <RoleIcon className="w-3.5 h-3.5" /> {roleLabel}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
+              {post.type_of_post === 'Electrical'
+                ? <Zap className="w-3.5 h-3.5" />
+                : <Hammer className="w-3.5 h-3.5" />
+              }
+              {post.type_of_post}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border ${statusCls}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
+              {statusText}
+            </span>
           </div>
+
+          {/* Title */}
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-5">
+            {post.title}
+          </h1>
+
+          {/* Description */}
+          <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line mb-10">
+            {post.description}
+          </p>
+
+          {/* About this post */}
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">
+            About this post
+          </h2>
+          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5 bg-gray-50 border border-gray-100 rounded-xl p-5">
+            <Detail label="Filed by" value={filedBy} />
+            {fp && <Detail label="Department" value={fp.Author?.department} />}
+            {fp && <Detail label="Area" value={fp.place} />}
+            {fp && fp.Author && (
+              <Detail label="Residence" value={`House ${fp.Author.house_number}, Block ${fp.Author.block} (Type ${fp.Author.type})`} />
+            )}
+            {wp && <Detail label="Hostel" value={wp.Author?.hostel} />}
+            {wp && <Detail label="Room" value={wp.room_number} />}
+            {cp && <Detail label="Building" value={cp.Author?.building} />}
+            <Detail label="Email" value={email} />
+            <Detail label="Phone" value={phone} />
+            <Detail label="Stage" value={post.stage} />
+            {post.assigned_je_id != null && <Detail label="Assigned JE" value={`#${post.assigned_je_id}`} />}
+            <Detail label="Filed on" value={formatDate(post.created_at)} />
+            <Detail label="Last updated" value={formatDate(post.updated_at)} />
+          </dl>
+
+          {/* ── Comments ── */}
+          <div className="mt-10 pt-8 border-t border-gray-200">
+            <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-5">
+              <MessageSquare className="w-4 h-4 text-gray-400" />
+              Comments
+              <span className="text-gray-400 font-semibold">({comments.length})</span>
+            </h2>
+
+            {/* Comment list */}
+            {comments.length === 0 ? (
+              <p className="text-sm text-gray-400 italic mb-8">No comments yet.</p>
+            ) : (
+              <ul className="space-y-3 mb-8">
+                {comments.map((c) => {
+                  const who = c.Author?.position ? c.Author.position.replace(/_/g, ' ') : `Admin #${c.author_id}`;
+                  return (
+                    <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-gray-800">{who}</span>
+                        <span className="ml-auto text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
+                      </div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {/* ── Comment + action area — always shown; locked when this admin has no applicable actions ── */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+                Comment &amp; Update Status
+              </label>
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                disabled={acting || !canAct}
+                placeholder={canAct
+                  ? 'Add a comment before updating the status…'
+                  : 'No actions available for this complaint at its current stage.'}
+                rows={3}
+                className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+
+              {/* Feedback */}
+              {actError && (
+                <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {actError}
+                </p>
+              )}
+              {actSuccess && (
+                <p className="mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  {actSuccess}
+                </p>
+              )}
+
+              {/* Action buttons — only when this admin can act on the current status */}
+              {canAct && (
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  {actionBtns.map((btn) => (
+                    <button
+                      key={btn.review}
+                      onClick={() => handleAction(btn.review)}
+                      disabled={disabled}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {acting ? (
+                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : btn.icon}
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </MainLayout>

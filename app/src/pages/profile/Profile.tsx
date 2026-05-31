@@ -282,7 +282,7 @@ export function Profile() {
           )}
 
           {!postsLoading && !postsError && posts.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="flex flex-col gap-4">
               {posts.map((post) => (
                 <ComplaintCard
                   key={post.id}

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2 } from 'lucide-react';
+import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2, Zap, Hammer } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -42,6 +42,31 @@ const STATUS_STYLES: Record<string, string> = {
   Closed:      'bg-red-50 text-red-600',
 };
 
+// Active-chip colours for the filter bar, derived from STATUS_STYLES.
+const FILTER_ACTIVE_STYLES: Record<string, string> = {
+  All:         'bg-[#ff9900] text-white border-[#ff9900]',
+  Pending_XEN: 'bg-amber-500 text-white border-amber-500',
+  Pending_AE:  'bg-blue-500 text-white border-blue-500',
+  Pending_JE:  'bg-indigo-500 text-white border-indigo-500',
+  Resolved_JE: 'bg-teal-500 text-white border-teal-500',
+  Resolved:    'bg-emerald-500 text-white border-emerald-500',
+  Closed:      'bg-red-500 text-white border-red-500',
+};
+
+const STATUS_FILTERS = [
+  'All',
+  'Pending_XEN',
+  'Pending_AE',
+  'Pending_JE',
+  'Resolved_JE',
+  'Resolved',
+  'Closed',
+] as const;
+
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
+const prettyStatus = (s: string) => s.replace('_', ' ');
+
 interface PostTileProps {
   label: string;
   icon: React.ReactNode;
@@ -61,37 +86,45 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
         </span>
       </div>
 
-      {/* List */}
+      {/* Card grid */}
       {posts.length === 0 ? (
         <div className="px-5 py-8 text-center text-xs text-gray-400 italic">
           No complaints at the moment.
         </div>
       ) : (
-        <ul className="divide-y divide-gray-100">
-          {posts.map((post) => (
-            <li key={post.id}>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 p-5">
+          {posts.map((post) => {
+            const isElectrical = post.type_of_post.toLowerCase() === 'electrical';
+            return (
               <Link
+                key={post.id}
                 to={`/admin/posts/${role}/${post.id}`}
-                className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="group flex flex-col gap-3 bg-gray-100 hover:bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-[#ff9900]/50 transition-all cursor-pointer"
               >
-                {/* ID chip */}
-                <span className="shrink-0 text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-                  #{post.id}
-                </span>
+                {/* Top row: id + type */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                    #{post.id}
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                    {isElectrical ? <Zap className="w-3 h-3" /> : <Hammer className="w-3 h-3" />}
+                    {post.type_of_post}
+                  </span>
+                </div>
+
                 {/* Title */}
-                <span className="text-sm font-medium text-gray-800 truncate flex-1">{post.title}</span>
-                {/* Type badge */}
-                <span className="shrink-0 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                  {post.type_of_post}
-                </span>
+                <p className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-gray-900">
+                  {post.title}
+                </p>
+
                 {/* Status badge */}
-                <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                  {post.status.replace('_', ' ')}
+                <span className={`self-start text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                  {prettyStatus(post.status)}
                 </span>
               </Link>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -107,6 +140,7 @@ export function AEPostView() {
   const [data, setData] = useState<AEPostsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ message: string; status?: number } | null>(null);
+  const [activeFilter, setActiveFilter] = useState<StatusFilter>('All');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -137,6 +171,20 @@ export function AEPostView() {
         }
       });
   }, [navigate]);
+
+  // Derive the three sections + per-status counts. Kept above the early returns
+  // (and memoised on `data`) so the hook order stays stable across renders.
+  const { facultyPosts, wardenPosts, centreheadPosts, statusCounts } = useMemo(() => {
+    const faculty    = normalise(data?.faculty_posts);
+    const warden     = normalise(data?.warden_posts);
+    const centrehead = normalise(data?.centrehead_posts);
+    const all = [...faculty, ...warden, ...centrehead];
+    const counts: Record<string, number> = { All: all.length };
+    for (const post of all) {
+      counts[post.status] = (counts[post.status] ?? 0) + 1;
+    }
+    return { facultyPosts: faculty, wardenPosts: warden, centreheadPosts: centrehead, statusCounts: counts };
+  }, [data]);
 
   // ── Loading ──
   if (loading) {
@@ -184,7 +232,8 @@ export function AEPostView() {
     );
   }
 
-  const { faculty_posts: fp, warden_posts: wp, centrehead_posts: cp } = data!;
+  const matchesFilter = (post: PostRow) =>
+    activeFilter === 'All' || post.status === activeFilter;
 
   return (
     <MainLayout>
@@ -206,27 +255,55 @@ export function AEPostView() {
             </p>
           </div>
 
+          {/* Status filter bar */}
+          <div className="mb-8 flex flex-wrap gap-2">
+            {STATUS_FILTERS.map((status) => {
+              const isActive = activeFilter === status;
+              const count = statusCounts[status] ?? 0;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setActiveFilter(status)}
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
+                    isActive
+                      ? FILTER_ACTIVE_STYLES[status]
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  {status === 'All' ? 'All' : prettyStatus(status)}
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Tiles — stacked vertically, full-width */}
           <div className="flex flex-col gap-6">
             <PostTile
               label="Faculty Posts"
               icon={<GraduationCap className="w-4 h-4" />}
               role="faculty"
-              posts={normalise(fp)}
+              posts={facultyPosts.filter(matchesFilter)}
             />
 
             <PostTile
               label="Warden Posts"
               icon={<BedDouble className="w-4 h-4" />}
               role="warden"
-              posts={normalise(wp)}
+              posts={wardenPosts.filter(matchesFilter)}
             />
 
             <PostTile
               label="Centre Head Posts"
               icon={<Building2 className="w-4 h-4" />}
               role="centrehead"
-              posts={normalise(cp)}
+              posts={centreheadPosts.filter(matchesFilter)}
             />
           </div>
         </div>

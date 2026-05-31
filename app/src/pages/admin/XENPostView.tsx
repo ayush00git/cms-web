@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2 } from 'lucide-react';
+import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2, Zap, Hammer } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -47,11 +47,56 @@ const STATUS_STYLES: Record<string, string> = {
   Closed:      'bg-red-50 text-red-600',
 };
 
+// Ordered list of selectable statuses (plus the implicit "All" default)
+const STATUS_FILTERS = [
+  'Pending_XEN',
+  'Pending_AE',
+  'Pending_JE',
+  'Resolved_JE',
+  'Resolved',
+  'Closed',
+] as const;
+
+const prettyStatus = (s: string) => s.replace('_', ' ');
+
 interface PostTileProps {
   label: string;
   icon: React.ReactNode;
   role: string;
   posts: PostRow[];
+}
+
+function PostCard({ role, post }: { role: string; post: PostRow }) {
+  const isElectrical = post.type_of_post.toLowerCase() === 'electrical';
+  return (
+    <Link
+      to={`/admin/posts/${role}/${post.id}`}
+      className="group flex flex-col gap-3 bg-gray-100 hover:bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-[#ff9900]/50 transition-all cursor-pointer"
+    >
+      {/* Top row: id + status */}
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+          #{post.id}
+        </span>
+        <span className={`ml-auto shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
+          {prettyStatus(post.status)}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h4 className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 group-hover:text-gray-900">
+        {post.title}
+      </h4>
+
+      {/* Type badge */}
+      <div className="mt-auto">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">
+          {isElectrical ? <Zap className="w-3 h-3" /> : <Hammer className="w-3 h-3" />}
+          {post.type_of_post}
+        </span>
+      </div>
+    </Link>
+  );
 }
 
 function PostTile({ label, icon, role, posts }: PostTileProps) {
@@ -66,37 +111,17 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
         </span>
       </div>
 
-      {/* List */}
+      {/* Card grid */}
       {posts.length === 0 ? (
         <div className="px-5 py-8 text-center text-xs text-gray-400 italic">
           No complaints at the moment.
         </div>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <div className="p-4 grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {posts.map((post) => (
-            <li key={post.id}>
-            <Link
-              to={`/admin/posts/${role}/${post.id}`}
-              className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer"
-            >
-              {/* ID chip */}
-              <span className="shrink-0 text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-                #{post.id}
-              </span>
-              {/* Title */}
-              <span className="text-sm font-medium text-gray-800 truncate flex-1">{post.title}</span>
-              {/* Type badge */}
-              <span className="shrink-0 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                {post.type_of_post}
-              </span>
-              {/* Status badge */}
-              <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                {post.status.replace('_', ' ')}
-              </span>
-            </Link>
-            </li>
+            <PostCard key={post.id} role={role} post={post} />
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
@@ -113,6 +138,7 @@ export function XENPostView() {
   const [data, setData] = useState<XENPostsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ message: string; status?: number } | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>('All');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -194,6 +220,20 @@ export function XENPostView() {
 
   const { faculty_posts: fp, warden_posts: wp, centrehead_posts: cp } = data!;
 
+  const facultyPosts = normalise(fp);
+  const wardenPosts = normalise(wp);
+  const centreheadPosts = normalise(cp);
+  const allPosts = [...facultyPosts, ...wardenPosts, ...centreheadPosts];
+
+  // Apply the active status filter across all sections
+  const applyFilter = (posts: PostRow[]) =>
+    activeFilter === 'All' ? posts : posts.filter((p) => p.status === activeFilter);
+
+  const statusCounts = (status: string) =>
+    status === 'All'
+      ? allPosts.length
+      : allPosts.filter((p) => p.status === status).length;
+
   return (
     <MainLayout>
       <div className="flex-grow bg-gray-50 py-12 relative overflow-hidden">
@@ -214,27 +254,54 @@ export function XENPostView() {
             </p>
           </div>
 
+          {/* Status filter chips */}
+          <div className="mb-8 flex flex-wrap gap-2">
+            {(['All', ...STATUS_FILTERS] as string[]).map((status) => {
+              const isActive = activeFilter === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setActiveFilter(status)}
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-[#ff9900] text-white border-[#ff9900]'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#ff9900]/50'
+                  }`}
+                >
+                  {status === 'All' ? 'All' : prettyStatus(status)}
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {statusCounts(status)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Tiles — stacked vertically, full-width */}
           <div className="flex flex-col gap-6">
             <PostTile
               label="Faculty Posts"
               icon={<GraduationCap className="w-4 h-4" />}
               role="faculty"
-              posts={normalise(fp)}
+              posts={applyFilter(facultyPosts)}
             />
 
             <PostTile
               label="Warden Posts"
               icon={<BedDouble className="w-4 h-4" />}
               role="warden"
-              posts={normalise(wp)}
+              posts={applyFilter(wardenPosts)}
             />
 
             <PostTile
               label="Centre Head Posts"
               icon={<Building2 className="w-4 h-4" />}
               role="centrehead"
-              posts={normalise(cp)}
+              posts={applyFilter(centreheadPosts)}
             />
           </div>
         </div>
