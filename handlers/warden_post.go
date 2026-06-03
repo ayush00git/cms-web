@@ -132,6 +132,12 @@ func (h *PostHandler) WardenPostEdit(c *gin.Context) {
 		return
 	}
 
+	// limit the edit window only for 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
+		return
+	}
+
 	var inputs WardenPostEditType
 	inputs.UpdatedAt = time.Now()
 	if err := c.ShouldBindJSON(&inputs); err != nil {

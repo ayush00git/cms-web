@@ -127,6 +127,12 @@ func (h *PostHandler) CentreheadPostEdit(c *gin.Context) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
 		return
 	}
+	
+	// limit the edit window only for 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
+		return
+	}
 
 	var inputs CentreheadPostEditType
 	inputs.UpdatedAt = time.Now()
