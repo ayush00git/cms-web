@@ -3,6 +3,7 @@ package test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ayush00git/cms-web/models"
 )
@@ -105,6 +106,18 @@ func TestWardenPostEdit_Unauthenticated(t *testing.T) {
 	assertStatus(t, rec, 401)
 }
 
+func TestWardenPostEdit_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	w := seedWarden(t, db, "war.expired@iit.ac.in")
+	post := models.WardenPost{WardenID: w.ID, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "old", Description: "old"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(w.ID, w.Email))
+	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/1", map[string]any{"title": "new"})
+	assertStatus(t, rec, 403)
+}
+
 // --- WardenPostDelete -------------------------------------------------------
 
 func TestWardenPostDelete_Success(t *testing.T) {
@@ -150,6 +163,18 @@ func TestWardenPostDelete_Unauthenticated(t *testing.T) {
 	e := newPostRouter(db, noAuth())
 	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
 	assertStatus(t, rec, 401)
+}
+
+func TestWardenPostDelete_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	w := seedWarden(t, db, "war.delexpired@iit.ac.in")
+	post := models.WardenPost{WardenID: w.ID, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(w.ID, w.Email))
+	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
+	assertStatus(t, rec, 403)
 }
 
 // --- GetWardenPosts ---------------------------------------------------------

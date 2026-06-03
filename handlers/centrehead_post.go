@@ -127,6 +127,12 @@ func (h *PostHandler) CentreheadPostEdit(c *gin.Context) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
 		return
 	}
+	
+	// limit the edit window only for 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
+		return
+	}
 
 	var inputs CentreheadPostEditType
 	inputs.UpdatedAt = time.Now()
@@ -170,6 +176,12 @@ func (h *PostHandler) CentreheadPostDelete(c *gin.Context) {
 
 	if post.CentreheadID != userID.(uint) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
+		return
+	}
+
+	// restrict post deletion after 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "deletion window has been expired"})
 		return
 	}
 

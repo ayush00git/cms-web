@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil, UserCheck,
-  Inbox, ServerCrash,
+  Inbox, ServerCrash, Info,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
@@ -254,6 +254,15 @@ export function Profile() {
           <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#E5E5E5]">
             <Inbox className="w-4 h-4 text-[#666666]" />
             <h3 className="text-sm font-bold text-[#111111] uppercase tracking-widest">Your Complaints</h3>
+            <div className="relative group">
+              <Info className="w-3.5 h-3.5 text-[#999999] cursor-default" />
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-10 pointer-events-none">
+                <div className="bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                  Posts can only be edited within 30 minutes of creation
+                </div>
+                <div className="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1" />
+              </div>
+            </div>
             {!postsLoading && (
               <span className="bg-[#F5F5F5] border border-[#E5E5E5] text-[#666666] text-xs font-bold px-2 py-0.5 rounded-lg">{posts.length}</span>
             )}

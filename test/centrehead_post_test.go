@@ -3,6 +3,7 @@ package test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ayush00git/cms-web/models"
 )
@@ -104,6 +105,18 @@ func TestCentreheadPostEdit_Unauthenticated(t *testing.T) {
 	assertStatus(t, rec, 401)
 }
 
+func TestCentreheadPostEdit_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	ch := seedCentrehead(t, db, "ch.expired@iit.ac.in")
+	post := models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "old", Description: "old"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(ch.ID, ch.Email))
+	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/1", map[string]any{"title": "new"})
+	assertStatus(t, rec, 403)
+}
+
 // --- CentreheadPostDelete ---------------------------------------------------
 
 func TestCentreheadPostDelete_Success(t *testing.T) {
@@ -149,6 +162,18 @@ func TestCentreheadPostDelete_Unauthenticated(t *testing.T) {
 	e := newPostRouter(db, noAuth())
 	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
 	assertStatus(t, rec, 401)
+}
+
+func TestCentreheadPostDelete_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	ch := seedCentrehead(t, db, "ch.delexpired@iit.ac.in")
+	post := models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(ch.ID, ch.Email))
+	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	assertStatus(t, rec, 403)
 }
 
 // --- GetCentreheadPosts -----------------------------------------------------

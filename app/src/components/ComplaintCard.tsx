@@ -80,6 +80,10 @@ function statusStyle(s: string): StatusStyle {
 
 const STAGES = ['XEN', 'AE', 'JE'];
 
+function isEditWindowExpired(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() >= 30 * 60 * 1000;
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
@@ -238,6 +242,7 @@ function PostModal({
   const theme        = typeTheme(isElectrical);
   const comments     = post.comments ?? [];
   const currentStageIdx = STAGES.indexOf(post.stage);
+  const editExpired  = isEditWindowExpired(post.created_at);
 
   return createPortal(
     <div
@@ -261,7 +266,7 @@ function PostModal({
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {!isEditing && (
+            {!isEditing && !editExpired && (
               <button
                 onClick={() => onStartEdit(post)}
                 disabled={isBusy}
@@ -283,12 +288,14 @@ function PostModal({
                 </button>
               </>
             )}
-            <button onClick={() => onDelete(post.id)} disabled={isBusy} title="Delete"
-              className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 cursor-pointer">
-              {isBusy && !isEditing
-                ? <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-                : <Trash2 className="w-4 h-4" />}
-            </button>
+            {!editExpired && (
+              <button onClick={() => onDelete(post.id)} disabled={isBusy} title="Delete"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 cursor-pointer">
+                {isBusy && !isEditing
+                  ? <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                  : <Trash2 className="w-4 h-4" />}
+              </button>
+            )}
             <div className="w-px h-5 bg-gray-300 mx-1" />
             <button onClick={onClose} title="Close"
               className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-white/70 transition-colors cursor-pointer">
@@ -391,6 +398,7 @@ export function ComplaintCard({
   const comments     = post.comments ?? [];
   const isFaculty    = role === 'faculty';
   const isWarden     = role === 'warden';
+  const editExpired  = isEditWindowExpired(post.created_at);
 
   return (
     <>
@@ -418,14 +426,18 @@ export function ComplaintCard({
             </span>
 
             <div className="ml-auto flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => onStartEdit(post)} disabled={isBusy} title="Edit"
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/80 transition-colors disabled:opacity-40 cursor-pointer">
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-              <button onClick={() => onDelete(post.id)} disabled={isBusy} title="Delete"
-                className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 cursor-pointer">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {!editExpired && (
+                <button onClick={() => onStartEdit(post)} disabled={isBusy} title="Edit"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/80 transition-colors disabled:opacity-40 cursor-pointer">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {!editExpired && (
+                <button onClick={() => onDelete(post.id)} disabled={isBusy} title="Delete"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 cursor-pointer">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
 

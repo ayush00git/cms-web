@@ -132,6 +132,12 @@ func (h *PostHandler) WardenPostEdit(c *gin.Context) {
 		return
 	}
 
+	// limit the edit window only for 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
+		return
+	}
+
 	var inputs WardenPostEditType
 	inputs.UpdatedAt = time.Now()
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -174,6 +180,12 @@ func (h *PostHandler) WardenPostDelete(c *gin.Context) {
 
 	if post.WardenID != userID.(uint) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
+		return
+	}
+
+	// restrict post deletion after 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "deletion window has been expired"})
 		return
 	}
 
