@@ -177,6 +177,18 @@ func TestFacultyPostDelete_Unauthenticated(t *testing.T) {
 	assertStatus(t, rec, 401)
 }
 
+func TestFacultyPostDelete_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	f := seedFaculty(t, db, "fac.delexpired@iit.ac.in")
+	post := models.FacultyPost{FacultyID: f.ID, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(f.ID, f.Email))
+	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/1", nil)
+	assertStatus(t, rec, 403)
+}
+
 // --- GetFacultyPosts --------------------------------------------------------
 
 func TestGetFacultyPosts_Success(t *testing.T) {

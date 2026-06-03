@@ -164,6 +164,18 @@ func TestCentreheadPostDelete_Unauthenticated(t *testing.T) {
 	assertStatus(t, rec, 401)
 }
 
+func TestCentreheadPostDelete_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	ch := seedCentrehead(t, db, "ch.delexpired@iit.ac.in")
+	post := models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeCivil, Title: "t", Description: "d"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(ch.ID, ch.Email))
+	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	assertStatus(t, rec, 403)
+}
+
 // --- GetCentreheadPosts -----------------------------------------------------
 
 func TestGetCentreheadPosts_Success(t *testing.T) {
