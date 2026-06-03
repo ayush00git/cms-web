@@ -3,6 +3,7 @@ package test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ayush00git/cms-web/models"
 )
@@ -114,6 +115,18 @@ func TestFacultyPostEdit_Unauthenticated(t *testing.T) {
 	e := newPostRouter(db, noAuth())
 	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{"title": "x"})
 	assertStatus(t, rec, 401)
+}
+
+func TestFacultyPostEdit_ExpiredWindow(t *testing.T) {
+	db := newTestDB(t)
+	f := seedFaculty(t, db, "fac.expired@iit.ac.in")
+	post := models.FacultyPost{FacultyID: f.ID, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "old", Description: "old desc"}
+	db.Create(&post)
+	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
+
+	e := newPostRouter(db, authAs(f.ID, f.Email))
+	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{"title": "new"})
+	assertStatus(t, rec, 403)
 }
 
 // --- FacultyPostDelete ------------------------------------------------------
