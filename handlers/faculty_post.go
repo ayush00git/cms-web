@@ -181,8 +181,15 @@ func (h *PostHandler) FacultyPostDelete(c *gin.Context) {
 		return
 	}
 
+	// check if the author is trying to delete
 	if post.FacultyID != userID.(uint) {
 		c.JSON(403, gin.H{"error": "you are not authorized for this action"})
+		return
+	}
+
+	// restrict post deletion after 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "deletion window has been expired"})
 		return
 	}
 

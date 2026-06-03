@@ -179,6 +179,12 @@ func (h *PostHandler) CentreheadPostDelete(c *gin.Context) {
 		return
 	}
 
+	// restrict post deletion after 30 minutes
+	if time.Since(post.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "deletion window has been expired"})
+		return
+	}
+
 	if result := h.DB.Delete(&post); result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed deleting the post"})
 		return
