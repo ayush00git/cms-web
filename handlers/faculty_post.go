@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/ayush00git/cms-web/middleware"
@@ -236,4 +237,65 @@ func (h *PostHandler) GetFacultyPosts(c *gin.Context) {
 	}
 	
 	c.JSON(200, gin.H{"success": "posts fetched successfully", "posts": posts})
+}
+
+
+// FacultyPostComment allows the author of the post to
+// comment on the post
+func (h *PostHandler) FacultyPostComment(c *gin.Context) {
+	// get email of the logged in user from gin context
+	email, _ := c.Get(middleware.EmailKey)
+
+	// find the user
+	var faculty models.Faculty
+	result := h.DB.Where("email = ?", email).Take(&faculty)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user does not exists"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"});
+		return;
+	}
+
+	// get post id from path parameters
+	postIDString := c.Param("post_id")
+	postIDU64, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse post id"})
+		return
+	}
+
+	// read database for this postIDU64
+	var post models.FacultyPost
+	result = h.DB.Where("id = ?", uint(postIDU64)).Take(&post)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "post unavailable"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	// validate the author of the post
+	if post.FacultyID != faculty.ID {
+		c.JSON(403, gin.H{"error": "you are not authorized to comment"})
+		return
+	}
+
+	// bind input to json
+	var inputs CommentType
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(401, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	_ = models.Comment{
+		CommentableID: uint(postIDU64),
+		CommentableType: "faculty_posts",
+		Content: inputs.Content,
+		AuthorID: faculty.ID,
+	}
+
 }
