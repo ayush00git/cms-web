@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
-	"errors"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
@@ -215,11 +216,7 @@ func (h *PostHandler) GetWardenPosts(c *gin.Context) {
 
 	var posts []models.WardenPost
 	result = h.DB.
-	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
-		return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
-			return d.Select("id, email, position")
-		})
-	}).
+	Preload("Comments").
 	Where("warden_id = ?", warden.ID).
 	Find(&posts)
 	if result.Error != nil {
@@ -228,4 +225,76 @@ func (h *PostHandler) GetWardenPosts(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"success": "posts fetched successfully", "posts": posts})
+}
+
+
+// WardenPostComment allows a user of type warden to post
+// comment as the post's author
+func (h *PostHandler) WardenPostComment(c *gin.Context) {
+	// get email of the logged in user from the gin context
+	email, _ := c.Get(middleware.EmailKey)
+
+	// check if the user is a type warden role
+	var warden models.Warden
+	result := h.DB.Where("email = ?", email).Take(&warden)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	// get post_id from path parameters
+	postIDString := c.Param("post_id")
+	postIDU64, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse post_id at the moment"})
+		return
+	}
+
+	// read this post from the db
+	postID := uint(postIDU64)
+	var post models.WardenPost
+	result = h.DB.Where("id = ?", postID).Take(&post)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "post not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	// verify the warden(logged in user) is the author of the post
+	if warden.ID != post.WardenID {
+		c.JSON(403, gin.H{"error": "you are not authorized to comment"})
+		return
+	}
+
+	// bind the input
+	var inputs CommentType
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(401, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	doc := models.Comment{
+		CommentableID: postID,
+		CommentableType: "warden_posts",
+		Content: inputs.Content,
+		Email: warden.Email,
+		Role: "warden",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result = h.DB.Create(&doc)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
+		return
+	}
+	
+	c.JSON(201, gin.H{"success": "comment posted!"})
 }
