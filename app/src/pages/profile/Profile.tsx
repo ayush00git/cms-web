@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil, UserCheck,
@@ -38,7 +38,7 @@ export function Profile() {
       });
   }, [navigate]);
 
-  useEffect(() => {
+  const fetchPosts = useCallback((silent = false) => {
     if (!profile) return;
     let endpoint = '';
     if ('department' in profile)    endpoint = '/api/post/faculty';
@@ -46,7 +46,7 @@ export function Profile() {
     else if ('building' in profile) endpoint = '/api/post/centrehead';
     else return;
 
-    setPostsLoading(true);
+    if (!silent) setPostsLoading(true);
     setPostsError(null);
     fetch(endpoint, { credentials: 'include' })
       .then(async (res) => {
@@ -56,6 +56,8 @@ export function Profile() {
       .then((data) => { setPosts(data.posts ?? []); setPostsLoading(false); })
       .catch((err: Error) => { setPostsError(err.message); setPostsLoading(false); });
   }, [profile]);
+
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
   if (loading) {
     return (
@@ -305,6 +307,7 @@ export function Profile() {
                   onCancelEdit={() => setEditingId(null)}
                   onSaveEdit={handleSaveEdit}
                   onDelete={handleDelete}
+                  onCommentPosted={() => fetchPosts(true)}
                 />
               ))}
             </div>
