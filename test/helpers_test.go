@@ -25,6 +25,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // testPassword is the cleartext password every seeded user is created with, so
@@ -74,7 +75,11 @@ func newTestDB(t *testing.T) *gorm.DB {
 	// The unique name keeps tests isolated from one another, while the shared
 	// cache keeps the schema alive across gorm's connection pool.
 	dsn := fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())
-	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
+		// Silence GORM's logger so expected "record not found" lookups in the
+		// not-found test cases don't spam the test output.
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		t.Fatalf("failed to open in-memory sqlite: %v", err)
 	}
@@ -143,6 +148,10 @@ func newPostRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e.GET("/api/post/faculty", auth, h.GetFacultyPosts)
 	e.GET("/api/post/warden", auth, h.GetWardenPosts)
 	e.GET("/api/post/centrehead", auth, h.GetCentreheadPosts)
+
+	e.POST("/api/post/faculty/comment/:post_id", auth, h.FacultyPostComment)
+	e.POST("/api/post/warden/comment/:post_id", auth, h.WardenPostComment)
+	e.POST("/api/post/centrehead/comment/:post_id", auth, h.CentreheadPostComment)
 
 	return e
 }
