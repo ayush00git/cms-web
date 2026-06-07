@@ -43,8 +43,11 @@ func TestAdminPostComment_Success(t *testing.T) {
 	if doc.Content != "looks good" {
 		t.Fatalf("expected content %q, got %q", "looks good", doc.Content)
 	}
-	if doc.AuthorID != admin.ID {
-		t.Fatalf("expected author %d, got %d", admin.ID, doc.AuthorID)
+	if doc.Email != admin.Email {
+		t.Fatalf("expected author email %q, got %q", admin.Email, doc.Email)
+	}
+	if doc.Role != string(admin.Position) {
+		t.Fatalf("expected role %q, got %q", string(admin.Position), doc.Role)
 	}
 }
 
