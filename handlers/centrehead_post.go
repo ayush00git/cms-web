@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
-	"errors"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
@@ -220,4 +221,76 @@ func (h *PostHandler) GetCentreheadPosts(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"success": "posts fetched successfully", "posts": posts})
+}
+
+
+// CentreheadPostComment allows a user of type centrehead to post
+// comment as the post's author
+func (h *PostHandler) CentreheadPostComment(c *gin.Context) {
+	// get email of the logged in user from the gin context
+	email, _ := c.Get(middleware.EmailKey)
+
+	// check if the user is a type centrehead role
+	var head models.Centrehead
+	result := h.DB.Where("email = ?", email).Take(&head)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	// get post_id from path parameters
+	postIDString := c.Param("post_id")
+	postIDU64, err := strconv.ParseUint(postIDString, 10, 64)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to parse post_id at the moment"})
+		return
+	}
+
+	// read this post from the db
+	postID := uint(postIDU64)
+	var post models.CentreheadPost
+	result = h.DB.Where("id = ?", postID).Take(&post)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "post not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	// verify the centrehead(logged in user) is the author of the post
+	if head.ID != post.CentreheadID {
+		c.JSON(403, gin.H{"error": "you are not authorized to comment"})
+		return
+	}
+
+	// bind the input
+	var inputs CommentType
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(401, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	doc := models.Comment{
+		CommentableID: postID,
+		CommentableType: "centrehead_posts",
+		Content: inputs.Content,
+		Email: head.Email,
+		Role: "centrehead",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result = h.DB.Create(&doc)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
+		return
+	}
+	
+	c.JSON(201, gin.H{"success": "comment posted!"})
 }
