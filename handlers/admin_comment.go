@@ -27,7 +27,7 @@ type CommentType struct {
 
 // AdminPost comment allow any admin comment on any type of post.
 // Common for all type of admins and posts.
-func (h *AdminHandler) AdminPostComment (c *gin.Context) {
+func (h *AdminHandler) AdminPostComment(c *gin.Context) {
 	// verify the admin
 	emailID, exists := c.Get(middleware.EmailKey)
 	if !exists {
