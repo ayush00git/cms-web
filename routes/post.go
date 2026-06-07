@@ -29,5 +29,7 @@ func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
 	e.GET("/api/post/centrehead", middleware.IsAuthenticated(), h.GetCentreheadPosts)
 
 	// APIs for comments on the posts
-	e.POST("/api/post/faculty/comment/:post_id", h.FacultyPostComment)
+	e.POST("/api/post/faculty/comment/:post_id", middleware.IsAuthenticated() ,h.FacultyPostComment)
+	e.POST("/api/post/warden/comment/:post_id", middleware.IsAuthenticated(), h.WardenPostComment)
+	e.POST("/api/post/centrehead/comment/:post_id", middleware.IsAuthenticated(), h.CentreheadPostComment)
 }
