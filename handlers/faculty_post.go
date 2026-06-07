@@ -224,11 +224,7 @@ func (h *PostHandler) GetFacultyPosts(c *gin.Context) {
 	// return posts where author is faculty (the logged in user)
 	var posts []models.FacultyPost
 	result = h.DB.
-	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
-		return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
-			return d.Select("id, email, position")
-		})
-	}).
+	Preload("Comments").
 	Where("faculty_id = ?", faculty.ID).
 	Find(&posts)
 	if result.Error != nil {
@@ -291,11 +287,21 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 		return
 	}
 
-	_ = models.Comment{
+	doc := models.Comment{
 		CommentableID: uint(postIDU64),
 		CommentableType: "faculty_posts",
 		Content: inputs.Content,
-		AuthorID: faculty.ID,
+		Email: faculty.Email,
+		Role: "faculty",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
+	result = h.DB.Create(&doc)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
+		return
+	}
+
+	c.JSON(201, gin.H{"success": "comment posted!"})
 }

@@ -89,7 +89,8 @@ func (h *AdminHandler) AdminPostComment (c *gin.Context) {
 		CommentableID: uint(postID),
 		CommentableType: postType,
 		Content : inputs.Content,
-		AuthorID: admin.ID,
+		Email: admin.Email,
+		Role: string(admin.Position),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

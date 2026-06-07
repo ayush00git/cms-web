@@ -215,11 +215,7 @@ func (h *PostHandler) GetWardenPosts(c *gin.Context) {
 
 	var posts []models.WardenPost
 	result = h.DB.
-	Preload("Comments", func(db *gorm.DB) (*gorm.DB) {
-		return db.Preload("Author", func(d *gorm.DB) (*gorm.DB) {
-			return d.Select("id, email, position")
-		})
-	}).
+	Preload("Comments").
 	Where("warden_id = ?", warden.ID).
 	Find(&posts)
 	if result.Error != nil {
