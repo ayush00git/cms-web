@@ -44,17 +44,11 @@ interface CentreHeadAuthor {
   phone_number: string;
 }
 
-interface CommentAuthor {
-  id: number;
-  email: string;
-  position: string;
-}
-
 interface Comment {
   id: number;
   comment_text: string;
-  author_id: number;
-  Author?: CommentAuthor;
+  email: string;
+  role: string;
   created_at: string;
 }
 
@@ -110,6 +104,7 @@ type Post = FacultyPost | WardenPost | CentreHeadPost;
 interface ApiResponse {
   success: string;
   post: Post;
+  position: string;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -217,11 +212,13 @@ function Detail({ label, value }: { label: string; value?: string }) {
 
 export function AdminPostView() {
   const { role, post_id } = useParams<{ role: string; post_id: string }>();
-  const adminPosition = sessionStorage.getItem('adminPosition') ?? '';
-  const adminType = adminPosition.startsWith('XEN') ? 'xen' : adminPosition.startsWith('AE') ? 'ae' : adminPosition.startsWith('JE') ? 'je' : '';
   const navigate = useNavigate();
 
   const [post, setPost]     = useState<Post | null>(null);
+  // Admin position comes from the server (AdminGetPost response) rather than
+  // per-tab sessionStorage, so action gating survives new tabs / direct nav.
+  const [adminPosition, setAdminPosition] = useState('');
+  const adminType = adminPosition.startsWith('XEN') ? 'xen' : adminPosition.startsWith('AE') ? 'ae' : adminPosition.startsWith('JE') ? 'je' : '';
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState<{ message: string; status?: number } | null>(null);
 
@@ -247,6 +244,7 @@ export function AdminPostView() {
       })
       .then((json: ApiResponse) => {
         setPost(json.post);
+        setAdminPosition(json.position ?? '');
         if (!silent) setLoading(false);
       })
       .catch((err: Error & { status?: number }) => {
@@ -463,11 +461,12 @@ export function AdminPostView() {
             ) : (
               <ul className="space-y-3 mb-8">
                 {comments.map((c) => {
-                  const who = c.Author?.position ? c.Author.position.replace(/_/g, ' ') : `Admin #${c.author_id}`;
+                  const who = c.role ? c.role.replace(/_/g, ' ') : 'Staff';
                   return (
                     <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold text-gray-800">{who}</span>
+                        {c.email && <span className="text-[11px] text-gray-400 truncate">{c.email}</span>}
                         <span className="ml-auto text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
                       </div>
                       <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>

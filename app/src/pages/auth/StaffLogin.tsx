@@ -41,7 +41,6 @@ export function StaffLogin() {
           setStatus('error');
           setMessage(`Unknown position "${data.position}" — contact admin.`);
         } else {
-          sessionStorage.setItem('adminPosition', data.position ?? '');
           navigate(dest);
         }
       } else {

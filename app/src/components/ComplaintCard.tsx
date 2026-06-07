@@ -10,17 +10,11 @@ import { POST_PLACES } from '../constants/models';
 
 export type Role = 'faculty' | 'warden' | 'centrehead';
 
-export interface CommentAuthor {
-  id: number;
-  email: string;
-  position: string;
-}
-
 export interface ComplaintComment {
   id: number;
   comment_text: string;
-  author_id: number;
-  Author?: CommentAuthor;
+  email: string;
+  role: string;
   created_at: string;
 }
 
@@ -195,7 +189,7 @@ function CommentsList({ comments }: { comments: ComplaintComment[] }) {
   return (
     <div className="flex flex-col gap-3">
       {comments.map((c, idx) => {
-        const author = c.Author?.position ? roleLabel(c.Author.position) : `Admin #${c.author_id}`;
+        const author = c.role ? roleLabel(c.role) : 'Staff';
         const initials = author.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
         return (
           <div key={c.id} className="flex gap-3">
@@ -208,7 +202,10 @@ function CommentsList({ comments }: { comments: ComplaintComment[] }) {
             <div className="flex-1 min-w-0">
               <div className="bg-white border border-gray-200 rounded-xl rounded-tl-sm px-4 py-3 shadow-sm">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="text-xs font-bold text-gray-800">{author}</span>
+                  <span className="min-w-0 flex items-baseline gap-1.5">
+                    <span className="text-xs font-bold text-gray-800">{author}</span>
+                    {c.email && <span className="text-[10px] text-gray-400 truncate">{c.email}</span>}
+                  </span>
                   <span className="inline-flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
                     <Clock className="w-3 h-3" />
                     {formatDateTime(c.created_at)}
