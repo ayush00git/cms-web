@@ -24,6 +24,7 @@ func TestWardenSignup_AlreadyRegistered(t *testing.T) {
 
 	e := newAuthRouter(db, noAuth())
 	body := map[string]any{
+		"name":         "Duplicate Warden",
 		"email":        "war.dup@iit.ac.in",
 		"password":     "whatever",
 		"hostel":       string(models.KBH),

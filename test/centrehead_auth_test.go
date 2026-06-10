@@ -24,6 +24,7 @@ func TestCentreheadSignup_AlreadyRegistered(t *testing.T) {
 
 	e := newAuthRouter(db, noAuth())
 	body := map[string]any{
+		"name":         "Duplicate Head",
 		"email":        "ch.dup@iit.ac.in",
 		"password":     "whatever",
 		"building":     string(models.LHC),
