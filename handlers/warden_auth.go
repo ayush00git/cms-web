@@ -33,6 +33,7 @@ func (h *AuthHandler) WardenSignup (c *gin.Context) {
 	// send a email for account verification
 
 	warden := models.Warden{
+		Name: inputs.Name,
 		Email: inputs.Email,
 		Password: inputs.Password,
 		Hostel: inputs.Hostel,

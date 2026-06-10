@@ -33,6 +33,7 @@ func (h *AuthHandler) CentreheadSignup(c *gin.Context) {
 	inputs.Password = string(hashedPass)
 
 	centrehead := models.Centrehead{
+		Name: inputs.Name,
 		Email: inputs.Email,
 		Password: inputs.Password,
 		Building: inputs.Building,

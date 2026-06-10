@@ -29,6 +29,7 @@ const (
 
 type Centrehead struct {
 	ID          uint         `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name        string       `gorm:"not null" json:"name"`
 	Email       string       `gorm:"uniqueIndex;not null" json:"email"`
 	Password    string       `gorm:"not null" json:"password"`
 	Building    BuildingName `gorm:"type:varchar(100);not null" json:"building"`
@@ -39,6 +40,7 @@ type Centrehead struct {
 }
 
 type CentreheadSignup struct {
+	Name        string       `json:"name" binding:"required"`
 	Email       string       `json:"email" binding:"required"`
 	Password    string       `json:"password" binding:"required"`
 	Building    BuildingName `json:"building" binding:"required"`

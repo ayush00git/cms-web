@@ -23,6 +23,7 @@ const (
 
 type Warden struct {
 	ID					uint			`gorm:"primaryKey;autoIncrement" json:"id"`
+	Name				string			`gorm:"not null" json:"name"`
 	Email				string			`gorm:"uniqueIndex;not null" json:"email"`
 	Password			string			`gorm:"not null" json:"password"`
 	Hostel				HostelName		`gorm:"type:varchar(30);not null" json:"hostel"`
@@ -33,6 +34,7 @@ type Warden struct {
 }
 
 type WardenSignup struct {
+	Name				string			`json:"name" binding:"required"`
 	Email				string			`json:"email" binding:"required"`
 	Password			string			`json:"password" binding:"required"`
 	Hostel				HostelName		`json:"hostel" binding:"required"`

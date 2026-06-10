@@ -6,6 +6,7 @@ import { HOSTELS } from '../../constants/models';
 
 export function WardenSignup() {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     phone_number: '',
@@ -97,6 +98,18 @@ export function WardenSignup() {
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Account Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="md:col-span-2">
+                  <label className={labelCls}>Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={inputCls}
+                    placeholder="Rahul Kumar"
+                    required
+                  />
+                </div>
                 <div>
                   <label className={labelCls}>Email Address</label>
                   <input
