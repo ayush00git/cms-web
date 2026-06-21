@@ -1,3 +1,10 @@
+// Architecture
+//
+// The status of post should be allowed to edit such that admin positions
+// JE can only report to AE and AE can only report to XEN
+// Only one Primary handler (AdminFacultyPostStatus) is maintained in this file
+// rest of the two handles just mirrors it.
+
 package handlers
 
 import (
@@ -17,6 +24,17 @@ import (
 type AdminReview struct {
 	Review	string
 }
+
+// PostStatus
+type PostStatus string
+const (
+	PendingXEN 		PostStatus = "pending_xen" 	// default to open post
+	PendingAE  		PostStatus = "pending_ae"
+	ResolvedAE  	PostStatus = "resolved_ae"
+	PendingJE  		PostStatus = "pending_je"
+	ResolvedJE  	PostStatus = "resolved_je"
+	ResolvedAll 	PostStatus = "resolved_all"	// defaults to closed post
+)
 
 // AdminFacultyPostStatus sets the stage of the faculty posts
 // Sends email to the corresponding post using goroutines
@@ -73,21 +91,16 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "faculty", post.ID)
 
 	switch post.Status {
-	case "Resolved_JE":
+	// ** Posts with status type mentioned PendingXEN **
+	case string(PendingXEN):
+		// only allow if user is of position XEN
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
 			return
 		}
-		if review.Review == "close" {
-			post.Status = "Closed"
-		}
-	case "Pending_XEN" :
-		if !strings.Contains(string(admin.Position), "XEN") {
-			c.JSON(403, gin.H{"error": "permissions denied"})
-			return
-		}
-		if review.Review == "to_ae" {
-			post.Status = "Pending_AE"
+		// forward the post to AE
+		if review.Review == string(PendingAE) {
+			post.Status = string(PendingAE)
 			// send mail to ae
 			go func() {
 				// search for email of ae
@@ -108,20 +121,23 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 					return
 				}
 			} ()
-		} else if review.Review == "close" {
-			post.Status = "Closed"
+		} else if review.Review == string(ResolvedAll) {	// post can be set to close
+			post.Status = string(ResolvedAll)
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
 		}
-	
-	case "Pending_AE":
+
+	// ** Posts with status type mentioned PendingAE **	
+	case string(PendingAE):
+		// only allow if user is of position AE
 		if !strings.Contains(string(admin.Position), "AE") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
 			return
 		}
-		if review.Review == "to_je" {
-			post.Status = "Pending_JE"
+		// forward the post to JE
+		if review.Review == string(PendingJE) {
+			post.Status = string(PendingJE)
 			// send mail to je
 			go func() {
 				// search for email of je
@@ -142,8 +158,8 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 					return
 				}
 			} ()
-		} else if review.Review == "require_review" {
-			post.Status = "Pending_XEN"
+		} else if review.Review == string(PendingXEN) {		// forward the mail back to XEN if reviews were required
+			post.Status = string(PendingXEN)
 			// send mail to xen
 			go func() {
 				// search for email of xen
@@ -169,36 +185,39 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			return
 		}
 
-	case "Pending_JE":
+	// ** Posts with status type mentioned PendingJE **
+	case string(PendingJE):
+		// only allow if user is of position JE
 		if !strings.Contains(string(admin.Position), "JE") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
 			return
 		}
-		if review.Review == "resolved" {
-			post.Status = "Resolved_JE"
-			// send mail to xen
+		// if JE approves the post as resolved forward it to AE
+		if review.Review == string(ResolvedJE) {
+			post.Status = string(ResolvedJE)
+			// send mail to AE
 			go func() {
-				// search for email of xen
+				// search for email of AE
 				var position models.PositionType
 				if post.TypeOfPost == "Civil" {
-					position = models.TypeXENCivil
+					position = models.TypeAECivil
 				} else {
-					position = models.TypeXENElectrical
+					position = models.TypeAEElectrical
 				}
-				var xen models.Admin
-				result := h.DB.Where("position = ?", position).Take(&xen)
+				var ae models.Admin
+				result := h.DB.Where("position = ?", position).Take(&ae)
 				if result.Error != nil {
 		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
 					return
 				}
-				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
+				if err := services.SendPostMailToAdmins(ae.Email, postURL); err != nil {
 		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
-		} else if review.Review == "require_review" {
-			post.Status = "Pending_AE"
-			// send mail to ae
+		} else if review.Review == string(PendingAE) {		// forward the mail back to JE if require reviews
+			post.Status = string(PendingAE)
+			// send mail to AE
 			go func() {
 				// search for email of ae
 				var position models.PositionType
@@ -222,13 +241,14 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
 		}
-	case "Closed":
+	case string(ResolvedAll):
+		// allow only if user is of position XEN
 		if !strings.Contains(string(admin.Position), "XEN") {
 			c.JSON(403, gin.H{"error": "permissions denied"})
 			return
 		}
-		if review.Review == "open" {
-			post.Status = "Pending_XEN"
+		if review.Review == string(PendingXEN) {		// to re-open an post
+			post.Status = string(PendingXEN)
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
