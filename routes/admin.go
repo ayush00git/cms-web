@@ -11,6 +11,8 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	e.POST("/api/auth/admin/login", h.AdminLogin)
 
 	e.POST("/api/admin/comment/:type/:id", middleware.IsAuthenticated(), h.AdminPostComment)
+	e.PATCH("/api/admin/comment/:type/:id/:comment_id", middleware.IsAuthenticated(), h.AdminEditComment)
+	e.DELETE("/api/admin/comment/:type/:id/:comment_id", middleware.IsAuthenticated(), h.AdminDeleteComment)
 
 	// keep separate apis for updating status
 	stage := e.Group("/api/admin")
