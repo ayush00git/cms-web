@@ -14,11 +14,11 @@ func TestGetXENPosts_Success(t *testing.T) {
 	admin := seedAdmin(t, db, "xen.civil@iit.ac.in", models.TypeXENCivil)
 
 	// In-scope: Civil + a status the XEN view cares about.
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: models.StatusPendingXEN})
-	db.Create(&models.WardenPost{WardenID: 1, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "war", Description: "d", Status: models.StatusResolved})
-	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusRejected})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: string(models.StatusPendingXEN)})
+	db.Create(&models.WardenPost{WardenID: 1, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "war", Description: "d", Status: string(models.StatusResolved)})
+	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: string(models.StatusResolvedJE)})
 	// Out-of-scope: Electrical type should be filtered out for a Civil XEN.
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeElectrical, Title: "elec", Description: "d", Status: models.StatusPendingXEN})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeElectrical, Title: "elec", Description: "d", Status: string(models.StatusPendingXEN)})
 
 	e := newAdminRouter(db, authAs(admin.ID, admin.Email))
 	rec := doRequest(t, e, http.MethodGet, "/api/admin/xen", nil)
@@ -66,10 +66,10 @@ func TestGetAEPosts_Success(t *testing.T) {
 	db := newTestDB(t)
 	admin := seedAdmin(t, db, "ae.civil@iit.ac.in", models.TypeAECivil)
 
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: models.StatusPendingAE})
-	db.Create(&models.WardenPost{WardenID: 1, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "war", Description: "d", Status: models.StatusPendingJE})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: string(models.StatusPendingAE)})
+	db.Create(&models.WardenPost{WardenID: 1, RoomNumber: "A-1", TypeOfPost: models.TypeCivil, Title: "war", Description: "d", Status: string(models.StatusPendingJE)})
 	// Out-of-scope status for the AE view.
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "closed", Description: "d", Status: models.StatusResolved})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "closed", Description: "d", Status: string(models.StatusResolved)})
 
 	e := newAdminRouter(db, authAs(admin.ID, admin.Email))
 	rec := doRequest(t, e, http.MethodGet, "/api/admin/ae", nil)
@@ -105,10 +105,10 @@ func TestGetJEPosts_Success(t *testing.T) {
 	db := newTestDB(t)
 	admin := seedAdmin(t, db, "je.civil2@iit.ac.in", models.TypeJECivil)
 
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: models.StatusPendingJE})
-	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: models.StatusResolvedJE})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "fac", Description: "d", Status: string(models.StatusPendingJE)})
+	db.Create(&models.CentreheadPost{CentreheadID: 1, TypeOfPost: models.TypeCivil, Title: "ch", Description: "d", Status: string(models.StatusResolvedJE)})
 	// Out-of-scope status for the JE view.
-	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "x", Description: "d", Status: models.StatusPendingXEN})
+	db.Create(&models.FacultyPost{FacultyID: 1, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "x", Description: "d", Status: string(models.StatusPendingXEN)})
 
 	e := newAdminRouter(db, authAs(admin.ID, admin.Email))
 	rec := doRequest(t, e, http.MethodGet, "/api/admin/je", nil)
