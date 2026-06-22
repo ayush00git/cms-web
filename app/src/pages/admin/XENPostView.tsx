@@ -39,25 +39,34 @@ interface PostRow {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending_XEN: 'bg-amber-50 text-amber-700',
-  Pending_AE:  'bg-blue-50 text-blue-700',
-  Pending_JE:  'bg-indigo-50 text-indigo-700',
-  Resolved_JE: 'bg-teal-50 text-teal-700',
-  Resolved:    'bg-emerald-50 text-emerald-700',
-  Closed:      'bg-red-50 text-red-600',
+  pending_xen:  'bg-amber-50 text-amber-700',
+  pending_ae:   'bg-blue-50 text-blue-700',
+  resolved_ae:  'bg-teal-50 text-teal-700',
+  pending_je:   'bg-indigo-50 text-indigo-700',
+  resolved_je:  'bg-teal-50 text-teal-700',
+  resolved_all: 'bg-emerald-50 text-emerald-700',
 };
 
 // Ordered list of selectable statuses (plus the implicit "All" default)
 const STATUS_FILTERS = [
-  'Pending_XEN',
-  'Pending_AE',
-  'Pending_JE',
-  'Resolved_JE',
-  'Resolved',
-  'Closed',
+  'pending_xen',
+  'pending_ae',
+  'resolved_ae',
+  'pending_je',
+  'resolved_je',
+  'resolved_all',
 ] as const;
 
-const prettyStatus = (s: string) => s.replace('_', ' ');
+const prettyStatus = (s: string) => {
+  const norm = s.toLowerCase();
+  if (norm === 'pending_xen') return 'Pending XEN';
+  if (norm === 'pending_ae') return 'Pending AE';
+  if (norm === 'resolved_ae') return 'Resolved AE';
+  if (norm === 'pending_je') return 'Pending JE';
+  if (norm === 'resolved_je') return 'Resolved JE';
+  if (norm === 'resolved_all') return 'Resolved All';
+  return s.replace('_', ' ');
+};
 
 interface PostTileProps {
   label: string;
@@ -78,7 +87,7 @@ function PostCard({ role, post }: { role: string; post: PostRow }) {
         <span className="shrink-0 text-[11px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
           #{post.id}
         </span>
-        <span className={`ml-auto shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
+        <span className={`ml-auto shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-500'}`}>
           {prettyStatus(post.status)}
         </span>
       </div>
@@ -227,12 +236,12 @@ export function XENPostView() {
 
   // Apply the active status filter across all sections
   const applyFilter = (posts: PostRow[]) =>
-    activeFilter === 'All' ? posts : posts.filter((p) => p.status === activeFilter);
+    activeFilter === 'All' ? posts : posts.filter((p) => p.status.toLowerCase() === activeFilter.toLowerCase());
 
-  const statusCounts = (status: string) =>
-    status === 'All'
-      ? allPosts.length
-      : allPosts.filter((p) => p.status === status).length;
+  const statusCounts = (status: string) => {
+    if (status === 'All') return allPosts.length;
+    return allPosts.filter((p) => p.status.toLowerCase() === status.toLowerCase()).length;
+  };
 
   return (
     <MainLayout>

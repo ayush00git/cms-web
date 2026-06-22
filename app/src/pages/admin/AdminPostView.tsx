@@ -110,22 +110,22 @@ interface ApiResponse {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending_XEN: 'bg-amber-50 text-amber-700 border-amber-200',
-  Pending_AE:  'bg-blue-50 text-blue-700 border-blue-200',
-  Pending_JE:  'bg-indigo-50 text-indigo-700 border-indigo-200',
-  Resolved_JE: 'bg-teal-50 text-teal-700 border-teal-200',
-  Resolved:    'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Closed:      'bg-red-50 text-red-600 border-red-200',
+  pending_xen:  'bg-amber-50 text-amber-700 border-amber-200',
+  pending_ae:   'bg-blue-50 text-blue-700 border-blue-200',
+  resolved_ae:  'bg-teal-50 text-teal-700 border-teal-200',
+  pending_je:   'bg-indigo-50 text-indigo-700 border-indigo-200',
+  resolved_je:  'bg-teal-50 text-teal-700 border-teal-200',
+  resolved_all: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
 // Solid dot colour per status — mirrors the badge palette for the status pill
 const STATUS_DOT: Record<string, string> = {
-  Pending_XEN: 'bg-amber-500',
-  Pending_AE:  'bg-blue-500',
-  Pending_JE:  'bg-indigo-500',
-  Resolved_JE: 'bg-teal-500',
-  Resolved:    'bg-emerald-500',
-  Closed:      'bg-red-500',
+  pending_xen:  'bg-amber-500',
+  pending_ae:   'bg-blue-500',
+  resolved_ae:  'bg-teal-500',
+  pending_je:   'bg-indigo-500',
+  resolved_je:  'bg-teal-500',
+  resolved_all: 'bg-emerald-500',
 };
 
 // Maps URL role param → API segment for the status endpoint
@@ -159,28 +159,29 @@ interface ActionButton {
 
 // Buttons derived directly from handler logic in admin_status.go
 function getActionButtons(adminType: string, status: string): ActionButton[] {
+  const norm = status.toLowerCase();
   if (adminType === 'xen') {
-    if (status === 'Pending_XEN') return [
-      { label: 'Send to AE', review: 'to_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
-      { label: 'Close Post',  review: 'close',  icon: <XCircle      className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_xen') return [
+      { label: 'Send to AE', review: 'pending_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Close Post',  review: 'resolved_all',  icon: <XCircle      className="w-3.5 h-3.5" /> },
     ];
-    if (status === 'Resolved_JE') return [
-      { label: 'Close Post', review: 'close', icon: <XCircle className="w-3.5 h-3.5" /> },
+    if (norm === 'resolved_je') return [
+      { label: 'Close Post', review: 'resolved_all', icon: <XCircle className="w-3.5 h-3.5" /> },
     ];
-    if (status === 'Closed') return [
-      { label: 'Reopen Post', review: 'open', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
+    if (norm === 'resolved_all') return [
+      { label: 'Reopen Post', review: 'pending_xen', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
     ];
   }
   if (adminType === 'ae') {
-    if (status === 'Pending_AE') return [
-      { label: 'Assign to JE',    review: 'to_je',          icon: <ChevronRight className="w-3.5 h-3.5" /> },
-      { label: 'Escalate to XEN', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_ae') return [
+      { label: 'Assign to JE',    review: 'pending_je',          icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to XEN', review: 'pending_xen',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
     ];
   }
   if (adminType === 'je') {
-    if (status === 'Pending_JE') return [
-      { label: 'Mark Resolved',  review: 'resolved',        icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
-      { label: 'Escalate to AE', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_je') return [
+      { label: 'Mark Resolved',  review: 'resolved_je',        icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to AE', review: 'pending_ae',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
     ];
   }
   return [];
@@ -367,9 +368,18 @@ export function AdminPostView() {
   const comments   = post.comments ?? [];
   const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
-  const statusCls  = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
-  const statusDot  = STATUS_DOT[post.status] ?? 'bg-gray-400';
-  const statusText = post.status.replace(/_/g, ' ');
+  const statusCls  = STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+  const statusDot  = STATUS_DOT[post.status.toLowerCase()] ?? 'bg-gray-400';
+  const statusText = (() => {
+    const norm = post.status.toLowerCase();
+    if (norm === 'pending_xen') return 'Pending XEN';
+    if (norm === 'pending_ae') return 'Pending AE';
+    if (norm === 'resolved_ae') return 'Resolved AE';
+    if (norm === 'pending_je') return 'Pending JE';
+    if (norm === 'resolved_je') return 'Resolved JE';
+    if (norm === 'resolved_all') return 'Resolved All';
+    return post.status.replace(/_/g, ' ');
+  })();
   const backPath   = ADMIN_BACK[adminType ?? ''] ?? '/';
   const actionBtns = getActionButtons(adminType ?? '', post.status);
   const canAct     = actionBtns.length > 0;

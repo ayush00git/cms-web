@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil, UserCheck,
+  ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil,
   Inbox, ServerCrash, Info,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';

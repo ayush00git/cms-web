@@ -34,38 +34,47 @@ interface PostRow {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending_XEN: 'bg-amber-50 text-amber-700',
-  Pending_AE:  'bg-blue-50 text-blue-700',
-  Pending_JE:  'bg-indigo-50 text-indigo-700',
-  Resolved_JE: 'bg-teal-50 text-teal-700',
-  Resolved:    'bg-emerald-50 text-emerald-700',
-  Closed:      'bg-red-50 text-red-600',
+  pending_xen:  'bg-amber-50 text-amber-700',
+  pending_ae:   'bg-blue-50 text-blue-700',
+  resolved_ae:  'bg-teal-50 text-teal-700',
+  pending_je:   'bg-indigo-50 text-indigo-700',
+  resolved_je:  'bg-teal-50 text-teal-700',
+  resolved_all: 'bg-emerald-50 text-emerald-700',
 };
 
 // Active-chip colours for the filter bar, derived from STATUS_STYLES.
 const FILTER_ACTIVE_STYLES: Record<string, string> = {
-  All:         'bg-[#ff9900] text-white border-[#ff9900]',
-  Pending_XEN: 'bg-amber-500 text-white border-amber-500',
-  Pending_AE:  'bg-blue-500 text-white border-blue-500',
-  Pending_JE:  'bg-indigo-500 text-white border-indigo-500',
-  Resolved_JE: 'bg-teal-500 text-white border-teal-500',
-  Resolved:    'bg-emerald-500 text-white border-emerald-500',
-  Closed:      'bg-red-500 text-white border-red-500',
+  All:          'bg-[#ff9900] text-white border-[#ff9900]',
+  pending_xen:  'bg-amber-500 text-white border-amber-500',
+  pending_ae:   'bg-blue-500 text-white border-blue-500',
+  resolved_ae:  'bg-teal-500 text-white border-teal-500',
+  pending_je:   'bg-indigo-500 text-white border-indigo-500',
+  resolved_je:  'bg-teal-500 text-white border-teal-500',
+  resolved_all: 'bg-emerald-500 text-white border-emerald-500',
 };
 
 const STATUS_FILTERS = [
   'All',
-  'Pending_XEN',
-  'Pending_AE',
-  'Pending_JE',
-  'Resolved_JE',
-  'Resolved',
-  'Closed',
+  'pending_xen',
+  'pending_ae',
+  'resolved_ae',
+  'pending_je',
+  'resolved_je',
+  'resolved_all',
 ] as const;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
-const prettyStatus = (s: string) => s.replace('_', ' ');
+const prettyStatus = (s: string) => {
+  const norm = s.toLowerCase();
+  if (norm === 'pending_xen') return 'Pending XEN';
+  if (norm === 'pending_ae') return 'Pending AE';
+  if (norm === 'resolved_ae') return 'Resolved AE';
+  if (norm === 'pending_je') return 'Pending JE';
+  if (norm === 'resolved_je') return 'Resolved JE';
+  if (norm === 'resolved_all') return 'Resolved All';
+  return s.replace('_', ' ');
+};
 
 interface PostTileProps {
   label: string;
@@ -118,7 +127,7 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
                 </p>
 
                 {/* Status badge */}
-                <span className={`self-start text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                <span className={`self-start text-[11px] font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-500'}`}>
                   {prettyStatus(post.status)}
                 </span>
               </Link>
@@ -181,7 +190,8 @@ export function AEPostView() {
     const all = [...faculty, ...warden, ...centrehead];
     const counts: Record<string, number> = { All: all.length };
     for (const post of all) {
-      counts[post.status] = (counts[post.status] ?? 0) + 1;
+      const statusNorm = post.status.toLowerCase();
+      counts[statusNorm] = (counts[statusNorm] ?? 0) + 1;
     }
     return { facultyPosts: faculty, wardenPosts: warden, centreheadPosts: centrehead, statusCounts: counts };
   }, [data]);
@@ -232,8 +242,10 @@ export function AEPostView() {
     );
   }
 
-  const matchesFilter = (post: PostRow) =>
-    activeFilter === 'All' || post.status === activeFilter;
+  const matchesFilter = (post: PostRow) => {
+    if (activeFilter === 'All') return true;
+    return post.status.toLowerCase() === activeFilter.toLowerCase();
+  };
 
   return (
     <MainLayout>

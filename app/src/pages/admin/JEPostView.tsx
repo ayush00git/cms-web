@@ -36,19 +36,31 @@ interface PostRow {
 // Badge styles per status. `badge` colours the status pill, `dot` colours the
 // small status indicator on each card (and the filter chip dot).
 const STATUS_STYLES: Record<string, { badge: string; dot: string }> = {
-  Pending_XEN: { badge: 'bg-amber-50 text-amber-700',     dot: 'bg-amber-500' },
-  Pending_AE:  { badge: 'bg-blue-50 text-blue-700',       dot: 'bg-blue-500' },
-  Pending_JE:  { badge: 'bg-indigo-50 text-indigo-700',   dot: 'bg-indigo-500' },
-  Resolved_JE: { badge: 'bg-teal-50 text-teal-700',       dot: 'bg-teal-500' },
-  Resolved:    { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
-  Closed:      { badge: 'bg-red-50 text-red-600',         dot: 'bg-red-500' },
+  pending_xen:  { badge: 'bg-amber-50 text-amber-700',     dot: 'bg-amber-500' },
+  pending_ae:   { badge: 'bg-blue-50 text-blue-700',       dot: 'bg-blue-500' },
+  resolved_ae:  { badge: 'bg-teal-50 text-teal-700',       dot: 'bg-teal-500' },
+  pending_je:   { badge: 'bg-indigo-50 text-indigo-700',   dot: 'bg-indigo-500' },
+  resolved_je:  { badge: 'bg-teal-50 text-teal-700',       dot: 'bg-teal-500' },
+  resolved_all: { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
 };
 
 const FALLBACK_STYLE = { badge: 'bg-gray-100 text-gray-500', dot: 'bg-gray-400' };
 
+const prettyStatus = (s: string) => {
+  const norm = s.toLowerCase();
+  if (norm === 'pending_xen') return 'Pending XEN';
+  if (norm === 'pending_ae') return 'Pending AE';
+  if (norm === 'resolved_ae') return 'Resolved AE';
+  if (norm === 'pending_je') return 'Pending JE';
+  if (norm === 'resolved_je') return 'Resolved JE';
+  if (norm === 'resolved_all') return 'Resolved All';
+  return s.replace('_', ' ');
+};
+
 // A complaint card — clickable tile in the responsive grid.
 function PostCard({ post, role }: { post: PostRow; role: string }) {
-  const style = STATUS_STYLES[post.status] ?? FALLBACK_STYLE;
+  const norm = post.status.toLowerCase();
+  const style = STATUS_STYLES[norm] ?? STATUS_STYLES[post.status] ?? FALLBACK_STYLE;
   const isElectrical = post.type_of_post.toLowerCase() === 'electrical';
 
   return (
@@ -75,7 +87,7 @@ function PostCard({ post, role }: { post: PostRow; role: string }) {
       {/* Status badge */}
       <span className={`mt-auto inline-flex w-fit items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded ${style.badge}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-        {post.status.replace('_', ' ')}
+        {prettyStatus(post.status)}
       </span>
     </Link>
   );
@@ -120,13 +132,13 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
 
 // Selectable statuses (in workflow order) plus their human-readable labels.
 const FILTERS: { value: string; label: string }[] = [
-  { value: 'All',         label: 'All' },
-  { value: 'Pending_XEN', label: 'Pending XEN' },
-  { value: 'Pending_AE',  label: 'Pending AE' },
-  { value: 'Pending_JE',  label: 'Pending JE' },
-  { value: 'Resolved_JE', label: 'Resolved by JE' },
-  { value: 'Resolved',    label: 'Resolved' },
-  { value: 'Closed',      label: 'Closed' },
+  { value: 'All',          label: 'All' },
+  { value: 'pending_xen',  label: 'Pending XEN' },
+  { value: 'pending_ae',   label: 'Pending AE' },
+  { value: 'resolved_ae',  label: 'Resolved AE' },
+  { value: 'pending_je',   label: 'Pending JE' },
+  { value: 'resolved_je',  label: 'Resolved JE' },
+  { value: 'resolved_all', label: 'Resolved All' },
 ];
 
 // ── Main Page ──────────────────────────────────────────────────────────────────
@@ -225,13 +237,16 @@ export function JEPostView() {
   const centrehead = normalise(cp);
 
   const byFilter = (posts: PostRow[]) =>
-    filter === 'All' ? posts : posts.filter((p) => p.status === filter);
+    filter === 'All' ? posts : posts.filter((p) => p.status.toLowerCase() === filter.toLowerCase());
 
   // Per-status counts across all three sections — shown on each filter chip.
   const counts = (() => {
     const all = [...faculty, ...warden, ...centrehead];
     const map: Record<string, number> = { All: all.length };
-    for (const p of all) map[p.status] = (map[p.status] ?? 0) + 1;
+    for (const p of all) {
+      const statusNorm = p.status.toLowerCase();
+      map[statusNorm] = (map[statusNorm] ?? 0) + 1;
+    }
     return map;
   })();
 

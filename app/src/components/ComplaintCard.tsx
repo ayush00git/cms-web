@@ -62,18 +62,19 @@ interface ComplaintCardProps {
 interface StatusStyle { label: string; pill: string; dot: string }
 
 const STATUS_CONFIG: Record<string, StatusStyle> = {
-  Pending_XEN: { label: 'Pending · XEN', pill: 'bg-amber-100 text-amber-800 border-amber-300',    dot: 'bg-amber-400' },
-  Pending_AE:  { label: 'Pending · AE',  pill: 'bg-sky-100 text-sky-800 border-sky-300',          dot: 'bg-sky-400' },
-  Pending_JE:  { label: 'Pending · JE',  pill: 'bg-violet-100 text-violet-800 border-violet-300', dot: 'bg-violet-400' },
-  Resolved_JE: { label: 'Resolved by JE', pill: 'bg-teal-100 text-teal-800 border-teal-300',      dot: 'bg-teal-400' },
-  Resolved:    { label: 'Resolved',       pill: 'bg-emerald-100 text-emerald-800 border-emerald-300', dot: 'bg-emerald-500' },
-  Closed:      { label: 'Closed',         pill: 'bg-rose-100 text-rose-800 border-rose-300',      dot: 'bg-rose-400' },
+  pending_xen:  { label: 'Pending · XEN', pill: 'bg-amber-100 text-amber-800 border-amber-300',    dot: 'bg-amber-400' },
+  pending_ae:   { label: 'Pending · AE',  pill: 'bg-sky-100 text-sky-800 border-sky-300',          dot: 'bg-sky-400' },
+  resolved_ae:  { label: 'Resolved · AE', pill: 'bg-teal-100 text-teal-800 border-teal-300',      dot: 'bg-teal-400' },
+  pending_je:   { label: 'Pending · JE',  pill: 'bg-violet-100 text-violet-800 border-violet-300', dot: 'bg-violet-400' },
+  resolved_je:  { label: 'Resolved · JE', pill: 'bg-teal-100 text-teal-800 border-teal-300',      dot: 'bg-teal-400' },
+  resolved_all: { label: 'Resolved · All', pill: 'bg-emerald-100 text-emerald-800 border-emerald-300', dot: 'bg-emerald-500' },
 };
 
 const FALLBACK: StatusStyle = { label: 'Unknown', pill: 'bg-gray-100 text-gray-600 border-gray-300', dot: 'bg-gray-400' };
 
 function statusStyle(s: string): StatusStyle {
-  return STATUS_CONFIG[s] ?? { ...FALLBACK, label: s.replace(/_/g, ' ') };
+  const norm = s.toLowerCase();
+  return STATUS_CONFIG[norm] ?? { ...FALLBACK, label: s.replace(/_/g, ' ') };
 }
 
 const STAGES = ['XEN', 'AE', 'JE'];
@@ -310,7 +311,6 @@ function PostModal({
   const isElectrical = post.type_of_post === 'Electrical';
   const theme        = typeTheme(isElectrical);
   const comments     = post.comments ?? [];
-  const currentStageIdx = STAGES.indexOf(post.stage);
   const editExpired  = isEditWindowExpired(post.created_at);
 
   return createPortal(
