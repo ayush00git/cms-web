@@ -138,7 +138,7 @@ const ROLE_TO_STATUS_API: Record<string, string> = {
 // Maps URL role param → API segment for the comment endpoint
 const ROLE_TO_COMMENT_API: Record<string, string> = {
   faculty:    'faculty_posts',
-  warden:     'wardens_posts',
+  warden:     'warden_posts',
   centrehead: 'centrehead_posts',
 };
 
