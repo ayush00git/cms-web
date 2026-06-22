@@ -13,7 +13,7 @@ The system classifies users into distinct roles, each having specific privileges
   * **AE (Assistant Engineer)**: Reviews posts pending AE review and manages them.
   * **JE (Junior Engineer)**: Resolves assignments directly or reports progress.
 
-*Diagram location:* `/public/img/cms6.png`
+![Role-Based Authorization](https://raw.githubusercontent.com/divyansh-v15-06/cms-webb/main/public/img/cms6.png)
 
 ---
 
@@ -21,7 +21,7 @@ The system classifies users into distinct roles, each having specific privileges
 
 Authentication is session or token-based, verifying credentials (login) and checking positions/roles on protected routes via custom Gin middleware.
 
-*Diagram location:* `/public/img/cms1.png`
+![Authentication Flow](https://raw.githubusercontent.com/divyansh-v15-06/cms-webb/main/public/img/cms1.png)
 
 ---
 
@@ -33,7 +33,7 @@ The typical flow of a complaint from submission to closure:
 3. **Execution**: The JE performs the work and updates the status to `Resolved_JE`.
 4. **Resolution**: The complaint progresses through administrative checks (AE / XEN) until it reaches `Resolved` or `Closed`.
 
-*Diagram location:* `/public/img/cms2.png`
+![Complaint Lifecycle Flow](https://raw.githubusercontent.com/divyansh-v15-06/cms-webb/main/public/img/cms2.png)
 
 ---
 
@@ -41,7 +41,7 @@ The typical flow of a complaint from submission to closure:
 
 A quick matrix showing how request statuses transition between the Executive Engineer (XEN) and the Junior Engineer (JE):
 
-*Diagram location:* `/public/img/cms3.png`
+![Request Status Matrix](https://raw.githubusercontent.com/divyansh-v15-06/cms-webb/main/public/img/cms3.png)
 
 ---
 
@@ -49,4 +49,5 @@ A quick matrix showing how request statuses transition between the Executive Eng
 
 How Assistant Engineers (AE) intervene in the verification process for specific complaints:
 
-*Diagram location:* `/public/img/cms4.png`
+![Request Status AE](https://raw.githubusercontent.com/divyansh-v15-06/cms-webb/main/public/img/cms4.png)
+
