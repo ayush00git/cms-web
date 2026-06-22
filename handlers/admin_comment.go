@@ -24,6 +24,27 @@ type CommentType struct {
 // AdminGetComments
 /////////////////////////////////////////////////////////////////////
 
+// AdminGetComments fetches all comments made by the logged-in admin.
+func (h *AdminHandler) AdminGetComments(c *gin.Context) {
+	emailID, exists := c.Get(middleware.EmailKey)
+	if !exists {
+		c.JSON(401, gin.H{"error": "permission denied"})
+		return
+	}
+
+	var comments []models.Comment
+	result := h.DB.Where("email = ?", emailID).Find(&comments)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to fetch comments"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "comments fetched",
+		"comments": comments,
+	})
+}
+
 
 // AdminPost comment allow any admin comment on any type of post.
 // Common for all type of admins and posts.

@@ -10,6 +10,7 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	// e.POST("/api/auth/admin/signup", h.AdminSignup)           // not to be used as an public API
 	e.POST("/api/auth/admin/login", h.AdminLogin)
 
+	e.GET("/api/admin/comments", middleware.IsAuthenticated(), h.AdminGetComments)
 	e.POST("/api/admin/comment/:type/:id", middleware.IsAuthenticated(), h.AdminPostComment)
 	e.PATCH("/api/admin/comment/:type/:id/:comment_id", middleware.IsAuthenticated(), h.AdminEditComment)
 	e.DELETE("/api/admin/comment/:type/:id/:comment_id", middleware.IsAuthenticated(), h.AdminDeleteComment)
