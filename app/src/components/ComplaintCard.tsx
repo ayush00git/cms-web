@@ -310,7 +310,6 @@ function PostModal({
   const isElectrical = post.type_of_post === 'Electrical';
   const theme        = typeTheme(isElectrical);
   const comments     = post.comments ?? [];
-  const currentStageIdx = STAGES.indexOf(post.stage);
   const editExpired  = isEditWindowExpired(post.created_at);
 
   return createPortal(
