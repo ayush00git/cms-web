@@ -133,12 +133,8 @@ function PostTile({ label, icon, role, posts }: PostTileProps) {
 // Selectable statuses (in workflow order) plus their human-readable labels.
 const FILTERS: { value: string; label: string }[] = [
   { value: 'All',          label: 'All' },
-  { value: 'pending_xen',  label: 'Pending XEN' },
-  { value: 'pending_ae',   label: 'Pending AE' },
-  { value: 'resolved_ae',  label: 'Resolved AE' },
   { value: 'pending_je',   label: 'Pending JE' },
   { value: 'resolved_je',  label: 'Resolved JE' },
-  { value: 'resolved_all', label: 'Resolved All' },
 ];
 
 // ── Main Page ──────────────────────────────────────────────────────────────────

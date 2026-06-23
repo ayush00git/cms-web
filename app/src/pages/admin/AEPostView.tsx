@@ -55,12 +55,10 @@ const FILTER_ACTIVE_STYLES: Record<string, string> = {
 
 const STATUS_FILTERS = [
   'All',
-  'pending_xen',
-  'pending_ae',
   'resolved_ae',
-  'pending_je',
   'resolved_je',
-  'resolved_all',
+  'pending_ae',
+  'pending_xen',
 ] as const;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number];
