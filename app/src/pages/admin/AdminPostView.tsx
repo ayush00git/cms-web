@@ -112,22 +112,22 @@ interface ApiResponse {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending_XEN: 'bg-amber-50 text-amber-700 border-amber-200',
-  Pending_AE:  'bg-blue-50 text-blue-700 border-blue-200',
-  Pending_JE:  'bg-indigo-50 text-indigo-700 border-indigo-200',
-  Resolved_JE: 'bg-teal-50 text-teal-700 border-teal-200',
-  Resolved:    'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Closed:      'bg-red-50 text-red-600 border-red-200',
+  pending_xen:  'bg-amber-50 text-amber-700 border-amber-200',
+  pending_ae:   'bg-blue-50 text-blue-700 border-blue-200',
+  resolved_ae:  'bg-teal-50 text-teal-700 border-teal-200',
+  pending_je:   'bg-indigo-50 text-indigo-700 border-indigo-200',
+  resolved_je:  'bg-teal-50 text-teal-700 border-teal-200',
+  resolved_all: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
 // Solid dot colour per status — mirrors the badge palette for the status pill
 const STATUS_DOT: Record<string, string> = {
-  Pending_XEN: 'bg-amber-500',
-  Pending_AE:  'bg-blue-500',
-  Pending_JE:  'bg-indigo-500',
-  Resolved_JE: 'bg-teal-500',
-  Resolved:    'bg-emerald-500',
-  Closed:      'bg-red-500',
+  pending_xen:  'bg-amber-500',
+  pending_ae:   'bg-blue-500',
+  resolved_ae:  'bg-teal-500',
+  pending_je:   'bg-indigo-500',
+  resolved_je:  'bg-teal-500',
+  resolved_all: 'bg-emerald-500',
 };
 
 // Maps URL role param → API segment for the status endpoint
@@ -161,28 +161,33 @@ interface ActionButton {
 
 // Buttons derived directly from handler logic in admin_status.go
 function getActionButtons(adminType: string, status: string): ActionButton[] {
+  const norm = status.toLowerCase();
   if (adminType === 'xen') {
-    if (status === 'Pending_XEN') return [
-      { label: 'Send to AE', review: 'to_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
-      { label: 'Close Post',  review: 'close',  icon: <XCircle      className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_xen') return [
+      { label: 'Send to AE', review: 'pending_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Resolved',  review: 'resolved_all',  icon: <XCircle      className="w-3.5 h-3.5" /> },
     ];
-    if (status === 'Resolved_JE') return [
-      { label: 'Close Post', review: 'close', icon: <XCircle className="w-3.5 h-3.5" /> },
+    if (norm === 'resolved_ae') return [
+      { label: 'Resolved', review: 'resolved_all', icon: <XCircle className="w-3.5 h-3.5" /> },
+      { label: 'Send back to AE', review: 'pending_ae', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
     ];
-    if (status === 'Closed') return [
-      { label: 'Reopen Post', review: 'open', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
+    if (norm === 'resolved_all') return [
+      { label: 'Reopen Post', review: 'pending_xen', icon: <RefreshCcw className="w-3.5 h-3.5" /> },
     ];
   }
   if (adminType === 'ae') {
-    if (status === 'Pending_AE') return [
-      { label: 'Assign to JE',    review: 'to_je',          icon: <ChevronRight className="w-3.5 h-3.5" /> },
-      { label: 'Escalate to XEN', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_ae') return [
+      { label: 'Assign to JE',    review: 'pending_je',          icon: <ChevronRight className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to XEN', review: 'pending_xen',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    ];
+    if (norm === 'resolved_je') return [
+      { label: 'Send to XEN', review: 'resolved_ae', icon: <ChevronRight className="w-3.5 h-3.5" /> },
     ];
   }
   if (adminType === 'je') {
-    if (status === 'Pending_JE') return [
-      { label: 'Mark Resolved',  review: 'resolved',        icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
-      { label: 'Escalate to AE', review: 'require_review',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
+    if (norm === 'pending_je') return [
+      { label: 'Mark Resolved',  review: 'resolved_je',        icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+      { label: 'Escalate to AE', review: 'pending_ae',  icon: <RefreshCcw   className="w-3.5 h-3.5" /> },
     ];
   }
   return [];
@@ -410,6 +415,47 @@ export function AdminPostView() {
     }
   }
 
+  // ── Comment only handler ──
+  async function handlePostCommentOnly() {
+    const trimmed = commentText.trim();
+    if (!trimmed) return;
+
+    const commentApi = ROLE_TO_COMMENT_API[role ?? ''];
+    if (!commentApi) {
+      setActError('Unknown post type.');
+      return;
+    }
+
+    setActing(true);
+    setActError(null);
+    setActSuccess(null);
+
+    try {
+      const commentRes = await fetch(`/api/admin/comment/${commentApi}/${post_id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Content: trimmed }),
+      });
+      if (!commentRes.ok) {
+        let msg = `Failed to post comment (${commentRes.status})`;
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      setCommentText('');
+      setActSuccess('Comment posted successfully!');
+      if (actTimer.current) clearTimeout(actTimer.current);
+      actTimer.current = setTimeout(() => setActSuccess(null), 3000);
+      fetchPost(true);
+      fetchAdminComments();
+    } catch (err) {
+      setActError((err as Error).message);
+    } finally {
+      setActing(false);
+    }
+  }
+
   // ── Loading ──
   if (loading) {
     return (
@@ -463,9 +509,18 @@ export function AdminPostView() {
   const comments   = post.comments ?? [];
   const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
-  const statusCls  = STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
-  const statusDot  = STATUS_DOT[post.status] ?? 'bg-gray-400';
-  const statusText = post.status.replace(/_/g, ' ');
+  const statusCls  = STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+  const statusDot  = STATUS_DOT[post.status.toLowerCase()] ?? 'bg-gray-400';
+  const statusText = (() => {
+    const norm = post.status.toLowerCase();
+    if (norm === 'pending_xen') return 'Pending XEN';
+    if (norm === 'pending_ae') return 'Pending AE';
+    if (norm === 'resolved_ae') return 'Resolved AE';
+    if (norm === 'pending_je') return 'Pending JE';
+    if (norm === 'resolved_je') return 'Resolved JE';
+    if (norm === 'resolved_all') return 'Resolved All';
+    return post.status.replace(/_/g, ' ');
+  })();
   const backPath   = ADMIN_BACK[adminType ?? ''] ?? '/';
   const actionBtns = getActionButtons(adminType ?? '', post.status);
   const canAct     = actionBtns.length > 0;
@@ -633,7 +688,7 @@ export function AdminPostView() {
               </ul>
             )}
 
-            {/* ── Comment + action area — always shown; locked when this admin has no applicable actions ── */}
+            {/* ── Comment + action area — always shown; unlocked for any logged-in admin ── */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
                 Comment &amp; Update Status
@@ -641,10 +696,10 @@ export function AdminPostView() {
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                disabled={acting || !canAct}
-                placeholder={canAct
-                  ? 'Add a comment before updating the status…'
-                  : 'No actions available for this complaint at its current stage.'}
+                disabled={acting || !adminType}
+                placeholder={adminType
+                  ? 'Add a comment…'
+                  : 'No actions available.'}
                 rows={3}
                 className="w-full text-sm text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50 disabled:cursor-not-allowed"
               />
@@ -663,22 +718,51 @@ export function AdminPostView() {
                 </p>
               )}
 
-              {/* Action buttons — only when this admin can act on the current status */}
-              {canAct && (
+              {/* Action buttons */}
+              {adminType && (
                 <div className="mt-3 flex flex-wrap justify-end gap-2">
-                  {actionBtns.map((btn) => (
+                  <span
+                    className={!commentText.trim() ? 'inline-block cursor-not-allowed' : 'inline-block'}
+                    title={!commentText.trim() ? 'comment content required' : undefined}
+                  >
                     <button
-                      key={btn.review}
-                      onClick={() => handleAction(btn.review)}
-                      disabled={disabled}
-                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-[#ff9900] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      onClick={handlePostCommentOnly}
+                      disabled={acting || !commentText.trim()}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                     >
                       {acting ? (
                         <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : btn.icon}
-                      {btn.label}
+                      ) : <MessageSquare className="w-3.5 h-3.5" />}
+                      Post Comment
                     </button>
-                  ))}
+                  </span>
+
+                  {canAct && actionBtns.map((btn) => {
+                    const isResolvedBtn = btn.label === 'Resolved';
+                    const buttonColorClass = isResolvedBtn
+                      ? 'bg-red-600 hover:bg-red-700'
+                      : 'bg-[#ff9900] hover:bg-[#e68a00]';
+                    const showBlockedTooltip = !commentText.trim();
+
+                    return (
+                      <span
+                        key={btn.review}
+                        className={showBlockedTooltip ? 'inline-block cursor-not-allowed' : 'inline-block'}
+                        title={showBlockedTooltip ? 'comment content required' : undefined}
+                      >
+                        <button
+                          onClick={() => handleAction(btn.review)}
+                          disabled={disabled}
+                          className={`inline-flex items-center gap-2 text-xs font-bold text-white ${buttonColorClass} px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer`}
+                        >
+                          {acting ? (
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : btn.icon}
+                          {btn.label}
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>

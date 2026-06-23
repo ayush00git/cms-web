@@ -25,12 +25,12 @@ const (
 
 type PostStatus string
 const (
-	StatusPendingXEN PostStatus = "Pending_XEN" // default to open post
-	StatusPendingAE  PostStatus = "Pending_AE"
-	StatusPendingJE  PostStatus = "Pending_JE"
-	StatusResolvedJE  PostStatus = "Resolved_JE"
-	StatusResolved   PostStatus = "Resolved"
-	StatusRejected   PostStatus = "Closed"
+	StatusPendingXEN PostStatus = "pending_xen" // default to open post
+	StatusPendingAE  PostStatus = "pending_ae"
+	StatusResolvedAE  PostStatus = "resolved_ae"
+	StatusPendingJE  PostStatus = "pending_je"
+	StatusResolvedJE  PostStatus = "resolved_je"
+	StatusResolved   PostStatus = "resolved_all"	// defaults to closed post
 )
 
 type PostStage string
@@ -48,7 +48,7 @@ type FacultyPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
-	Status          PostStatus 	    `gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
+	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	Stage           PostStage  	    `gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
@@ -65,7 +65,7 @@ type WardenPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
-	Status          PostStatus 	    `gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
+	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	Stage           PostStage  	    `gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
@@ -81,7 +81,7 @@ type CentreheadPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
-	Status          PostStatus 	    `gorm:"type:varchar(20);not null;default:'Pending_XEN'" json:"status"`
+	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	Stage           PostStage  	    `gorm:"type:varchar(20);not null;default:'XEN'" json:"stage"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`

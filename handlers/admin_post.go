@@ -49,7 +49,7 @@ func (h *AdminHandler) GetXENPosts(c *gin.Context) {
 	// this api only returns the fields that are required at the
 	// main page of all queries
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
-	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("status IN ?", []string{string(PendingXEN), string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE), string(ResolvedAll)}).
 	Where("type_of_post = ?", postType).
 	Find(&facultyPosts)
 	if result.Error != nil {
@@ -58,7 +58,7 @@ func (h *AdminHandler) GetXENPosts(c *gin.Context) {
 	}
 
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
-	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("status IN ?", []string{string(PendingXEN), string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE), string(ResolvedAll)}).
 	Where("type_of_post = ?", postType).
 	Find(&wardenPosts)
 	if result.Error != nil {
@@ -67,7 +67,7 @@ func (h *AdminHandler) GetXENPosts(c *gin.Context) {
 	}
 
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
-	Where("status IN ?", []string{"Pending_XEN", "Resolved_JE", "Pending_JE", "Pending_AE", "Resolved", "Closed"}).
+	Where("status IN ?", []string{string(PendingXEN), string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE), string(ResolvedAll)}).
 	Where("type_of_post = ?", postType).
 	Find(&centreheadPosts)
 	if result.Error != nil {
@@ -123,7 +123,7 @@ func (h* AdminHandler) GetAEPosts(c *gin.Context) {
 	// fetch faculty posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE)}).
 	Find(&facultyPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment"})
@@ -133,7 +133,7 @@ func (h* AdminHandler) GetAEPosts(c *gin.Context) {
 	// fetch warden posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE)}).
 	Find(&wardenPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment"})
@@ -143,7 +143,7 @@ func (h* AdminHandler) GetAEPosts(c *gin.Context) {
 	// fetch centrehead posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Pending_AE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingAE), string(ResolvedAE), string(PendingJE), string(ResolvedJE)}).
 	Find(&centreheadPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch centre head posts at the moment"})
@@ -198,7 +198,7 @@ func (h* AdminHandler) GetJEPosts(c *gin.Context) {
 	// fetch faculty posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingJE), string(ResolvedJE)}).
 	Find(&facultyPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment"})
@@ -208,7 +208,7 @@ func (h* AdminHandler) GetJEPosts(c *gin.Context) {
 	// fetch warden posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingJE), string(ResolvedJE)}).
 	Find(&wardenPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment"})
@@ -218,7 +218,7 @@ func (h* AdminHandler) GetJEPosts(c *gin.Context) {
 	// fetch centrehead posts
 	result = h.DB.Select("id, title, type_of_post, status, assigned_je_id").
 	Where("type_of_post = ?", postType).
-	Where("status IN ?", []string{"Resolved_JE", "Pending_JE"}).
+	Where("status IN ?", []string{string(PendingJE), string(ResolvedJE)}).
 	Find(&centreheadPosts)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to fetch centre head posts at the moment"})

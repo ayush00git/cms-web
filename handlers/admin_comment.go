@@ -19,10 +19,6 @@ type CommentType struct {
 	Content	string
 }
 
-/////////////////////////////////////////////////////////////////////
-// More apis to integrate - AdminEditComment, AdminDeleteComment
-// AdminGetComments
-/////////////////////////////////////////////////////////////////////
 
 // AdminGetComments fetches all comments made by the logged-in admin.
 func (h *AdminHandler) AdminGetComments(c *gin.Context) {
