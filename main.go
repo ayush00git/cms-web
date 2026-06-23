@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/ayush00git/cms-web/config"
 	"github.com/ayush00git/cms-web/handlers"
@@ -57,25 +54,6 @@ func main() {
 	routes.PostRoute(r, postHandler)
 	routes.AdminRoutes(r, adminHandler)
 
-	// Fallback/serving logic for frontend React SPA in app/dist
-	r.NoRoute(func(c *gin.Context) {
-		// If request is for backend API, return standard 404 JSON response
-		if strings.HasPrefix(c.Request.URL.Path, "/api") {
-			c.JSON(404, gin.H{"error": "route not found"})
-			return
-		}
-
-		// Try to serve static file from app/dist
-		path := filepath.Join("app", "dist", c.Request.URL.Path)
-		if fileInfo, err := os.Stat(path); err == nil && !fileInfo.IsDir() {
-			c.File(path)
-			return
-		}
-
-		// Fallback to index.html for SPA routing
-		c.File(filepath.Join("app", "dist", "index.html"))
-	})
-
-	fmt.Println("Server running on port 8080")
 	r.Run(":8080")
+	fmt.Println("Sevrer running on port 8080")
 }
