@@ -144,14 +144,14 @@ func (h *AdminHandler) AdminEditComment(c *gin.Context) {
 	postIDString := c.Param("id")
 	postID, err := strconv.ParseUint(postIDString, 10, 64)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid post id"})
+		c.JSON(500, gin.H{"error": "failed parsing the post id"})
 		return
 	}
 
 	commentIDString := c.Param("comment_id")
 	commentID, err := strconv.ParseUint(commentIDString, 10, 64)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid comment id"})
+		c.JSON(500, gin.H{"error": "failed parsing the comment id"})
 		return
 	}
 
@@ -178,10 +178,10 @@ func (h *AdminHandler) AdminEditComment(c *gin.Context) {
 	}
 
 	// Update the comment
-	comment.Content = inputs.Content
-	comment.UpdatedAt = time.Now()
-
-	result = h.DB.Save(&comment)
+	result = h.DB.Model(&comment).Updates(models.Comment{
+		Content:   inputs.Content,
+		UpdatedAt: time.Now(),
+	})
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to update comment"})
 		return
@@ -203,14 +203,14 @@ func (h *AdminHandler) AdminDeleteComment(c *gin.Context) {
 	postIDString := c.Param("id")
 	postID, err := strconv.ParseUint(postIDString, 10, 64)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid post id"})
+		c.JSON(500, gin.H{"error": "failed parsing the post id"})
 		return
 	}
 
 	commentIDString := c.Param("comment_id")
 	commentID, err := strconv.ParseUint(commentIDString, 10, 64)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid comment id"})
+		c.JSON(500, gin.H{"error": "failed parsing the comment id"})
 		return
 	}
 
