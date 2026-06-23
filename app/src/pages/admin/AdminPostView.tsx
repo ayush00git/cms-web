@@ -14,6 +14,8 @@ import {
   XCircle,
   ChevronRight,
   RefreshCcw,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
@@ -138,7 +140,7 @@ const ROLE_TO_STATUS_API: Record<string, string> = {
 // Maps URL role param → API segment for the comment endpoint
 const ROLE_TO_COMMENT_API: Record<string, string> = {
   faculty:    'faculty_posts',
-  warden:     'wardens_posts',
+  warden:     'warden_posts',
   centrehead: 'centrehead_posts',
 };
 
@@ -230,6 +232,26 @@ export function AdminPostView() {
   const [actSuccess, setActSuccess]   = useState<string | null>(null);
   const actTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Admin's own comments states
+  const [adminComments, setAdminComments] = useState<Comment[]>([]);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [commentActionLoadingId, setCommentActionLoadingId] = useState<number | null>(null);
+
+  const fetchAdminComments = useCallback(() => {
+    fetch('/api/admin/comments', { credentials: 'include' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch admin comments');
+        return res.json();
+      })
+      .then((json) => {
+        if (json.comments) {
+          setAdminComments(json.comments);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   const fetchPost = useCallback((silent = false) => {
     if (!silent) setLoading(true);
     fetch(`/api/admin/posts/${role}/${post_id}`, { credentials: 'include' })
@@ -257,8 +279,81 @@ export function AdminPostView() {
       });
   }, [role, post_id, navigate]);
 
-  useEffect(() => { fetchPost(); }, [fetchPost]);
+  useEffect(() => {
+    fetchPost();
+    fetchAdminComments();
+  }, [fetchPost, fetchAdminComments]);
+
   useEffect(() => () => { if (actTimer.current) clearTimeout(actTimer.current); }, []);
+
+  // ── Edit comment handler ──
+  async function handleEditComment(commentId: number) {
+    const trimmed = editingText.trim();
+    if (!trimmed) return;
+
+    const commentApi = ROLE_TO_COMMENT_API[role ?? ''];
+    if (!commentApi) {
+      setActError('Unknown post type.');
+      return;
+    }
+
+    setCommentActionLoadingId(commentId);
+    try {
+      const res = await fetch(`/api/admin/comment/${commentApi}/${post_id}/${commentId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Content: trimmed }),
+      });
+
+      if (!res.ok) {
+        let msg = `Failed to edit comment (${res.status})`;
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      setEditingCommentId(null);
+      setEditingText('');
+      fetchPost(true);
+      fetchAdminComments();
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setCommentActionLoadingId(null);
+    }
+  }
+
+  // ── Delete comment handler ──
+  async function handleDeleteComment(commentId: number) {
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+
+    const commentApi = ROLE_TO_COMMENT_API[role ?? ''];
+    if (!commentApi) {
+      setActError('Unknown post type.');
+      return;
+    }
+
+    setCommentActionLoadingId(commentId);
+    try {
+      const res = await fetch(`/api/admin/comment/${commentApi}/${post_id}/${commentId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        let msg = `Failed to delete comment (${res.status})`;
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      fetchPost(true);
+      fetchAdminComments();
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setCommentActionLoadingId(null);
+    }
+  }
 
   // ── Combined handler: post comment THEN update status ──
   async function handleAction(review: string) {
@@ -308,6 +403,7 @@ export function AdminPostView() {
       if (actTimer.current) clearTimeout(actTimer.current);
       actTimer.current = setTimeout(() => setActSuccess(null), 3000);
       fetchPost(true);
+      fetchAdminComments();
     } catch (err) {
       setActError((err as Error).message);
     } finally {
@@ -472,14 +568,75 @@ export function AdminPostView() {
               <ul className="space-y-3 mb-8">
                 {comments.map((c) => {
                   const who = c.role ? c.role.replace(/_/g, ' ') : 'Staff';
+                  const isMyComment = adminComments.some((ac) => ac.id === c.id);
+                  const isEditing = editingCommentId === c.id;
+                  const isBusy = commentActionLoadingId === c.id;
+
                   return (
-                    <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3">
+                    <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3 group/comment relative">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold text-gray-800">{who}</span>
-                        {c.email && <span className="text-[11px] text-gray-400 truncate">{c.email}</span>}
-                        <span className="ml-auto text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
+                        {c.email && <span className="text-[11px] text-gray-400 truncate max-w-[150px] sm:max-w-none">{c.email}</span>}
+                        <span className="ml-auto text-[11px] text-gray-400 flex items-center gap-2">
+                          {formatDateTime(c.created_at)}
+                          
+                          {/* Edit/Delete actions (only shown for owner comments on hover and when not editing) */}
+                          {isMyComment && !isEditing && (
+                            <span className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(c.id);
+                                  setEditingText(c.comment_text);
+                                }}
+                                disabled={isBusy}
+                                className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200/50 transition cursor-pointer"
+                                title="Edit comment"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(c.id)}
+                                disabled={isBusy}
+                                className="p-0.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                title="Delete comment"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </span>
+                          )}
+                        </span>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed">{c.comment_text}</p>
+
+                      {isEditing ? (
+                        <div className="mt-2">
+                          <textarea
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            disabled={isBusy}
+                            rows={2}
+                            className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition resize-none"
+                          />
+                          <div className="mt-2 flex justify-end gap-2">
+                            <button
+                              onClick={() => setEditingCommentId(null)}
+                              disabled={isBusy}
+                              className="border border-gray-200 text-gray-500 hover:bg-gray-100 font-bold text-[11px] px-2.5 py-1.5 rounded transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleEditComment(c.id)}
+                              disabled={isBusy || !editingText.trim()}
+                              className="bg-[#2d2d2d] text-white hover:bg-[#ff9900] font-bold text-[11px] px-3 py-1.5 rounded transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
+                            >
+                              {isBusy && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-700 leading-relaxed break-words">{c.comment_text}</p>
+                      )}
                     </li>
                   );
                 })}
