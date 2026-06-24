@@ -31,6 +31,9 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 		posts.GET("/je/posts", middleware.IsAuthenticated(), h.GetJEPosts)
 	}
 
+	// for getting info of JEs
+	e.GET("/api/admin/return-je", middleware.IsAuthenticated(), h.AdminReturnJE);
+
 	// for any post
 	e.GET("/api/admin/posts/:role/:post_id", middleware.IsAuthenticated(), h.AdminGetPost)
 }
