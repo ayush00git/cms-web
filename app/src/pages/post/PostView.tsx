@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Hammer, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
   MessageSquare, Wrench, ArrowLeft, Send, AlertCircle,
-  UserCircle, Clock,
+  Clock,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_PLACES } from '../../constants/models';
@@ -270,7 +270,7 @@ export function PostView() {
       });
       if (!res.ok) {
         let msg = `Failed to post comment (${res.status})`;
-        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
       setCommentText('');

@@ -294,7 +294,7 @@ export function AdminPostView() {
       .then(async (res) => {
         if (!res.ok) {
           let msg = `Server error (${res.status})`;
-          try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+          try { const b = await res.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
           const err: Error & { status?: number } = new Error(msg);
           err.status = res.status;
           throw err;
@@ -350,7 +350,7 @@ export function AdminPostView() {
 
       if (!res.ok) {
         let msg = `Failed to edit comment (${res.status})`;
-        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -384,7 +384,7 @@ export function AdminPostView() {
 
       if (!res.ok) {
         let msg = `Failed to delete comment (${res.status})`;
-        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -423,7 +423,7 @@ export function AdminPostView() {
       });
       if (!commentRes.ok) {
         let msg = `Failed to post comment (${commentRes.status})`;
-        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -436,7 +436,7 @@ export function AdminPostView() {
       });
       if (!statusRes.ok) {
         let msg = `Comment posted but status update failed (${statusRes.status})`;
-        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -480,7 +480,7 @@ export function AdminPostView() {
       });
       if (!commentRes.ok) {
         let msg = `Failed to post comment (${commentRes.status})`;
-        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -493,7 +493,7 @@ export function AdminPostView() {
       });
       if (!statusRes.ok) {
         let msg = `Comment posted but status update failed (${statusRes.status})`;
-        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 
@@ -534,7 +534,7 @@ export function AdminPostView() {
       });
       if (!commentRes.ok) {
         let msg = `Failed to post comment (${commentRes.status})`;
-        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
 

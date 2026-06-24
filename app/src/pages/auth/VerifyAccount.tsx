@@ -13,20 +13,17 @@ const roleLoginRoute: Record<string, string> = {
 export function VerifyAccount() {
   const [searchParams] = useSearchParams();
   const navigate        = useNavigate();
+  const token           = searchParams.get('token');
 
-  const [status,    setStatus]    = useState<VerifyStatus>('loading');
-  const [message,   setMessage]   = useState('');
+  const [status,    setStatus]    = useState<VerifyStatus>(token ? 'loading' : 'no-token');
+  const [message,   setMessage]   = useState(token ? '' : 'No verification token found in the link.');
   const [countdown, setCountdown] = useState(3);
 
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-
     if (!token) {
-      setStatus('no-token');
-      setMessage('No verification token found in the link.');
       return;
     }
 

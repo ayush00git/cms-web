@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 
@@ -15,7 +15,6 @@ export function Landing() {
   const [profile, setProfile]           = useState<Profile>(null);
   const [isAuth, setIsAuth]             = useState<boolean | null>(null);
   const [showLoginMenu, setShowLoginMenu] = useState(false);
-  const [trackId, setTrackId]           = useState('');
   const menuRef                         = useRef<HTMLDivElement>(null);
   const navigate                        = useNavigate();
 
@@ -89,28 +88,6 @@ export function Landing() {
                 </Link>
               </div>
             </div>
-            <button className="inline-flex items-center gap-2 border border-[#16a34a] text-[#16a34a] hover:bg-[#E6F7ED] text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-              Track Status <Search className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Track Bar */}
-      <section className="bg-[#F5F5F5] border-b border-[#E5E5E5] py-4">
-        <div className="container mx-auto px-6 flex flex-col sm:flex-row items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#666666] whitespace-nowrap">Quick Track</span>
-          <div className="flex flex-1 max-w-xl border border-[#111111] rounded-lg overflow-hidden bg-white">
-            <input
-              type="text"
-              value={trackId}
-              onChange={e => setTrackId(e.target.value)}
-              placeholder="Enter Complaint ID — e.g. CMS-1042"
-              className="flex-1 px-4 py-2.5 text-sm text-[#111111] placeholder-[#999999] outline-none bg-transparent"
-            />
-            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold uppercase tracking-wider px-5 flex items-center gap-1.5 transition-colors duration-200 cursor-pointer">
-              <Search className="w-3.5 h-3.5" /> Track
-            </button>
           </div>
         </div>
       </section>
@@ -158,8 +135,7 @@ export function Landing() {
                 { step: '01', text: 'Select the correct category — Civil or Electrical — to ensure proper routing.' },
                 { step: '02', text: 'Provide the exact building and room number in the complaint description.' },
                 { step: '03', text: 'Only Wardens may file complaints for hostel common areas.' },
-                { step: '04', text: 'Attach relevant photos to help the team assess the issue faster.' },
-                { step: '05', text: 'Do not file duplicate complaints for the same issue.' },
+                { step: '04', text: 'Do not file duplicate complaints for the same issue.' },
               ].map(({ step, text }) => (
                 <div key={step} className="flex gap-4 items-start">
                   <span className="flex-shrink-0 text-xs font-bold text-[#666666] w-6 pt-0.5">{step}</span>
