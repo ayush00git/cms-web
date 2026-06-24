@@ -55,6 +55,11 @@ interface Comment {
   created_at: string;
 }
 
+interface StatusAudit {
+  event: string;
+  timestamp: string;
+}
+
 interface FacultyPost {
   id: number;
   faculty_id: number;
@@ -69,6 +74,7 @@ interface FacultyPost {
   created_at: string;
   updated_at: string;
   comments: Comment[] | null;
+  status_audit_logs?: StatusAudit[] | null;
 }
 
 interface WardenPost {
@@ -85,6 +91,7 @@ interface WardenPost {
   created_at: string;
   updated_at: string;
   comments: Comment[] | null;
+  status_audit_logs?: StatusAudit[] | null;
 }
 
 interface CentreHeadPost {
@@ -100,6 +107,7 @@ interface CentreHeadPost {
   created_at: string;
   updated_at: string;
   comments: Comment[] | null;
+  status_audit_logs?: StatusAudit[] | null;
 }
 
 type Post = FacultyPost | WardenPost | CentreHeadPost;
@@ -548,6 +556,40 @@ export function AdminPostView() {
     return jes.find((j) => j.id === post.assigned_je_id)?.email || null;
   }, [post, jes]);
 
+  const timelineItems = useMemo(() => {
+    if (!post) return [];
+    const items: Array<
+      | { type: 'comment'; data: Comment; date: Date }
+      | { type: 'audit'; data: StatusAudit; date: Date }
+    > = [];
+
+    if (post.comments) {
+      post.comments.forEach((c) => {
+        const isJEComment = jes.some((je) => c.comment_text.includes(je.email));
+        if (isJEComment && post.status !== 'pending_je') {
+          return;
+        }
+        items.push({
+          type: 'comment',
+          data: c,
+          date: new Date(c.created_at),
+        });
+      });
+    }
+
+    if (post.status_audit_logs) {
+      post.status_audit_logs.forEach((log) => {
+        items.push({
+          type: 'audit',
+          data: log,
+          date: new Date(log.timestamp),
+        });
+      });
+    }
+
+    return items.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [post, jes]);
+
   // ── Loading ──
   if (loading) {
     return (
@@ -599,6 +641,7 @@ export function AdminPostView() {
   const cp = isCentrehead ? (post as CentreHeadPost)  : null;
 
   const comments   = post.comments ?? [];
+
   const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
   const statusCls  = STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-700 border-gray-200';
@@ -699,11 +742,11 @@ export function AdminPostView() {
             <Detail label="Last updated" value={formatDate(post.updated_at)} />
           </dl>
 
-          {/* ── Comments ── */}
+          {/* ── Timeline & Comments ── */}
           <div className="mt-10 pt-8 border-t border-gray-200">
             <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-5">
               <MessageSquare className="w-4 h-4 text-gray-400" />
-              Comments
+              Post Timeline &amp; Comments
               <span className="text-gray-400 font-semibold">({comments.length})</span>
               <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 font-normal ml-2 bg-gray-100 px-2 py-0.5 rounded-full">
                 <Info className="w-3 h-3 text-gray-400" />
@@ -711,92 +754,123 @@ export function AdminPostView() {
               </span>
             </h2>
 
-            {/* Comment list */}
-            {comments.length === 0 ? (
-              <p className="text-sm text-gray-400 italic mb-8">No comments yet.</p>
+            {/* Combined Timeline */}
+            {timelineItems.length === 0 ? (
+              <p className="text-sm text-gray-400 italic mb-8">No history or comments yet.</p>
             ) : (
-              <ul className="space-y-3 mb-8">
-                {comments.map((c) => {
-                  const who = c.role ? c.role.replace(/_/g, ' ') : 'Staff';
-                  const isMyComment = adminComments.some((ac) => ac.id === c.id);
-                  const isEditing = editingCommentId === c.id;
-                  const isBusy = commentActionLoadingId === c.id;
-                  const editExpired = isEditWindowExpired(c.created_at);
-
-                  const isJEComment = jes.some((je) => c.comment_text.includes(je.email));
-                  if (isJEComment && post?.status !== 'pending_je') {
-                    return null;
-                  }
-
-                  return (
-                    <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3 group/comment relative">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-gray-800">{who}</span>
-                        {c.email && <span className="text-[11px] text-gray-400 truncate max-w-[150px] sm:max-w-none">{c.email}</span>}
-                        <span className="ml-auto text-[11px] text-gray-400 flex items-center gap-2">
-                          {formatDateTime(c.created_at)}
-                          
-                          {/* Edit/Delete actions (only shown for owner comments on hover and when not editing/expired) */}
-                          {isMyComment && !isEditing && !editExpired && (
-                            <span className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => {
-                                  setEditingCommentId(c.id);
-                                  setEditingText(c.comment_text);
-                                }}
-                                disabled={isBusy}
-                                className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200/50 transition cursor-pointer"
-                                title="Edit comment"
-                              >
-                                <Pencil className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteComment(c.id)}
-                                disabled={isBusy}
-                                className="p-0.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                                title="Delete comment"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </span>
-                          )}
+              <div className="relative border-l border-gray-200 ml-4 pl-6 space-y-6 mb-8">
+                {timelineItems.map((item, idx) => {
+                  if (item.type === 'audit') {
+                    const audit = item.data;
+                    const normEvent = audit.event.toLowerCase();
+                    const dotColor = STATUS_DOT[normEvent] ?? 'bg-gray-400';
+                    const eventText = (() => {
+                      if (normEvent === 'pending_xen') return 'Sent to XEN for review.';
+                      if (normEvent === 'pending_ae') return 'Sent to AE for review.';
+                      if (normEvent === 'resolved_ae') return 'Post marked as resolved by AE.';
+                      if (normEvent === 'pending_je') return 'Sent to JE for review.';
+                      if (normEvent === 'resolved_je') return 'Post marked as resolved by JE.';
+                      if (normEvent === 'resolved_all') return 'Post Resolved and closed by XEN.';
+                      return `Status updated to ${audit.event.replace(/_/g, ' ')}`;
+                    })();
+                    
+                    return (
+                      <div key={`audit-${idx}`} className="relative">
+                        <span className="absolute -left-[30px] top-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-white ring-4 ring-white">
+                          <span className={`h-2 w-2 rounded-full ${dotColor}`} />
                         </span>
-                      </div>
-
-                      {isEditing ? (
-                        <div className="mt-2">
-                          <textarea
-                            value={editingText}
-                            onChange={(e) => setEditingText(e.target.value)}
-                            disabled={isBusy}
-                            rows={2}
-                            className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition resize-none"
-                          />
-                          <div className="mt-2 flex justify-end gap-2">
-                            <button
-                              onClick={() => setEditingCommentId(null)}
-                              disabled={isBusy}
-                              className="border border-gray-200 text-gray-500 hover:bg-gray-100 font-bold text-[11px] px-2.5 py-1.5 rounded transition cursor-pointer"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => handleEditComment(c.id)}
-                              disabled={isBusy || !editingText.trim()}
-                              className="bg-[#2d2d2d] text-white hover:bg-[#ff9900] font-bold text-[11px] px-3 py-1.5 rounded transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
-                            >
-                              {isBusy && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                              Save
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-gray-500">
+                            {formatDateTime(audit.timestamp)}
+                          </span>
+                          <span className="text-sm font-bold text-gray-800">
+                            {eventText}
+                          </span>
                         </div>
-                      ) : (
-                        <p className="text-sm text-gray-700 leading-relaxed break-words">{c.comment_text}</p>
-                      )}
-                    </li>
-                  );
+                      </div>
+                    );
+                  } else {
+                    const c = item.data;
+                    const who = c.role ? c.role.replace(/_/g, ' ') : 'Staff';
+                    const isMyComment = adminComments.some((ac) => ac.id === c.id);
+                    const isEditing = editingCommentId === c.id;
+                    const isBusy = commentActionLoadingId === c.id;
+                    const editExpired = isEditWindowExpired(c.created_at);
+
+                    return (
+                      <div key={`comment-${c.id}`} className="relative">
+                        <span className="absolute -left-[34px] top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white ring-4 ring-white">
+                          <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
+                        </span>
+                        <div className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3 group/comment relative">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-gray-800">{who}</span>
+                            {c.email && <span className="text-[11px] text-gray-400 truncate max-w-[150px] sm:max-w-none">{c.email}</span>}
+                            <span className="ml-auto text-[11px] text-gray-400 flex items-center gap-2">
+                              {formatDateTime(c.created_at)}
+                              
+                              {isMyComment && !isEditing && !editExpired && (
+                                <span className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={() => {
+                                      setEditingCommentId(c.id);
+                                      setEditingText(c.comment_text);
+                                    }}
+                                    disabled={isBusy}
+                                    className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200/50 transition cursor-pointer"
+                                    title="Edit comment"
+                                  >
+                                    <Pencil className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteComment(c.id)}
+                                    disabled={isBusy}
+                                    className="p-0.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                    title="Delete comment"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              )}
+                            </span>
+                          </div>
+
+                          {isEditing ? (
+                            <div className="mt-2">
+                              <textarea
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                                disabled={isBusy}
+                                rows={2}
+                                className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition resize-none"
+                              />
+                              <div className="mt-2 flex justify-end gap-2">
+                                <button
+                                  onClick={() => setEditingCommentId(null)}
+                                  disabled={isBusy}
+                                  className="border border-gray-200 text-gray-500 hover:bg-gray-100 font-bold text-[11px] px-2.5 py-1.5 rounded transition cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => handleEditComment(c.id)}
+                                  disabled={isBusy || !editingText.trim()}
+                                  className="bg-[#2d2d2d] text-white hover:bg-[#ff9900] font-bold text-[11px] px-3 py-1.5 rounded transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
+                                >
+                                  {isBusy && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                                  Save
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-700 leading-relaxed break-words">{c.comment_text}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
                 })}
-              </ul>
+              </div>
             )}
 
             {/* ── Comment + action area — always shown; unlocked for any logged-in admin ── */}
