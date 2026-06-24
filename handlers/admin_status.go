@@ -245,7 +245,7 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedJE) {
 			post.Status = string(ResolvedJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedJE), TimeStamp: time.Now()})
 			// send mail to AE
 			go func() {
 				// search for email of AE
@@ -306,11 +306,11 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 			// send mail to xen
 			go func() {
 				// search for email of xen
@@ -346,7 +346,7 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 		if review.Review == string(PendingXEN) {		// to re-open an post
 			post.Status = string(PendingXEN)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingXEN), TimeStamp: time.Now()})
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -574,7 +574,7 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedJE) {
 			post.Status = string(ResolvedJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedJE), TimeStamp: time.Now()})
 			// send mail to AE
 			go func() {
 				// search for email of AE
@@ -635,11 +635,11 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 			// send mail to xen
 			go func() {
 				// search for email of xen
@@ -675,7 +675,7 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 		if review.Review == string(PendingXEN) {		// to re-open an post
 			post.Status = string(PendingXEN)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingXEN), TimeStamp: time.Now()})
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
@@ -903,7 +903,7 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedJE) {
 			post.Status = string(ResolvedJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedJE), TimeStamp: time.Now()})
 			// send mail to AE
 			go func() {
 				// search for email of AE
@@ -964,11 +964,11 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
 			// send mail to xen
 			go func() {
 				// search for email of xen
@@ -1004,7 +1004,7 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		if review.Review == string(PendingXEN) {		// to re-open an post
 			post.Status = string(PendingXEN)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingXEN), TimeStamp: time.Now()})
 		} else {
 			c.JSON(400, gin.H{"error": "invalid review type"})
 			return
