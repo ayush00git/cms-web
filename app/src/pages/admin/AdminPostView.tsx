@@ -16,6 +16,7 @@ import {
   RefreshCcw,
   Pencil,
   Trash2,
+  Info,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 
@@ -204,6 +205,11 @@ function formatDateTime(iso: string) {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
+
+function isEditWindowExpired(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() >= 30 * 60 * 1000;
+}
+
 
 // A single label/value pair in the "About this post" section
 function Detail({ label, value }: { label: string; value?: string }) {
@@ -604,6 +610,10 @@ export function AdminPostView() {
               <MessageSquare className="w-4 h-4 text-gray-400" />
               Comments
               <span className="text-gray-400 font-semibold">({comments.length})</span>
+              <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 font-normal ml-2 bg-gray-100 px-2 py-0.5 rounded-full">
+                <Info className="w-3 h-3 text-gray-400" />
+                Comments can be updated only within 30 minutes
+              </span>
             </h2>
 
             {/* Comment list */}
@@ -616,6 +626,7 @@ export function AdminPostView() {
                   const isMyComment = adminComments.some((ac) => ac.id === c.id);
                   const isEditing = editingCommentId === c.id;
                   const isBusy = commentActionLoadingId === c.id;
+                  const editExpired = isEditWindowExpired(c.created_at);
 
                   return (
                     <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3 group/comment relative">
@@ -625,8 +636,8 @@ export function AdminPostView() {
                         <span className="ml-auto text-[11px] text-gray-400 flex items-center gap-2">
                           {formatDateTime(c.created_at)}
                           
-                          {/* Edit/Delete actions (only shown for owner comments on hover and when not editing) */}
-                          {isMyComment && !isEditing && (
+                          {/* Edit/Delete actions (only shown for owner comments on hover and when not editing/expired) */}
+                          {isMyComment && !isEditing && !editExpired && (
                             <span className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                               <button
                                 onClick={() => {

@@ -173,6 +173,12 @@ func (h *AdminHandler) AdminEditComment(c *gin.Context) {
 		return
 	}
 
+	// limit the edit window only for 30 minutes
+	if time.Since(comment.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
+		return
+	}
+
 	// Update the comment
 	result = h.DB.Model(&comment).Updates(models.Comment{
 		Content:   inputs.Content,
@@ -229,6 +235,12 @@ func (h *AdminHandler) AdminDeleteComment(c *gin.Context) {
 	// Verify that the comment belongs to this admin
 	if comment.Email != emailID {
 		c.JSON(403, gin.H{"error": "you are not authorized to delete this comment"})
+		return
+	}
+
+	// limit the edit window only for 30 minutes
+	if time.Since(comment.CreatedAt) >= 30*time.Minute {
+		c.JSON(403, gin.H{"error": "edit window has been expired"})
 		return
 	}
 
