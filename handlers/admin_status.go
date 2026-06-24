@@ -303,10 +303,14 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			return
 		}
 		// if ae approves the work of je
-		if review.Review == string(ResolvedAE) {
-			post.Status = string(ResolvedAE)
+		if review.Review == string(PendingJE) {
+			post.Status = string(PendingJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je
+			// go func() {
+				
+			// } ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
@@ -632,10 +636,14 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 			return
 		}
 		// if ae approves the work of je
-		if review.Review == string(ResolvedAE) {
-			post.Status = string(ResolvedAE)
+		if review.Review == string(PendingJE) {
+			post.Status = string(PendingJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je
+			// go func() {
+			// 
+			// } ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
@@ -961,10 +969,14 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 			return
 		}
 		// if ae approves the work of je
-		if review.Review == string(ResolvedAE) {
-			post.Status = string(ResolvedAE)
+		if review.Review == string(PendingJE) {
+			post.Status = string(PendingJE)
 			// keep a audit
-			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(ResolvedAE), TimeStamp: time.Now()})
+			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je
+			// go func() {
+				
+			// } ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
