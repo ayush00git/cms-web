@@ -16,11 +16,11 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	e.DELETE("/api/admin/comment/:type/:id/:comment_id", middleware.IsAuthenticated(), h.AdminDeleteComment)
 
 	// keep separate apis for updating status
-	stage := e.Group("/api/admin")
+	status := e.Group("/api/admin")
 	{
-		stage.PATCH("/faculty_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminFacultyPostStatus)
-		stage.PATCH("/warden_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminWardenPostStatus)
-		stage.PATCH("/centrehead_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreheadPostStatus)
+		status.PATCH("/faculty_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminFacultyPostStatus)
+		status.PATCH("/warden_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminWardenPostStatus)
+		status.PATCH("/centrehead_posts/status/:post_id", middleware.IsAuthenticated(), h.AdminCentreheadPostStatus)
 	}
 
 	// get the posts according to the status
