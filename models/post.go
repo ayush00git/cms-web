@@ -33,6 +33,12 @@ const (
 	StatusResolved   PostStatus = "resolved_all"	// defaults to closed post
 )
 
+// For status audit logs with timestamps
+type StatusAudit struct {
+	Event			string			`json:"event"`
+	TimeStamp		time.Time		`json:"timestamp"`
+}
+
 type FacultyPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	FacultyID       uint        	`gorm:"not null" json:"faculty_id"`
@@ -42,7 +48,7 @@ type FacultyPost struct {
 	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
-	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
+	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
@@ -59,7 +65,7 @@ type WardenPost struct {
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
-	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
+	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
@@ -75,7 +81,7 @@ type CentreheadPost struct {
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
-	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
+	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
