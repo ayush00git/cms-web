@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Hammer, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
   MessageSquare, Wrench, ArrowLeft, Send, AlertCircle,
-  UserCircle, Clock,
+  Clock,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_PLACES } from '../../constants/models';
@@ -270,7 +270,7 @@ export function PostView() {
       });
       if (!res.ok) {
         let msg = `Failed to post comment (${res.status})`;
-        try { const b = await res.json(); if (b?.error) msg = b.error; } catch {}
+        try { const b = await res.json(); if (b?.error) msg = b.error; } catch { /* ignore */ }
         throw new Error(msg);
       }
       setCommentText('');
@@ -460,28 +460,66 @@ export function PostView() {
 
         {/* Comments Section */}
         {!isEditing && (
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden p-6 space-y-6">
-            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-3 mt-4">
               <MessageSquare className={`w-4 h-4 ${theme.iconColor}`} />
-              <h3 className="text-sm font-bold text-gray-800">Official Responses</h3>
+              <h3 className="text-sm font-bold text-gray-800">Activity & Discussion</h3>
               {comments.length > 0 && (
                 <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{comments.length}</span>
               )}
             </div>
 
-            {/* Combined Timeline */}
-            {timelineItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <MessageSquare className="w-8 h-8 text-gray-200 mb-2" />
-                <p className="text-sm text-gray-400 font-medium">No activity or responses yet</p>
-              </div>
-            ) : (
-              <div className="relative border-l border-gray-200 ml-4 pl-6 space-y-6 mb-8">
-                {timelineItems.map((item, idx) => {
+            {/* Timeline */}
+            <div className="relative space-y-6">
+              {/* Connecting pipeline/line */}
+              <div className="absolute left-[15px] top-2 bottom-6 w-[2px] bg-gray-200" />
+
+              {timelineItems.length === 0 ? (
+                <div className="relative pl-10 py-2">
+                  <p className="text-xs text-gray-400 font-medium">No activity or responses yet.</p>
+                </div>
+              ) : (
+                timelineItems.map((item, idx) => {
                   if (item.type === 'audit') {
                     const audit = item.data;
                     const normEvent = audit.event.toLowerCase();
-                    const dotColor = STATUS_CONFIG[normEvent]?.dot ?? 'bg-gray-400';
+
+                    const auditStyle = (() => {
+                      if (normEvent.includes('resolved')) {
+                        return {
+                          bg: 'bg-emerald-50 border-emerald-300 text-emerald-600',
+                          icon: <Check className="w-3.5 h-3.5 text-emerald-600" />,
+                          textCls: 'text-emerald-700 font-bold',
+                        };
+                      }
+                      if (normEvent === 'pending_xen') {
+                        return {
+                          bg: 'bg-amber-50 border-amber-300 text-amber-600',
+                          icon: <Clock className="w-3.5 h-3.5 text-amber-600" />,
+                          textCls: 'text-amber-700 font-bold',
+                        };
+                      }
+                      if (normEvent === 'pending_ae') {
+                        return {
+                          bg: 'bg-sky-50 border-sky-300 text-sky-600',
+                          icon: <Clock className="w-3.5 h-3.5 text-sky-600" />,
+                          textCls: 'text-sky-700 font-bold',
+                        };
+                      }
+                      if (normEvent === 'pending_je') {
+                        return {
+                          bg: 'bg-violet-50 border-violet-300 text-violet-600',
+                          icon: <Clock className="w-3.5 h-3.5 text-violet-600" />,
+                          textCls: 'text-violet-700 font-bold',
+                        };
+                      }
+                      return {
+                        bg: 'bg-gray-50 border-gray-300 text-gray-500',
+                        icon: <Clock className="w-3.5 h-3.5 text-gray-500" />,
+                        textCls: 'text-gray-700 font-bold',
+                      };
+                    })();
+
                     const eventText = (() => {
                       if (normEvent === 'pending_xen') return 'Sent to XEN for review.';
                       if (normEvent === 'pending_ae') return 'Sent to AE for review.';
@@ -493,16 +531,14 @@ export function PostView() {
                     })();
 
                     return (
-                      <div key={`audit-${idx}`} className="relative">
-                        <span className="absolute -left-[30px] top-1 flex h-3 w-3 items-center justify-center rounded-full bg-white ring-4 ring-white">
-                          <span className={`h-2 w-2 rounded-full ${dotColor}`} />
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-semibold text-gray-400">
+                      <div key={`audit-${idx}`} className="relative pl-10 min-h-[32px] flex items-center py-0.5">
+                        <div className={`absolute left-1 top-[4px] flex h-6 w-6 items-center justify-center rounded-full bg-white border ${auditStyle.bg} shadow-sm z-10`}>
+                          {auditStyle.icon}
+                        </div>
+                        <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
+                          <span className={`${auditStyle.textCls}`}>{eventText}</span>
+                          <span className="text-[10px] text-gray-400 font-mono">
                             {formatDateTime(audit.timestamp)}
-                          </span>
-                          <span className="text-xs font-bold text-gray-800">
-                            {eventText}
                           </span>
                         </div>
                       </div>
@@ -510,15 +546,12 @@ export function PostView() {
                   } else {
                     const c = item.data;
                     const author = c.role ? roleLabel(c.role) : 'Staff';
-                    const borderCls = theme.accentBar.replace('bg-', 'border-');
 
                     return (
-                      <div key={`comment-${c.id}`} className="relative">
-                        <span className="absolute -left-[34px] top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white ring-4 ring-white">
-                          <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
-                        </span>
-                        <div className={`border-l-2 ${borderCls}/50 bg-gray-50 rounded-r-lg px-4 py-3 relative`}>
-                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div key={`comment-${c.id}`} className="relative pl-10">
+                        {/* Comment Bubble in GitHub Style */}
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                          <div className="bg-gray-50 border-b border-gray-150 px-4 py-2 flex items-center justify-between gap-2">
                             <span className="min-w-0 flex items-baseline gap-1.5">
                               <span className="text-xs font-bold text-gray-800">{author}</span>
                               {c.email && <span className="text-[10px] text-gray-400 truncate">{c.email}</span>}
@@ -528,46 +561,50 @@ export function PostView() {
                               {formatDateTime(c.created_at)}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{c.comment_text}</p>
+                          <div className="px-4 py-3 text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">
+                            {c.comment_text}
+                          </div>
                         </div>
                       </div>
                     );
                   }
-                })}
-              </div>
-            )}
-
-            {/* Composer */}
-            <div className="pt-4 border-t border-gray-100">
-              <div className="flex items-end gap-2">
-                <textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitComment(); }}
-                  disabled={commentSubmitting}
-                  rows={2}
-                  placeholder="Add a reply/update…"
-                  className="flex-1 text-xs text-gray-800 placeholder-gray-400 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition disabled:opacity-50"
-                />
-                <button
-                  onClick={submitComment}
-                  disabled={commentSubmitting || !commentText.trim()}
-                  title="Post reply (Ctrl/⌘ + Enter)"
-                  className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gray-900 hover:bg-gray-700 px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {commentSubmitting
-                    ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    : <Send className="w-3.5 h-3.5" />}
-                  Send
-                </button>
-              </div>
-              {commentError && (
-                <p className="mt-2 text-xs font-semibold text-red-500 flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {commentError}
-                </p>
+                })
               )}
-            </div>
 
+              {/* Composer */}
+              <div className="relative pl-10">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 space-y-3">
+                  <div className="flex items-end gap-2">
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitComment(); }}
+                      disabled={commentSubmitting}
+                      rows={2}
+                      placeholder="Add a reply/update…"
+                      className="flex-1 text-xs text-gray-800 placeholder-gray-400 bg-white border border-gray-200 rounded-lg px-3.5 py-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition disabled:opacity-50"
+                    />
+                    <button
+                      onClick={submitComment}
+                      disabled={commentSubmitting || !commentText.trim()}
+                      title="Post reply (Ctrl/⌘ + Enter)"
+                      className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gray-900 hover:bg-gray-700 px-4 py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-[38px]"
+                    >
+                      {commentSubmitting
+                        ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <Send className="w-3.5 h-3.5" />}
+                      Send
+                    </button>
+                  </div>
+                  {commentError && (
+                    <p className="text-xs font-semibold text-red-500 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {commentError}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </div>
         )}
 

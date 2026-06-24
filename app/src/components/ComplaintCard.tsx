@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Zap, Hammer, Calendar, MapPin, BedDouble, MessageSquare, ChevronRight,
 } from 'lucide-react';
-import { POST_PLACES } from '../constants/models';
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -74,7 +74,6 @@ function statusStyle(s: string): StatusStyle {
   return STATUS_CONFIG[norm] ?? { ...FALLBACK, label: s.replace(/_/g, ' ') };
 }
 
-const STAGES = ['XEN', 'AE', 'JE'];
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });

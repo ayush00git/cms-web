@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_TYPES } from '../../constants/models';
 
 export function WardenPost() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     room_number: '',
     type_of_post: '',
@@ -40,6 +42,9 @@ export function WardenPost() {
         setStatus('success');
         setMessage(data.success || 'Complaint submitted successfully!');
         setFormData({ room_number: '', type_of_post: '', title: '', description: '' });
+        if (data.post?.id) {
+          navigate(`/post/warden/${data.post.id}`);
+        }
       } else {
         setStatus('error');
         const errorMsg = data.error || Object.values(data)[0] || 'An error occurred';

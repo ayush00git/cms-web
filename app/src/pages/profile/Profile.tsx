@@ -8,8 +8,21 @@ import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
 import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
 
+interface ProfileData {
+  name?: string;
+  email?: string;
+  is_verified?: boolean;
+  phone_number?: string;
+  department?: string;
+  house_number?: string;
+  block?: string;
+  type?: string;
+  hostel?: string;
+  building?: string;
+}
+
 export function Profile() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
   const navigate = useNavigate();
@@ -40,7 +53,7 @@ export function Profile() {
 
   const fetchPosts = useCallback((silent = false) => {
     if (!profile) return;
-    let endpoint = '';
+    let endpoint: string;
     if ('department' in profile)    endpoint = '/api/post/faculty';
     else if ('hostel' in profile)   endpoint = '/api/post/warden';
     else if ('building' in profile) endpoint = '/api/post/centrehead';
@@ -87,6 +100,8 @@ export function Profile() {
     );
   }
 
+  if (!profile) return null;
+
   const isFaculty    = 'department' in profile;
   const isWarden     = 'hostel' in profile;
   const isCentreHead = 'building' in profile;
@@ -102,7 +117,7 @@ export function Profile() {
   const deleteBase = isFaculty ? '/api/post/faculty/delete' : isWarden ? '/api/post/warden/delete' : '/api/post/centrehead/delete';
 
   const handleLogout = async () => {
-    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
     window.location.href = '/';
   };
 
@@ -200,7 +215,7 @@ export function Profile() {
             {/* Identity row */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
               <div>
-                <p className="text-base font-bold text-[#111111]">{profile.name || profile.email.split('@')[0]}</p>
+                <p className="text-base font-bold text-[#111111]">{profile.name || profile.email?.split('@')[0] || ''}</p>
                 <p className="text-sm text-[#666666] mt-0.5">{profile.email}</p>
               </div>
               <div className="flex items-center gap-2">
