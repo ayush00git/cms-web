@@ -310,8 +310,7 @@ export function AdminPostView() {
   useEffect(() => {
     fetchPost();
     fetchAdminComments();
-    fetchJEs();
-  }, [fetchPost, fetchAdminComments, fetchJEs]);
+  }, [fetchPost, fetchAdminComments]);
 
   useEffect(() => () => { if (actTimer.current) clearTimeout(actTimer.current); }, []);
 
@@ -476,7 +475,7 @@ export function AdminPostView() {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Review: 'pending_je' }),
+        body: JSON.stringify({ Review: 'pending_je', JeToAssign: jeEmail }),
       });
       if (!statusRes.ok) {
         let msg = `Comment posted but status update failed (${statusRes.status})`;
@@ -842,7 +841,12 @@ export function AdminPostView() {
                           <div className="relative inline-block text-left">
                             <button
                               type="button"
-                              onClick={() => setJeDropdownOpen(!jeDropdownOpen)}
+                              onClick={() => {
+                                if (!jeDropdownOpen) {
+                                  fetchJEs();
+                                }
+                                setJeDropdownOpen(!jeDropdownOpen);
+                              }}
                               disabled={acting || !commentText.trim()}
                               className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#ff9900] hover:bg-[#e68a00] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                             >

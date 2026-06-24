@@ -22,7 +22,8 @@ import (
 )
 
 type AdminReview struct {
-	Review	string
+	Review     string `json:"Review"`
+	JeToAssign string `json:"JeToAssign"`
 }
 
 // PostStatus
@@ -138,22 +139,17 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 		// forward the post to JE
 		if review.Review == string(PendingJE) {
 			post.Status = string(PendingJE)
+			// Assign the JE's user id to the post
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					post.AssignedJE_ID = &je.ID
+				}
+			}
 			// send mail to je
 			go func() {
-				// search for email of je
-				var position models.PositionType
-				if post.TypeOfPost == "Civil" {
-					position = models.TypeJECivil
-				} else {
-					position = models.TypeJEElectrical
-				}
-				var je models.Admin
-				result := h.DB.Where("position = ?", position).Take(&je)
-				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
-					return
-				}
-				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
 		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
 					return
 				}
@@ -447,22 +443,17 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 		// forward the post to JE
 		if review.Review == string(PendingJE) {
 			post.Status = string(PendingJE)
+			// Assign the JE's user id to the post
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					post.AssignedJE_ID = &je.ID
+				}
+			}
 			// send mail to je
 			go func() {
-				// search for email of je
-				var position models.PositionType
-				if post.TypeOfPost == "Civil" {
-					position = models.TypeJECivil
-				} else {
-					position = models.TypeJEElectrical
-				}
-				var je models.Admin
-				result := h.DB.Where("position = ?", position).Take(&je)
-				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
-					return
-				}
-				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
 		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
 					return
 				}
@@ -756,22 +747,17 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 		// forward the post to JE
 		if review.Review == string(PendingJE) {
 			post.Status = string(PendingJE)
+			// Assign the JE's user id to the post
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					post.AssignedJE_ID = &je.ID
+				}
+			}
 			// send mail to je
 			go func() {
-				// search for email of je
-				var position models.PositionType
-				if post.TypeOfPost == "Civil" {
-					position = models.TypeJECivil
-				} else {
-					position = models.TypeJEElectrical
-				}
-				var je models.Admin
-				result := h.DB.Where("position = ?", position).Take(&je)
-				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
-					return
-				}
-				if err := services.SendPostMailToAdmins(je.Email, postURL); err != nil {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
 		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
 					return
 				}
