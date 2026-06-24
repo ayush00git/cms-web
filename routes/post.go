@@ -27,6 +27,7 @@ func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
 	e.GET("/api/post/faculty", middleware.IsAuthenticated(), h.GetFacultyPosts)
 	e.GET("/api/post/warden", middleware.IsAuthenticated(), h.GetWardenPosts)
 	e.GET("/api/post/centrehead", middleware.IsAuthenticated(), h.GetCentreheadPosts)
+	e.GET("/api/post/:role/:post_id", middleware.IsAuthenticated(), h.GetPostByID)
 
 	// APIs for comments on the posts
 	e.POST("/api/post/faculty/comment/:post_id", middleware.IsAuthenticated() ,h.FacultyPostComment)

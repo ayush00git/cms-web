@@ -15,6 +15,7 @@ import { VerifyAccount } from './pages/auth/VerifyAccount';
 import { FacultyPost } from './pages/post/FacultyPost';
 import { WardenPost } from './pages/post/WardenPost';
 import { CentreHeadPost } from './pages/post/CentreHeadPost';
+import { PostView } from './pages/post/PostView';
 import { Profile } from './pages/profile/Profile';
 import { XENPostView } from './pages/admin/XENPostView';
 import { AEPostView } from './pages/admin/AEPostView';
@@ -40,6 +41,7 @@ function App() {
         <Route path="/faculty/post" element={<FacultyPost />} />
         <Route path="/warden/post" element={<WardenPost />} />
         <Route path="/centre-head/post" element={<CentreHeadPost />} />
+        <Route path="/post/:role/:post_id" element={<PostView />} />
         <Route path="/account/verify" element={<VerifyAccount />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin/xen" element={<XENPostView />} />

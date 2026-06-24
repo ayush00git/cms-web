@@ -148,6 +148,7 @@ func newPostRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e.GET("/api/post/faculty", auth, h.GetFacultyPosts)
 	e.GET("/api/post/warden", auth, h.GetWardenPosts)
 	e.GET("/api/post/centrehead", auth, h.GetCentreheadPosts)
+	e.GET("/api/post/:role/:post_id", auth, h.GetPostByID)
 
 	e.POST("/api/post/faculty/comment/:post_id", auth, h.FacultyPostComment)
 	e.POST("/api/post/warden/comment/:post_id", auth, h.WardenPostComment)
