@@ -40,7 +40,7 @@ func (h *AdminHandler) AdminReturnJE(c *gin.Context) {
 	// find those 2 JEs to return
 	var je []models.Admin
 	if(strings.Contains(string(admin.Position), "Civil")) {
-		result := h.DB.Where("position: ?", models.TypeJECivil).
+		result := h.DB.Where("position = ?", models.TypeJECivil).
 		Select("id, email, position").
 		Find(&je)
 		if result.Error != nil {
