@@ -42,6 +42,7 @@ type FacultyPost struct {
 	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
+	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
@@ -58,6 +59,7 @@ type WardenPost struct {
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
+	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
@@ -73,6 +75,7 @@ type CentreheadPost struct {
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
+	StatusAudits 	[]string 		`gorm:"serializer:json;default:'[\"pending_xen\"]'" json:"status_audits"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
 	CreatedAt       time.Time		`json:"created_at"`
 	UpdatedAt       time.Time		`json:"updated_at"`
