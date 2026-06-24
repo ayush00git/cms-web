@@ -242,6 +242,10 @@ export function AdminPostView() {
   const [actSuccess, setActSuccess]   = useState<string | null>(null);
   const actTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // JEs list for assignment dropdown
+  const [jes, setJes] = useState<{ id: number; email: string; position: string }[]>([]);
+  const [jeDropdownOpen, setJeDropdownOpen] = useState(false);
+
   // Admin's own comments states
   const [adminComments, setAdminComments] = useState<Comment[]>([]);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
@@ -257,6 +261,20 @@ export function AdminPostView() {
       .then((json) => {
         if (json.comments) {
           setAdminComments(json.comments);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  const fetchJEs = useCallback(() => {
+    fetch('/api/admin/return-je', { credentials: 'include' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch JEs');
+        return res.json();
+      })
+      .then((json) => {
+        if (json.JEs) {
+          setJes(json.JEs);
         }
       })
       .catch((err) => console.error(err));
@@ -292,7 +310,8 @@ export function AdminPostView() {
   useEffect(() => {
     fetchPost();
     fetchAdminComments();
-  }, [fetchPost, fetchAdminComments]);
+    fetchJEs();
+  }, [fetchPost, fetchAdminComments, fetchJEs]);
 
   useEffect(() => () => { if (actTimer.current) clearTimeout(actTimer.current); }, []);
 
@@ -410,6 +429,63 @@ export function AdminPostView() {
 
       setCommentText('');
       setActSuccess('Comment posted & status updated!');
+      if (actTimer.current) clearTimeout(actTimer.current);
+      actTimer.current = setTimeout(() => setActSuccess(null), 3000);
+      fetchPost(true);
+      fetchAdminComments();
+    } catch (err) {
+      setActError((err as Error).message);
+    } finally {
+      setActing(false);
+    }
+  }
+
+  async function handleAssignToJE(jeEmail: string) {
+    const trimmed = commentText.trim();
+    if (!trimmed) return;
+
+    const commentApi = ROLE_TO_COMMENT_API[role ?? ''];
+    const statusApi  = ROLE_TO_STATUS_API[role ?? ''];
+    if (!commentApi || !statusApi) {
+      setActError('Unknown post type.');
+      return;
+    }
+
+    setActing(true);
+    setActError(null);
+    setActSuccess(null);
+    setJeDropdownOpen(false);
+
+    try {
+      // 1. Post the comment with the user's commentText and the JE email appended
+      const contentWithJE = `${trimmed} (Assigned to: ${jeEmail})`;
+      const commentRes = await fetch(`/api/admin/comment/${commentApi}/${post_id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Content: contentWithJE }),
+      });
+      if (!commentRes.ok) {
+        let msg = `Failed to post comment (${commentRes.status})`;
+        try { const b = await commentRes.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      // 2. Update status to pending_je
+      const statusRes = await fetch(`/api/admin/${statusApi}/status/${post_id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Review: 'pending_je' }),
+      });
+      if (!statusRes.ok) {
+        let msg = `Comment posted but status update failed (${statusRes.status})`;
+        try { const b = await statusRes.json(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
+
+      setCommentText('');
+      setActSuccess('Assigned to JE successfully!');
       if (actTimer.current) clearTimeout(actTimer.current);
       actTimer.current = setTimeout(() => setActSuccess(null), 3000);
       fetchPost(true);
@@ -628,6 +704,11 @@ export function AdminPostView() {
                   const isBusy = commentActionLoadingId === c.id;
                   const editExpired = isEditWindowExpired(c.created_at);
 
+                  const isJEComment = jes.some((je) => c.comment_text.includes(je.email));
+                  if (isJEComment && post?.status !== 'pending_je') {
+                    return null;
+                  }
+
                   return (
                     <li key={c.id} className="border-l-2 border-[#ff9900]/50 bg-gray-50 rounded-r-lg px-4 py-3 group/comment relative">
                       <div className="flex items-center gap-2 mb-1">
@@ -749,6 +830,55 @@ export function AdminPostView() {
                   </span>
 
                   {canAct && actionBtns.map((btn) => {
+                    const isAssignBtn = btn.label === 'Assign to JE';
+                    if (isAssignBtn) {
+                      const showBlockedTooltip = !commentText.trim();
+                      return (
+                        <span
+                          key={btn.review}
+                          className={showBlockedTooltip ? 'inline-block cursor-not-allowed' : 'inline-block'}
+                          title={showBlockedTooltip ? 'comment content required' : undefined}
+                        >
+                          <div className="relative inline-block text-left">
+                            <button
+                              type="button"
+                              onClick={() => setJeDropdownOpen(!jeDropdownOpen)}
+                              disabled={acting || !commentText.trim()}
+                              className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#ff9900] hover:bg-[#e68a00] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+                            >
+                              {acting ? (
+                                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : btn.icon}
+                              {btn.label}
+                            </button>
+                            {jeDropdownOpen && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setJeDropdownOpen(false)} />
+                                <div className="absolute right-0 bottom-full mb-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                                  <div className="py-1">
+                                    {jes.length === 0 ? (
+                                      <span className="block px-4 py-2 text-xs text-gray-500">No JEs available</span>
+                                    ) : (
+                                      jes.map((je) => (
+                                        <button
+                                          key={je.id}
+                                          type="button"
+                                          onClick={() => handleAssignToJE(je.email)}
+                                          className="w-full text-left block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors cursor-pointer relative z-50"
+                                        >
+                                          {je.email}
+                                        </button>
+                                      ))
+                                    )}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </span>
+                      );
+                    }
+
                     const isResolvedBtn = btn.label === 'Resolved';
                     const buttonColorClass = isResolvedBtn
                       ? 'bg-red-600 hover:bg-red-700'

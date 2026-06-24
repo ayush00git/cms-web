@@ -48,7 +48,7 @@ func (h *AdminHandler) AdminReturnJE(c *gin.Context) {
 			return
 		}
 	} else {
-		result := h.DB.Where("position: ?", models.TypeJEElectrical).
+		result := h.DB.Where("position = ?", models.TypeJEElectrical).
 		Select("id, email, position").
 		Find(&je)
 		if result.Error != nil {
