@@ -64,6 +64,12 @@ func (h *PostHandler) CentreheadPost(c *gin.Context) {
 		TypeOfPost: models.PostType(inputs.TypeOfPost),
 		Title: inputs.Title,
 		Description: inputs.Description,
+		StatusAuditLogs: []models.StatusAudit{
+			{
+				Event: string(PendingXEN),
+				TimeStamp: time.Now(),
+			},
+		},
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
