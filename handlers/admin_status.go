@@ -160,7 +160,7 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			go func() {
 				JeToAssign := review.JeToAssign
 				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send JE mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -180,11 +180,11 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -307,10 +307,23 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			post.Status = string(PendingJE)
 			// keep a audit
 			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je (assigned JE can be changed atp)
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
+				}
+			}
 			// send mail to je
-			// go func() {
-				
-			// } ()
+			go func() {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
+		       	 	log.Printf("failed to send JE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
@@ -327,11 +340,11 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -493,7 +506,7 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 			go func() {
 				JeToAssign := review.JeToAssign
 				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send JE mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -513,11 +526,11 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -640,10 +653,23 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 			post.Status = string(PendingJE)
 			// keep a audit
 			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je (assigned JE can be changed atp)
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
+				}
+			}
 			// send mail to je
-			// go func() {
-			// 
-			// } ()
+			go func() {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
+		       	 	log.Printf("failed to send JE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
@@ -660,11 +686,11 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -846,11 +872,11 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
@@ -973,10 +999,23 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 			post.Status = string(PendingJE)
 			// keep a audit
 			post.StatusAuditLogs = append(post.StatusAuditLogs, models.StatusAudit{Event: string(PendingJE), TimeStamp: time.Now()})
+			// send mail to je (assigned JE can be changed atp)
+			var je models.Admin
+			if review.JeToAssign != "" {
+				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
+				}
+			}
 			// send mail to je
-			// go func() {
-				
-			// } ()
+			go func() {
+				JeToAssign := review.JeToAssign
+				if err := services.SendPostMailToAdmins(JeToAssign, postURL); err != nil {
+		       	 	log.Printf("failed to send JE mail for post %d: %s", post.ID, err)
+					return
+				}
+			} ()
 		} else if review.Review == string(ResolvedAE) {
 			post.Status = string(ResolvedAE)
 			// keep a audit
@@ -993,11 +1032,11 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 				var xen models.Admin
 				result := h.DB.Where("position = ?", position).Take(&xen)
 				if result.Error != nil {
-		       	 	log.Printf("failed to send AE mail for post %d", post.ID)
+		       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
 					return
 				}
 				if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
-		       	 	log.Printf("failed to send AE mail for post %d: %s", post.ID, err)
+		       	 	log.Printf("failed to send XEN mail for post %d: %s", post.ID, err)
 					return
 				}
 			} ()
