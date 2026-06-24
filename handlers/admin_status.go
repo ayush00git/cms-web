@@ -143,7 +143,9 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 			var je models.Admin
 			if review.JeToAssign != "" {
 				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
-					post.AssignedJE_ID = &je.ID
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
 				}
 			}
 			// send mail to je
@@ -447,7 +449,9 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 			var je models.Admin
 			if review.JeToAssign != "" {
 				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
-					post.AssignedJE_ID = &je.ID
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
 				}
 			}
 			// send mail to je
@@ -751,7 +755,9 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 			var je models.Admin
 			if review.JeToAssign != "" {
 				if err := h.DB.Where("email = ?", review.JeToAssign).Take(&je).Error; err == nil {
-					post.AssignedJE_ID = &je.ID
+					jeID := je.ID
+					post.AssignedJE_ID = &jeID
+					h.DB.Model(&post).Update("assigned_je_id", &jeID)
 				}
 			}
 			// send mail to je

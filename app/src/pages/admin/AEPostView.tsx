@@ -58,7 +58,7 @@ const STATUS_FILTERS = [
   'resolved_ae',
   'resolved_je',
   'pending_ae',
-  'pending_xen',
+  'pending_je',
 ] as const;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number];

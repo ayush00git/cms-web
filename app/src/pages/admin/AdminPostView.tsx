@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -314,6 +314,12 @@ export function AdminPostView() {
 
   useEffect(() => () => { if (actTimer.current) clearTimeout(actTimer.current); }, []);
 
+  useEffect(() => {
+    if (post && post.assigned_je_id != null) {
+      fetchJEs();
+    }
+  }, [post, fetchJEs]);
+
   // ── Edit comment handler ──
   async function handleEditComment(commentId: number) {
     const trimmed = editingText.trim();
@@ -537,6 +543,11 @@ export function AdminPostView() {
     }
   }
 
+  const assignedJEEmail = useMemo(() => {
+    if (!post || post.assigned_je_id == null) return null;
+    return jes.find((j) => j.id === post.assigned_je_id)?.email || null;
+  }, [post, jes]);
+
   // ── Loading ──
   if (loading) {
     return (
@@ -612,6 +623,8 @@ export function AdminPostView() {
   const email   = fp?.Author?.email || wp?.Author?.email || cp?.Author?.email;
   const phone   = fp?.Author?.phone_number || wp?.Author?.phone_number || cp?.Author?.phone_number;
 
+
+
   return (
     <MainLayout>
       <div className="flex-grow bg-white py-10">
@@ -647,10 +660,17 @@ export function AdminPostView() {
             </span>
           </div>
 
-          {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-5">
-            {post.title}
-          </h1>
+          {/* Title and Assigned JE */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
+              {post.title}
+            </h1>
+            {assignedJEEmail && (
+              <span className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full md:self-start">
+                Assigned JE - {assignedJEEmail}
+              </span>
+            )}
+          </div>
 
           {/* Description */}
           <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line mb-10">
