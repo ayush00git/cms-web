@@ -27,3 +27,5 @@ the official web interface of the Estate Office of NIT Hamirpur to manage compla
 ### Complaint status public dashboard
 
 <img src="public/img/cms5.png" alt="Complaint status public dashboard" width="800" />
+
+<!-- Automated CI/CD Deployment Trigger -->
