@@ -42,4 +42,4 @@ jobs:
           script: |
             cd ~/cms-webb
             git pull origin main
-            docker compose up -d --build
+            sg docker -c "docker compose up -d --build"
