@@ -42,15 +42,23 @@ func ConnectDB() {
 		&models.Comment{},
 	)
 
-	seedAdmins(DB)
+	seedUsers(DB)
 
 	log.Println("Database connected")
 }
 
-func seedAdmins(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Admin{}).Count(&count)
-	if count == 0 {
+func seedUsers(db *gorm.DB) {
+	password := "Admin@123"
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		log.Printf("Failed to hash seed password: %v", err)
+		return
+	}
+
+	// 1. Seed Admins
+	var adminCount int64
+	db.Model(&models.Admin{}).Count(&adminCount)
+	if adminCount == 0 {
 		log.Println("Seeding default admin users...")
 		admins := []models.Admin{
 			{Email: "xen_civil@nith.ac.in", Position: models.TypeXENCivil, IsVerified: true},
@@ -60,12 +68,6 @@ func seedAdmins(db *gorm.DB) {
 			{Email: "ae_electrical@nith.ac.in", Position: models.TypeAEElectrical, IsVerified: true},
 			{Email: "je_electrical@nith.ac.in", Position: models.TypeJEElectrical, IsVerified: true},
 		}
-		password := "Admin@123"
-		hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-		if err != nil {
-			log.Printf("Failed to hash admin seed password: %v", err)
-			return
-		}
 		for i := range admins {
 			admins[i].Password = string(hashedPass)
 			admins[i].CreatedAt = time.Now()
@@ -73,6 +75,72 @@ func seedAdmins(db *gorm.DB) {
 				log.Printf("Failed to seed admin %s: %v", admins[i].Email, err)
 			}
 		}
-		log.Println("Admin users seeded successfully!")
+		log.Println("Admin users seeded.")
+	}
+
+	// 2. Seed Faculty
+	var facultyCount int64
+	db.Model(&models.Faculty{}).Count(&facultyCount)
+	if facultyCount == 0 {
+		log.Println("Seeding default faculty user...")
+		faculty := models.Faculty{
+			Name:        "Test Faculty",
+			Email:       "faculty@nith.ac.in",
+			Password:    string(hashedPass),
+			Department:  models.CSE,
+			HouseNumber: "H-101",
+			Block:       models.BlockA,
+			Type:        models.Type1,
+			PhoneNumber: "1234567890",
+			IsVerified:  true,
+			CreatedAt:   time.Now(),
+		}
+		if err := db.Create(&faculty).Error; err != nil {
+			log.Printf("Failed to seed faculty user: %v", err)
+		} else {
+			log.Println("Faculty user seeded.")
+		}
+	}
+
+	// 3. Seed Warden
+	var wardenCount int64
+	db.Model(&models.Warden{}).Count(&wardenCount)
+	if wardenCount == 0 {
+		log.Println("Seeding default warden user...")
+		warden := models.Warden{
+			Name:        "Test Warden",
+			Email:       "warden@nith.ac.in",
+			Password:    string(hashedPass),
+			Hostel:      models.KBH,
+			PhoneNumber: "1234567890",
+			IsVerified:  true,
+			CreatedAt:   time.Now(),
+		}
+		if err := db.Create(&warden).Error; err != nil {
+			log.Printf("Failed to seed warden user: %v", err)
+		} else {
+			log.Println("Warden user seeded.")
+		}
+	}
+
+	// 4. Seed Centrehead
+	var centreheadCount int64
+	db.Model(&models.Centrehead{}).Count(&centreheadCount)
+	if centreheadCount == 0 {
+		log.Println("Seeding default centrehead user...")
+		centrehead := models.Centrehead{
+			Name:        "Test Centrehead",
+			Email:       "centrehead@nith.ac.in",
+			Password:    string(hashedPass),
+			Building:    models.ComputerCentre,
+			PhoneNumber: "1234567890",
+			IsVerified:  true,
+			CreatedAt:   time.Now(),
+		}
+		if err := db.Create(&centrehead).Error; err != nil {
+			log.Printf("Failed to seed centrehead user: %v", err)
+		} else {
+			log.Println("Centrehead user seeded.")
+		}
 	}
 }
