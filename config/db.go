@@ -42,7 +42,9 @@ func ConnectDB() {
 		&models.Comment{},
 	)
 
-	seedUsers(DB)
+	if helpers.GetEnvWithDefault("SEED_DB", "false") == "true" {
+		seedUsers(DB)
+	}
 
 	log.Println("Database connected")
 }
