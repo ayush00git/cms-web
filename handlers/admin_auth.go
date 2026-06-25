@@ -77,7 +77,7 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		token,
 		30 * 24 * 60 * 60,
 		"/",
-		"localhost",
+		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,
 		true,
 	)

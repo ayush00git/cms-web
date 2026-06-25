@@ -16,7 +16,7 @@ func (h *AuthHandler) Logout (c *gin.Context) {
 		" ",
 		-1,
 		"/",
-		"localhost",
+		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,
 		true,
 	)

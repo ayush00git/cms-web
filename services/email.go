@@ -42,7 +42,8 @@ func SendVerificationMail(userId uint, email, role string) (error) {
 	}
 
 	// create the verification url
-	verificationURL := fmt.Sprintf(`http://localhost:5173/account/verify?token=%s`, token)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	verificationURL := fmt.Sprintf(`%s/account/verify?token=%s`, frontendURL, token)
 
 	// send the email
 	mail := fmt.Sprintf(`
@@ -79,7 +80,8 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 	if err != nil {
 		return err
 	}
-	resetURL := fmt.Sprintf(`http://localhost:5173/account/reset-password?user=%s`, token)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	resetURL := fmt.Sprintf(`%s/account/reset-password?user=%s`, frontendURL, token)
 
 	// send the email
 	mail := fmt.Sprintf(`

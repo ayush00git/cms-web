@@ -12,3 +12,11 @@ func GetEnv(target string) string {
 	}
 	return value
 }
+
+func GetEnvWithDefault(target, defaultValue string) string {
+	value := os.Getenv(target)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}

@@ -17,9 +17,10 @@ func ConnectDB() {
 	DB_USER := helpers.GetEnv("DB_USER")
 	DB_NAME := helpers.GetEnv("DB_NAME")
 	DB_PASS := helpers.GetEnv("DB_PASS")
-	// DB_PORT := helpers.GetEnv("DB_PORT") // will see during deployment
+	DB_HOST := helpers.GetEnvWithDefault("DB_HOST", "localhost")
+	DB_PORT := helpers.GetEnvWithDefault("DB_PORT", "5432")
 
-	dsn := fmt.Sprintf("host=localhost user=%s password=%s dbname=%s port=5432 sslmode=disable", DB_USER, DB_PASS, DB_NAME)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT)
 	
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

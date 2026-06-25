@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
@@ -80,9 +81,8 @@ func (h *PostHandler) CentreheadPost(c *gin.Context) {
 		return
 	}
 
-	// send the mail to the corresponding xen
-    // <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
-	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, head.Role, post.ID)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, head.Role, post.ID)
 	go func() {
 		var position models.PositionType
 		if post.TypeOfPost == "Civil" {

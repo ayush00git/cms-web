@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
@@ -90,7 +91,8 @@ func (h *AdminHandler) AdminFacultyPostStatus(c *gin.Context) {
 	}
 
 	// create the postURL
-	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "faculty", post.ID)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "faculty", post.ID)
 
 	switch post.Status {
 	// ** Posts with status type mentioned PendingXEN **
@@ -436,7 +438,8 @@ func (h *AdminHandler) AdminWardenPostStatus(c *gin.Context) {
 	}
 
 	// create the postURL
-	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "warden", post.ID)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "warden", post.ID)
 
 	switch post.Status {
 	// ** Posts with status type mentioned PendingXEN **
@@ -782,7 +785,8 @@ func (h *AdminHandler) AdminCentreheadPostStatus(c *gin.Context) {
 	}
 
 	// create the postURL
-	postURL := fmt.Sprintf(`http://localhost:5173/admin/posts/%s/%d`, "centrehead", post.ID)
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "centrehead", post.ID)
 
 	switch post.Status {
 	// ** Posts with status type mentioned PendingXEN **

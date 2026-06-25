@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/ayush00git/cms-web/config"
 	"github.com/ayush00git/cms-web/handlers"
+	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/routes"
 
 	"github.com/gin-contrib/cors"
@@ -14,10 +14,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error while loading the environment variables")
-	}
+	// Load .env file if it exists, ignore error if missing (e.g. in docker containers)
+	_ = godotenv.Load()
 
 	// db connection
 	config.ConnectDB()
@@ -26,7 +24,8 @@ func main() {
 
 	// CORS policy and config
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:5173"}
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	corsConfig.AllowOrigins = []string{frontendURL}
 	corsConfig.AllowCredentials = true
 
 	r.Use(cors.New(corsConfig))
