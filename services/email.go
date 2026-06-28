@@ -140,7 +140,7 @@ func SendPostMailToAdmins(email, postURL string) error {
 }
 
 // Send email to peoples in the conversation thread
-func SendMailToPeopleInThread(emails []string, postURL string) error {
+func SendMailToPeopleInThread(emails []string, ignoreEmail string, postURL string) error {
 	mail := fmt.Sprintf(`
 		<!DOCTYPE html>
 		<html>
@@ -161,6 +161,9 @@ func SendMailToPeopleInThread(emails []string, postURL string) error {
 		`, postURL)
 
 	for _, email := range emails {
+		if email == ignoreEmail {
+			continue
+		}
 		if err := SendMail(email, "cms: updates on your recent complaint", mail); err != nil {		// if sending mail to one user fails don't abort for others
 			log.Printf("failed sending mail to %s", email)
 			continue
