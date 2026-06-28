@@ -118,7 +118,7 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 		if result.Error != nil {
 			log.Printf("failed adding xen to the thread")
 		}
-	}()
+	} ()
 
 	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }

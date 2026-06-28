@@ -69,6 +69,7 @@ func (h *PostHandler) WardenPost(c *gin.Context) {
 		TypeOfPost: models.PostType(inputs.TypeOfPost),
 		Title: inputs.Title,
 		Description: inputs.Description,
+		PeopleInThread: []string{warden.Email},
 		StatusAuditLogs: []models.StatusAudit{
 			{
 				Event: string(PendingXEN),
@@ -96,16 +97,23 @@ func (h *PostHandler) WardenPost(c *gin.Context) {
 		}
 		// through type of post send the mail to the corresponding civil/electrical XEN
 		var xen models.Admin
+
 		result := h.DB.Where("position = ?", position).Take(&xen)
 		if result.Error != nil {
-       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
+       	 	log.Printf("failed fetching user at the moment %v", result.Error)
 			return
 		}
 		// send mail to that user
 		if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
         	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
 		}
-	}()
+		// append xen's email to the post
+		people := append(post.PeopleInThread, xen.Email)
+		result = h.DB.Model(&post).Update("people_in_thread", people)
+		if result.Error != nil {
+			log.Printf("failed adding xen to the thread")
+		}
+	} ()
 
 	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
