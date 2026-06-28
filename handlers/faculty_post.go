@@ -324,12 +324,12 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 		frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
 		postURL := fmt.Sprintf(`%s/faculty/post/%d`, frontendURL, post.ID)
 
-		if err := services.SendMailToPeopleInThread(post.PeopleInThread, faculty.Email, postURL); err != nil {
+		if err := services.SendMailToPeopleInThread(post.PeopleInThread, facultyEmail, postURL); err != nil {
 			log.Printf("failed sending notification emails for post #%d: %v", post.ID, err)
 			return
 		}
 		log.Printf("notification emails sent for post #%d", post.ID)
-	} (post, faculty.Email)
+	}(post, faculty.Email)
 
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }

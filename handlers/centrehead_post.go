@@ -286,7 +286,7 @@ func (h *PostHandler) CentreheadPostComment(c *gin.Context) {
 	// bind the input
 	var inputs CommentType
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(401, gin.H{"error": "invalid request body"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -306,5 +306,18 @@ func (h *PostHandler) CentreheadPostComment(c *gin.Context) {
 		return
 	}
 	
+	// send email notification to people involved in the conversation
+	go func(post models.CentreheadPost, headEmail string) {
+		frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+		postURL := fmt.Sprintf(`%s/centre-head/post/%d`, frontendURL, post.ID)
+
+		if err := services.SendMailToPeopleInThread(post.PeopleInThread, headEmail, postURL); err != nil {
+			log.Printf("failed sending notification emails for post #%d: %v", post.ID, err)
+			return
+		}
+		log.Printf("notification emails sent for post #%d", post.ID)
+	}(post, head.Email)
+
+
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }
