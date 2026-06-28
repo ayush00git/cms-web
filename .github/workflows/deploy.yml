@@ -1,4 +1,4 @@
-name: Deploy to College Server
+name: Push to production
 
 on:
   push:
