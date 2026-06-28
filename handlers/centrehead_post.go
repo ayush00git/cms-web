@@ -318,6 +318,5 @@ func (h *PostHandler) CentreheadPostComment(c *gin.Context) {
 		log.Printf("notification emails sent for post #%d", post.ID)
 	}(post, head.Email)
 
-
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }

@@ -290,7 +290,7 @@ func (h *PostHandler) WardenPostComment(c *gin.Context) {
 	// bind the input
 	var inputs CommentType
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(401, gin.H{"error": "invalid request body"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -309,6 +309,18 @@ func (h *PostHandler) WardenPostComment(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
 		return
 	}
-	
+
+	// send email notification to people involved in the conversation
+	go func(post models.WardenPost, wardenEmail string) {
+		frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+		postURL := fmt.Sprintf(`%s/warden/post/%d`, frontendURL, post.ID)
+
+		if err := services.SendMailToPeopleInThread(post.PeopleInThread, wardenEmail, postURL); err != nil {
+			log.Printf("failed sending notification emails for post #%d: %v", post.ID, err)
+			return
+		}
+		log.Printf("notification emails sent for post #%d", post.ID)
+	}(post, warden.Email)
+
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }
