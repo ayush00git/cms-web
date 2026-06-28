@@ -20,6 +20,14 @@ type PostHandler struct {
 	DB *gorm.DB
 }
 
+// FacultyPostType
+type FacultyPostType struct {
+	Place			string		`json:"place"`
+	TypeOfPost		string		`json:"type_of_post"`
+	Title			string		`json:"title"`
+	Description		string		`json:"description"`
+}
+
 // FacultyPostEditType
 type FacultyPostEditType struct {
 	Place			string		`json:"place"`
@@ -28,13 +36,6 @@ type FacultyPostEditType struct {
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
-// FacultyPostType
-type FacultyPostType struct {
-	Place			string		`json:"place"`
-	TypeOfPost		string		`json:"type_of_post"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
-}
 
 // FacultyPost registers the post of faculty members.
 // forwards the post to the associated XEN.
@@ -72,6 +73,7 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 		TypeOfPost: models.PostType(inputs.TypeOfPost),
 		Title: inputs.Title,
 		Description: inputs.Description,
+		PeopleInThread: []string{faculty.Email},
 		StatusAuditLogs: []models.StatusAudit{
 			{
 				Event: string(PendingXEN),
@@ -90,6 +92,7 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 
 	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
 	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, faculty.Role, post.ID)
+	// forward the post creation update to xen
 	go func() {
 		var position models.PositionType
 		if post.TypeOfPost == "Civil" {
@@ -99,14 +102,21 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 		}
 		// through type of post send the mail to the corresponding civil/electrical XEN
 		var xen models.Admin
+
 		result := h.DB.Where("position = ?", position).Take(&xen)
 		if result.Error != nil {
-       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
+       	 	log.Printf("failed fetching user at the moment %v", result.Error)
 			return
 		}
 		// send mail to that user
 		if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
         	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
+		}
+		// append xen's email to the post
+		people := append(post.PeopleInThread, xen.Email)
+		result = h.DB.Model(&post).Update("people_in_thread", people)
+		if result.Error != nil {
+			log.Printf("failed adding xen to the thread")
 		}
 	}()
 

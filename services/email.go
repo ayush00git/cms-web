@@ -161,7 +161,7 @@ func SendMailToPeopleInThread(emails []string, postURL string) error {
 		`, postURL)
 
 	for _, email := range emails {
-		if err := SendMail(email, "cms: updates on your recent complaint", mail); err != nil {		// if sending mail to one user failed don't abort for others
+		if err := SendMail(email, "cms: updates on your recent complaint", mail); err != nil {		// if sending mail to one user fails don't abort for others
 			log.Printf("failed sending mail to %s", email)
 			continue
 		}
