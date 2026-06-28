@@ -299,7 +299,7 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 	// bind input to json
 	var inputs CommentType
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(401, gin.H{"error": "invalid request body"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -318,6 +318,18 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
 		return
 	}
+
+	// send email notification to people involved in the conversation
+	go func(post models.FacultyPost, facultyEmail string) {
+		frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+		postURL := fmt.Sprintf(`%s/faculty/post/%d`, frontendURL, post.ID)
+
+		if err := services.SendMailToPeopleInThread(post.PeopleInThread, faculty.Email, postURL); err != nil {
+			log.Printf("failed sending notification emails for post #%d: %v", post.ID, err)
+			return
+		}
+		log.Printf("notification emails sent for post #%d", post.ID)
+	} (post, faculty.Email)
 
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }
