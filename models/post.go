@@ -47,6 +47,7 @@ type FacultyPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
@@ -64,6 +65,7 @@ type WardenPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
@@ -80,6 +82,7 @@ type CentreheadPost struct {
 	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
 	Title           string          `gorm:"not null" json:"title" binding:"required"`
 	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
 	AssignedJE_ID   *uint           `json:"assigned_je_id"`
