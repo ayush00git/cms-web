@@ -112,7 +112,6 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 }
 
 func SendPostMailToAdmins(email, postURL string) error {
-	// send the email
 	mail := fmt.Sprintf(`
 		<!DOCTYPE html>
 		<html>
@@ -124,7 +123,36 @@ func SendPostMailToAdmins(email, postURL string) error {
 			</style>
 		</head>
 		<body>
-			<h2>Reset your password</h2>
+			<h2>cms: updates on your recent complaint</h2>
+			<p>
+				<a href="%s" class="button" style="color: white;">Reset!</a>
+			</p>
+		</body>
+		</html>
+		`, postURL)
+// sends the email
+	err := SendMail(email, "New complaint recieved", mail)
+	if err != nil {
+		return err
+	}
+	log.Printf("complaint mail was sent to %s", email)
+	return nil
+}
+
+// Send email to peoples in the conversation thread
+func SendMailToPeopleInThread(emails []string, postURL string) error {
+	mail := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="utf-8">
+			<style>
+				body { font-family: sans-serif; line-height: 1.5; color: #333333; }
+				.button { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+			</style>
+		</head>
+		<body>
+			<h2>cms: updates on your recent complaint</h2>
 			<p>
 				<a href="%s" class="button" style="color: white;">Reset!</a>
 			</p>
@@ -132,10 +160,12 @@ func SendPostMailToAdmins(email, postURL string) error {
 		</html>
 		`, postURL)
 
-	err := SendMail(email, "New complaint recieved", mail)
-	if err != nil {
-		return err
+	for _, email := range emails {
+		if err := SendMail(email, "cms: updates on your recent complaint", mail); err != nil {		// if sending mail to one user failed don't abort for others
+			log.Printf("failed sending mail to %s", email)
+			continue
+		}
+		log.Printf("complaint was sent to %s\n", email)
 	}
-	log.Printf("complaint mail was sent to %s", email)
 	return nil
 }
