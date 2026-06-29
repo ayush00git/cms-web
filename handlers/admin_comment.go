@@ -2,11 +2,15 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"strconv"
 	"time"
 
+	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -100,6 +104,64 @@ func (h *AdminHandler) AdminPostComment(c *gin.Context) {
 		}
 		c.JSON(500, gin.H{"error": "internal server error"})
 		return
+	}
+
+	// update the PeopleInThread field for post
+	switch p := postModel.(type) {
+	case *models.FacultyPost:
+		// add person to conversation thread and send mail to all people in thread
+		p.PeopleInThread = helpers.AppendUnique(p.PeopleInThread, admin.Email)
+		result := h.DB.Save(p)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed updating the conversation thread"})
+			return
+		}
+		go func() {
+			frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+			postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "faculty", p.ID)
+			
+			if err := services.SendMailToPeopleInThread(p.PeopleInThread, admin.Email, postURL); err != nil {
+				log.Printf("failed sending notification emails for post #%d: %v", p.ID, err)
+				return
+			}
+			log.Printf("notification emails sent for post #%d", p.ID)
+		}()
+
+	case *models.WardenPost:
+		p.PeopleInThread = helpers.AppendUnique(p.PeopleInThread, admin.Email)
+		result := h.DB.Save(p)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed updating the conversation thread"})
+			return
+		}
+		go func() {
+			frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+			postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "warden", p.ID)
+			
+			if err := services.SendMailToPeopleInThread(p.PeopleInThread, admin.Email, postURL); err != nil {
+				log.Printf("failed sending notification emails for post #%d: %v", p.ID, err)
+				return
+			}
+			log.Printf("notification emails sent for post #%d", p.ID)
+		}()
+
+	case *models.CentreheadPost:
+		p.PeopleInThread = helpers.AppendUnique(p.PeopleInThread, admin.Email)
+		result := h.DB.Save(p)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed updating the conversation thread"})
+			return
+		}
+		go func() {
+			frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+			postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "centrehead", p.ID)
+			
+			if err := services.SendMailToPeopleInThread(p.PeopleInThread, admin.Email, postURL); err != nil {
+				log.Printf("failed sending notification emails for post #%d: %v", p.ID, err)
+				return
+			}
+			log.Printf("notification emails sent for post #%d", p.ID)
+		}()
 	}
 
 	doc := models.Comment{

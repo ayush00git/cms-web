@@ -20,6 +20,14 @@ type PostHandler struct {
 	DB *gorm.DB
 }
 
+// FacultyPostType
+type FacultyPostType struct {
+	Place			string		`json:"place"`
+	TypeOfPost		string		`json:"type_of_post"`
+	Title			string		`json:"title"`
+	Description		string		`json:"description"`
+}
+
 // FacultyPostEditType
 type FacultyPostEditType struct {
 	Place			string		`json:"place"`
@@ -28,13 +36,6 @@ type FacultyPostEditType struct {
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
-// FacultyPostType
-type FacultyPostType struct {
-	Place			string		`json:"place"`
-	TypeOfPost		string		`json:"type_of_post"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
-}
 
 // FacultyPost registers the post of faculty members.
 // forwards the post to the associated XEN.
@@ -72,6 +73,7 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 		TypeOfPost: models.PostType(inputs.TypeOfPost),
 		Title: inputs.Title,
 		Description: inputs.Description,
+		PeopleInThread: []string{faculty.Email},
 		StatusAuditLogs: []models.StatusAudit{
 			{
 				Event: string(PendingXEN),
@@ -90,6 +92,7 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 
 	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
 	postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, faculty.Role, post.ID)
+	// forward the post creation update to xen
 	go func() {
 		var position models.PositionType
 		if post.TypeOfPost == "Civil" {
@@ -99,16 +102,23 @@ func (h *PostHandler) FacultyPost(c *gin.Context) {
 		}
 		// through type of post send the mail to the corresponding civil/electrical XEN
 		var xen models.Admin
+
 		result := h.DB.Where("position = ?", position).Take(&xen)
 		if result.Error != nil {
-       	 	log.Printf("failed to send XEN mail for post %d", post.ID)
+       	 	log.Printf("failed fetching user at the moment %v", result.Error)
 			return
 		}
 		// send mail to that user
 		if err := services.SendPostMailToAdmins(xen.Email, postURL); err != nil {
         	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
 		}
-	}()
+		// append xen's email to the post
+		post.PeopleInThread = append(post.PeopleInThread, xen.Email)
+		result = h.DB.Model(&post).Updates(post)
+		if result.Error != nil {
+			log.Printf("failed adding xen to the thread")
+		}
+	} ()
 
 	c.JSON(201, gin.H{"success": "post submitted successfully", "post": post})
 }
@@ -289,7 +299,7 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 	// bind input to json
 	var inputs CommentType
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(401, gin.H{"error": "invalid request body"})
+		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -308,6 +318,18 @@ func (h *PostHandler) FacultyPostComment(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "failed to comment at the moment"})
 		return
 	}
+
+	// send email notification to people involved in the conversation
+	go func(post models.FacultyPost, facultyEmail string) {
+		frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+		postURL := fmt.Sprintf(`%s/faculty/post/%d`, frontendURL, post.ID)
+
+		if err := services.SendMailToPeopleInThread(post.PeopleInThread, facultyEmail, postURL); err != nil {
+			log.Printf("failed sending notification emails for post #%d: %v", post.ID, err)
+			return
+		}
+		log.Printf("notification emails sent for post #%d", post.ID)
+	}(post, faculty.Email)
 
 	c.JSON(201, gin.H{"success": "comment posted!"})
 }

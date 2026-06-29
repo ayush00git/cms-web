@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Hammer, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
   MessageSquare, Wrench, ArrowLeft, Send, AlertCircle,
-  Clock,
+  Clock, Users,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_PLACES } from '../../constants/models';
@@ -37,6 +37,7 @@ interface ComplaintPost {
   updated_at?: string;
   comments?: ComplaintComment[] | null;
   status_audit_logs?: StatusAudit[] | null;
+  people_in_thread?: string[] | null;
 }
 
 interface EditForm {
@@ -457,6 +458,30 @@ export function PostView() {
 
           </div>
         </div>
+
+        {/* People in conversation thread */}
+        {!isEditing && (
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" /> People in conversation thread
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {post.people_in_thread && post.people_in_thread.length > 0 ? (
+                post.people_in_thread.map((email) => (
+                  <span
+                    key={email}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-700 shadow-sm"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    {email}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-400 italic">No one in thread yet</span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Comments Section */}
         {!isEditing && (
