@@ -139,7 +139,8 @@ func SendPostMailToAdmins(email, postURL string) error {
 	return nil
 }
 
-// Send email to peoples in the conversation thread
+// Send email to peoples in the conversation thread expect the ignoreEmail
+// one, to prevent sending the mail to user itself for its events
 func SendMailToPeopleInThread(emails []string, ignoreEmail string, postURL string) error {
 	mail := fmt.Sprintf(`
 		<!DOCTYPE html>
