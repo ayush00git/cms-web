@@ -108,8 +108,8 @@ func (h *PostHandler) WardenPost(c *gin.Context) {
         	log.Printf("failed to send XEN mail for post %d: %v", post.ID, err)
 		}
 		// append xen's email to the post
-		people := append(post.PeopleInThread, xen.Email)
-		result = h.DB.Model(&post).Update("people_in_thread", people)
+		post.PeopleInThread = append(post.PeopleInThread, xen.Email)
+		result = h.DB.Model(&post).Updates(post)
 		if result.Error != nil {
 			log.Printf("failed adding xen to the thread")
 		}
