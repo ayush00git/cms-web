@@ -154,7 +154,7 @@ func (h *AdminHandler) AdminPostComment(c *gin.Context) {
 		}
 		go func() {
 			frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
-			postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "centre-head", p.ID)
+			postURL := fmt.Sprintf(`%s/admin/posts/%s/%d`, frontendURL, "centrehead", p.ID)
 			
 			if err := services.SendMailToPeopleInThread(p.PeopleInThread, admin.Email, postURL); err != nil {
 				log.Printf("failed sending notification emails for post #%d: %v", p.ID, err)
