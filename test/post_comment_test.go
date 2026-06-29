@@ -82,7 +82,7 @@ func TestFacultyPostComment_InvalidBody(t *testing.T) {
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
 	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/faculty/comment/1", "{not json")
-	assertStatus(t, rec, 401)
+	assertStatus(t, rec, 400)
 }
 
 // --- WardenPostComment ------------------------------------------------------
@@ -155,7 +155,7 @@ func TestWardenPostComment_InvalidBody(t *testing.T) {
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
 	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/warden/comment/1", "{not json")
-	assertStatus(t, rec, 401)
+	assertStatus(t, rec, 400)
 }
 
 // --- CentreheadPostComment --------------------------------------------------
@@ -228,5 +228,5 @@ func TestCentreheadPostComment_InvalidBody(t *testing.T) {
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
 	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/centrehead/comment/1", "{not json")
-	assertStatus(t, rec, 401)
+	assertStatus(t, rec, 400)
 }
