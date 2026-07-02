@@ -171,7 +171,6 @@ export function ComplaintCard({
                 <MessageSquare className="w-3.5 h-3.5 text-gray-400" /> {comments.length}
               </span>
             )}
-            <ChevronRight className={`w-4 h-4 text-gray-300 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all duration-250`} />
           </div>
         </div>
 
