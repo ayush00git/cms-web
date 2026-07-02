@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
+import { Loader } from '../../components/Loader';
 
 type VerifyStatus = 'loading' | 'success' | 'error' | 'no-token';
 
@@ -91,7 +92,7 @@ export function VerifyAccount() {
         {/* Loading */}
         {status === 'loading' && (
           <div className="flex flex-col items-center gap-5 text-center">
-            <div className="w-16 h-16 rounded-full border-4 border-[#E5E5E5] border-t-[#111111] animate-spin" />
+            <Loader size="xl" color="dark" className="w-16 h-16" />
             <p className="text-gray-500 font-medium">Verifying your account, please wait…</p>
           </div>
         )}
