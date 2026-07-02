@@ -66,7 +66,13 @@ export function Profile() {
         if (!res.ok) throw new Error(`Server error (${res.status})`);
         return res.json();
       })
-      .then((data) => { setPosts(data.posts ?? []); setPostsLoading(false); })
+      .then((data) => {
+        setPosts(data.posts ?? []);
+        setPostsLoading(false);
+        if (data.name) {
+          setProfile((prev) => prev ? { ...prev, name: data.name } : null);
+        }
+      })
       .catch((err: Error) => { setPostsError(err.message); setPostsLoading(false); });
   }, [profile]);
 

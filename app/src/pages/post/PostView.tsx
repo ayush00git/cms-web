@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_PLACES } from '../../constants/models';
+import { CommentBox } from '../../components/CommentBox';
 
 type Role = 'faculty' | 'warden' | 'centrehead';
 
@@ -570,27 +571,8 @@ export function PostView() {
                     );
                   } else {
                     const c = item.data;
-                    const author = c.role ? roleLabel(c.role) : 'Staff';
-
                     return (
-                      <div key={`comment-${c.id}`} className="relative pl-10">
-                        {/* Comment Bubble in GitHub Style */}
-                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                          <div className="bg-gray-50 border-b border-gray-150 px-4 py-2 flex items-center justify-between gap-2">
-                            <span className="min-w-0 flex items-baseline gap-1.5">
-                              <span className="text-xs font-bold text-gray-800">{author}</span>
-                              {c.email && <span className="text-[10px] text-gray-400 truncate">{c.email}</span>}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
-                              <Clock className="w-3 h-3" />
-                              {formatDateTime(c.created_at)}
-                            </span>
-                          </div>
-                          <div className="px-4 py-3 text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">
-                            {c.comment_text}
-                          </div>
-                        </div>
-                      </div>
+                      <CommentBox key={`comment-${c.id}`} comment={c} />
                     );
                   }
                 })
