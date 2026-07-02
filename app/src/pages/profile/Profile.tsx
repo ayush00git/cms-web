@@ -66,7 +66,13 @@ export function Profile() {
         if (!res.ok) throw new Error(`Server error (${res.status})`);
         return res.json();
       })
-      .then((data) => { setPosts(data.posts ?? []); setPostsLoading(false); })
+      .then((data) => {
+        setPosts(data.posts ?? []);
+        setPostsLoading(false);
+        if (data.name) {
+          setProfile((prev) => prev ? { ...prev, name: data.name } : null);
+        }
+      })
       .catch((err: Error) => { setPostsError(err.message); setPostsLoading(false); });
   }, [profile]);
 
@@ -215,7 +221,7 @@ export function Profile() {
             {/* Identity row */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
               <div>
-                <p className="text-base font-bold text-[#111111]">{profile.name || profile.email?.split('@')[0] || ''}</p>
+                <p className="text-base font-bold text-[#111111]">{profile.name}</p>
                 <p className="text-sm text-[#666666] mt-0.5">{profile.email}</p>
               </div>
               <div className="flex items-center gap-2">

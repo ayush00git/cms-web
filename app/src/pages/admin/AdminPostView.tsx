@@ -22,6 +22,7 @@ import {
   Users,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
+import { CommentBox } from '../../components/CommentBox';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -856,84 +857,29 @@ export function AdminPostView() {
                     );
                   } else {
                     const c = item.data;
-                    const who = c.role ? c.role.replace(/_/g, ' ') : 'Staff';
                     const isMyComment = adminComments.some((ac) => ac.id === c.id);
                     const isEditing = editingCommentId === c.id;
                     const isBusy = commentActionLoadingId === c.id;
                     const editExpired = isEditWindowExpired(c.created_at);
 
                     return (
-                      <div key={`comment-${c.id}`} className="relative pl-10">
-                        {/* Comment Bubble in GitHub Style */}
-                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden group/comment">
-                          <div className="bg-gray-50 border-b border-gray-150 px-4 py-2 flex items-center justify-between gap-2">
-                            <span className="min-w-0 flex items-baseline gap-1.5">
-                              <span className="text-xs font-bold text-gray-800">{who}</span>
-                              {c.email && <span className="text-[10px] text-gray-400 truncate max-w-[150px] sm:max-w-none">{c.email}</span>}
-                            </span>
-                            <span className="ml-auto text-[10px] text-gray-400 flex items-center gap-2">
-                              {formatDateTime(c.created_at)}
-                              
-                              {isMyComment && !isEditing && !editExpired && (
-                                <span className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
-                                  <button
-                                    onClick={() => {
-                                      setEditingCommentId(c.id);
-                                      setEditingText(c.comment_text);
-                                    }}
-                                    disabled={isBusy}
-                                    className="p-0.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200/50 transition cursor-pointer"
-                                    title="Edit comment"
-                                  >
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteComment(c.id)}
-                                    disabled={isBusy}
-                                    className="p-0.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                                    title="Delete comment"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </span>
-                              )}
-                            </span>
-                          </div>
-
-                          <div className="px-4 py-3 relative">
-                            {isEditing ? (
-                              <div className="mt-1">
-                                <textarea
-                                  value={editingText}
-                                  onChange={(e) => setEditingText(e.target.value)}
-                                  disabled={isBusy}
-                                  rows={2}
-                                  className="w-full text-xs text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition resize-none"
-                                />
-                                <div className="mt-2 flex justify-end gap-2">
-                                  <button
-                                    onClick={() => setEditingCommentId(null)}
-                                    disabled={isBusy}
-                                    className="border border-gray-200 text-gray-500 hover:bg-gray-100 font-bold text-[10px] px-2.5 py-1.5 rounded transition cursor-pointer"
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    onClick={() => handleEditComment(c.id)}
-                                    disabled={isBusy || !editingText.trim()}
-                                    className="bg-[#2d2d2d] text-white hover:bg-[#ff9900] font-bold text-[10px] px-3 py-1.5 rounded transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
-                                  >
-                                    {isBusy && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                                    Save
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-gray-600 leading-relaxed break-words whitespace-pre-wrap">{c.comment_text}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <CommentBox
+                        key={`comment-${c.id}`}
+                        comment={c}
+                        isMyComment={isMyComment}
+                        isEditing={isEditing}
+                        isBusy={isBusy}
+                        editExpired={editExpired}
+                        editingText={editingText}
+                        onStartEdit={() => {
+                          setEditingCommentId(c.id);
+                          setEditingText(c.comment_text);
+                        }}
+                        onCancelEdit={() => setEditingCommentId(null)}
+                        onSaveEdit={() => handleEditComment(c.id)}
+                        onDeleteComment={() => handleDeleteComment(c.id)}
+                        onEditingTextChange={(text) => setEditingText(text)}
+                      />
                     );
                   }
                 })
@@ -941,137 +887,144 @@ export function AdminPostView() {
 
               {/* ── Comment + action area ── */}
               <div className="relative pl-10">
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 space-y-3">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Comment &amp; Update Status
-                  </label>
+                {/* Precision-aligned Connector Dot */}
+                <div className="absolute left-[10px] top-[26px] w-3 h-3 rounded-full border-[2.5px] border-white bg-zinc-300 z-10 shadow-sm" />
+
+                <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-sm focus-within:border-zinc-400 focus-within:ring-4 focus-within:ring-zinc-800/5 transition-all duration-300">
                   <textarea
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     disabled={acting || !adminType}
                     placeholder={adminType
-                      ? 'Add a comment…'
+                      ? 'Add a comment and select an action below...'
                       : 'No actions available.'}
                     rows={3}
-                    className="w-full text-xs text-gray-800 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#ff9900]/40 focus:border-[#ff9900] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-[13px] text-zinc-800 placeholder-zinc-400 bg-transparent px-4 py-3.5 resize-none focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   />
 
-                  {/* Feedback */}
-                  {actError && (
-                    <p className="text-xs font-semibold text-red-500 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      {actError}
-                    </p>
-                  )}
-                  {actSuccess && (
-                    <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      {actSuccess}
-                    </p>
-                  )}
+                  {/* Bottom Toolbar */}
+                  <div className="bg-zinc-50/50 border-t border-zinc-100 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                      Comment &amp; Update Status
+                    </span>
 
-                  {/* Action buttons */}
-                  {adminType && (
-                    <div className="flex flex-wrap justify-end gap-2 pt-1">
-                      <span
-                        className={!commentText.trim() ? 'inline-block cursor-not-allowed' : 'inline-block'}
-                        title={!commentText.trim() ? 'comment content required' : undefined}
-                      >
-                        <button
-                          onClick={handlePostCommentOnly}
-                          disabled={acting || !commentText.trim()}
-                          className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#2d2d2d] hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+                    {/* Action buttons */}
+                    {adminType && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={!commentText.trim() ? 'inline-block cursor-not-allowed' : 'inline-block'}
+                          title={!commentText.trim() ? 'comment content required' : undefined}
                         >
-                          {acting ? (
-                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : <MessageSquare className="w-3.5 h-3.5" />}
-                          Post Comment
-                        </button>
-                      </span>
+                          <button
+                            onClick={handlePostCommentOnly}
+                            disabled={acting || !commentText.trim()}
+                            className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+                          >
+                            {acting ? (
+                              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : <MessageSquare className="w-3.5 h-3.5" />}
+                            Post Comment
+                          </button>
+                        </span>
 
-                      {canAct && actionBtns.map((btn) => {
-                        const isAssignBtn = btn.label === 'Assign to JE';
-                        if (isAssignBtn) {
+                        {canAct && actionBtns.map((btn) => {
+                          const isAssignBtn = btn.label === 'Assign to JE';
+                          if (isAssignBtn) {
+                            const showBlockedTooltip = !commentText.trim();
+                            return (
+                              <span
+                                key={btn.review}
+                                className={showBlockedTooltip ? 'inline-block cursor-not-allowed' : 'inline-block'}
+                                title={showBlockedTooltip ? 'comment content required' : undefined}
+                              >
+                                <div className="relative inline-block text-left">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (!jeDropdownOpen) {
+                                        fetchJEs();
+                                      }
+                                      setJeDropdownOpen(!jeDropdownOpen);
+                                    }}
+                                    disabled={acting || !commentText.trim()}
+                                    className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+                                  >
+                                    {acting ? (
+                                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : btn.icon}
+                                    {btn.label}
+                                  </button>
+                                  {jeDropdownOpen && (
+                                    <>
+                                      <div className="fixed inset-0 z-40" onClick={() => setJeDropdownOpen(false)} />
+                                      <div className="absolute right-0 bottom-full mb-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-zinc-200 focus:outline-none z-50">
+                                        <div className="py-1">
+                                          {jes.length === 0 ? (
+                                            <span className="block px-4 py-2 text-xs text-zinc-500">No JEs available</span>
+                                          ) : (
+                                            jes.map((je) => (
+                                              <button
+                                                key={je.id}
+                                                type="button"
+                                                onClick={() => handleAssignToJE(je.email)}
+                                                className="w-full text-left block px-4 py-2 text-xs text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 transition-colors cursor-pointer relative z-50 font-medium"
+                                              >
+                                                {je.email}
+                                              </button>
+                                            ))
+                                          )}
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              </span>
+                            );
+                          }
+
+                          const isResolvedBtn = btn.label === 'Resolved';
+                          const buttonColorClass = isResolvedBtn
+                            ? 'bg-rose-600 hover:bg-rose-700'
+                            : 'bg-amber-500 hover:bg-amber-600';
                           const showBlockedTooltip = !commentText.trim();
+
                           return (
                             <span
                               key={btn.review}
                               className={showBlockedTooltip ? 'inline-block cursor-not-allowed' : 'inline-block'}
                               title={showBlockedTooltip ? 'comment content required' : undefined}
                             >
-                              <div className="relative inline-block text-left">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (!jeDropdownOpen) {
-                                      fetchJEs();
-                                    }
-                                    setJeDropdownOpen(!jeDropdownOpen);
-                                  }}
-                                  disabled={acting || !commentText.trim()}
-                                  className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#ff9900] hover:bg-[#e68a00] px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
-                                >
-                                  {acting ? (
-                                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                  ) : btn.icon}
-                                  {btn.label}
-                                </button>
-                                {jeDropdownOpen && (
-                                  <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setJeDropdownOpen(false)} />
-                                    <div className="absolute right-0 bottom-full mb-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                                      <div className="py-1">
-                                        {jes.length === 0 ? (
-                                          <span className="block px-4 py-2 text-xs text-gray-500">No JEs available</span>
-                                        ) : (
-                                          jes.map((je) => (
-                                            <button
-                                              key={je.id}
-                                              type="button"
-                                              onClick={() => handleAssignToJE(je.email)}
-                                              className="w-full text-left block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors cursor-pointer relative z-50"
-                                            >
-                                              {je.email}
-                                            </button>
-                                          ))
-                                        )}
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
+                              <button
+                                onClick={() => handleAction(btn.review)}
+                                disabled={disabled}
+                                className={`inline-flex items-center gap-2 text-xs font-semibold text-white ${buttonColorClass} px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer`}
+                              >
+                                {acting ? (
+                                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : btn.icon}
+                                {btn.label}
+                              </button>
                             </span>
                           );
-                        }
-
-                        const isResolvedBtn = btn.label === 'Resolved';
-                        const buttonColorClass = isResolvedBtn
-                          ? 'bg-red-600 hover:bg-red-700'
-                          : 'bg-[#ff9900] hover:bg-[#e68a00]';
-                        const showBlockedTooltip = !commentText.trim();
-
-                        return (
-                          <span
-                            key={btn.review}
-                            className={showBlockedTooltip ? 'inline-block cursor-not-allowed' : 'inline-block'}
-                            title={showBlockedTooltip ? 'comment content required' : undefined}
-                          >
-                            <button
-                              onClick={() => handleAction(btn.review)}
-                              disabled={disabled}
-                              className={`inline-flex items-center gap-2 text-xs font-bold text-white ${buttonColorClass} px-4 py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer`}
-                            >
-                              {acting ? (
-                                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              ) : btn.icon}
-                              {btn.label}
-                            </button>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Feedback */}
+                {actError && (
+                  <p className="text-xs font-semibold text-red-500 mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {actError}
+                  </p>
+                )}
+                {actSuccess && (
+                  <p className="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    {actSuccess}
+                  </p>
+                )}
               </div>
 
             </div>
