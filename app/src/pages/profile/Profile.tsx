@@ -7,6 +7,7 @@ import {
 import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
 import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
+import { Loader } from '../../components/Loader';
 
 interface ProfileData {
   name?: string;
@@ -83,7 +84,7 @@ export function Profile() {
       <MainLayout>
         <div className="flex-grow flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#111111] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <Loader size="lg" color="dark" className="mx-auto mb-4" />
             <p className="text-[#666666] font-semibold text-sm">Loading profile data…</p>
           </div>
         </div>
@@ -293,7 +294,7 @@ export function Profile() {
 
           {postsLoading && (
             <div className="flex items-center justify-center py-16 gap-3 text-[#666666]">
-              <div className="w-5 h-5 border-2 border-[#111111] border-t-transparent rounded-full animate-spin" />
+              <Loader size="sm" color="dark" />
               <span className="text-sm font-semibold">Fetching your complaints…</span>
             </div>
           )}

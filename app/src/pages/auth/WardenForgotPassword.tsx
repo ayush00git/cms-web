@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
+import { Loader } from '../../components/Loader';
 
 export function WardenForgotPassword() {
   const [email, setEmail]         = useState('');
@@ -94,12 +95,7 @@ export function WardenForgotPassword() {
                 disabled={loading || submitted}
                 className={`inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2.5 px-8 rounded-lg transition-colors duration-200 text-sm active:scale-[0.98] ${(loading || submitted) ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                {loading && (
-                  <svg className="animate-spin w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                  </svg>
-                )}
+                {loading && <Loader size="sm" color="white" />}
                 {loading ? 'Sending…' : submitted ? 'Link Sent' : 'Send Reset Link'}
               </button>
               <Link to="/warden/login" className="text-sm text-[#666666] hover:text-[#111111] transition-colors cursor-pointer">

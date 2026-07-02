@@ -1,4 +1,5 @@
 import { Clock, Pencil, Trash2 } from 'lucide-react';
+import { Loader } from './Loader';
 
 interface CommentBoxProps {
   comment: {
@@ -171,7 +172,7 @@ export function CommentBox({
                     disabled={isBusy || !editingText.trim()}
                     className="bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-xs px-4.5 py-1.5 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
                   >
-                    {isBusy && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    {isBusy && <Loader size="xs" color="white" />}
                     Save
                   </button>
                 </div>

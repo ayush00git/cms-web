@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AlertCircle, ServerCrash, ClipboardList, GraduationCap, BedDouble, Building2, Zap, Hammer } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
+import { Loader } from '../../components/Loader';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -185,7 +186,7 @@ export function JEPostView() {
       <MainLayout>
         <div className="flex-grow flex items-center justify-center bg-gray-50 py-20">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <Loader size="lg" color="orange" className="mx-auto mb-4" />
             <p className="text-gray-600 font-semibold">Fetching posts…</p>
           </div>
         </div>

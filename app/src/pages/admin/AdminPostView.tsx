@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { CommentBox } from '../../components/CommentBox';
+import { Loader } from '../../components/Loader';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -603,7 +604,7 @@ export function AdminPostView() {
       <MainLayout>
         <div className="flex-grow flex items-center justify-center bg-white py-20">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <Loader size="lg" color="orange" className="mx-auto mb-4" />
             <p className="text-gray-600 font-semibold">Loading post…</p>
           </div>
         </div>
@@ -921,7 +922,7 @@ export function AdminPostView() {
                             className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                           >
                             {acting ? (
-                              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              <Loader size="xs" color="white" />
                             ) : <MessageSquare className="w-3.5 h-3.5" />}
                             Post Comment
                           </button>
@@ -950,7 +951,7 @@ export function AdminPostView() {
                                     className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                                   >
                                     {acting ? (
-                                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      <Loader size="xs" color="white" />
                                     ) : btn.icon}
                                     {btn.label}
                                   </button>
@@ -1000,7 +1001,7 @@ export function AdminPostView() {
                                 className={`inline-flex items-center gap-2 text-xs font-semibold text-white ${buttonColorClass} px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer`}
                               >
                                 {acting ? (
-                                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  <Loader size="xs" color="white" />
                                 ) : btn.icon}
                                 {btn.label}
                               </button>
