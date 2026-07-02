@@ -563,7 +563,7 @@ export function PostView() {
                         </div>
                         <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
                           <span className={`${auditStyle.textCls}`}>{eventText}</span>
-                          <span className="text-[10px] text-gray-400 font-mono">
+                          <span className="text-xs text-zinc-500 font-normal">
                             {formatDateTime(audit.timestamp)}
                           </span>
                         </div>

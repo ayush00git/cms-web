@@ -146,21 +146,21 @@ export function ComplaintCard({
         </div>
 
         {/* Footer row: Date, Info fields, Comments and hover arrow */}
-        <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-gray-100">
-          <div className="flex items-center gap-4 text-gray-400">
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium">
-              <Calendar className="w-3.5 h-3.5 text-gray-400" /> {formatDate(post.created_at)}
+        <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-zinc-100">
+          <div className="flex items-center gap-4 text-zinc-500">
+            <span className="inline-flex items-center gap-1.5 text-xs font-normal">
+              <Calendar className="w-3.5 h-3.5 text-zinc-400" /> {formatDate(post.created_at)}
             </span>
             
             {isFaculty && post.place && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium">
-                <MapPin className="w-3.5 h-3.5 text-gray-400" /> {post.place}
+              <span className="inline-flex items-center gap-1.5 text-xs font-normal">
+                <MapPin className="w-3.5 h-3.5 text-zinc-400" /> {post.place}
               </span>
             )}
             
             {isWarden && post.room_number && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium">
-                <BedDouble className="w-3.5 h-3.5 text-gray-400" /> Room {post.room_number}
+              <span className="inline-flex items-center gap-1.5 text-xs font-normal">
+                <BedDouble className="w-3.5 h-3.5 text-zinc-400" /> Room {post.room_number}
               </span>
             )}
           </div>
