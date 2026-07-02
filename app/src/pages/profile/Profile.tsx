@@ -215,7 +215,7 @@ export function Profile() {
             {/* Identity row */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
               <div>
-                <p className="text-base font-bold text-[#111111]">{profile.name || profile.email?.split('@')[0] || ''}</p>
+                <p className="text-base font-bold text-[#111111]">{profile.name}</p>
                 <p className="text-sm text-[#666666] mt-0.5">{profile.email}</p>
               </div>
               <div className="flex items-center gap-2">
