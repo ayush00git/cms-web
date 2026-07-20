@@ -125,7 +125,7 @@ func SendPostMailToAdmins(email, postURL string) error {
 		<body>
 			<h2>cms: updates on your recent complaint</h2>
 			<p>
-				<a href="%s" class="button" style="color: white;">Reset!</a>
+				<a href="%s" class="button" style="color: white;">View Updates</a>
 			</p>
 		</body>
 		</html>
@@ -155,7 +155,7 @@ func SendMailToPeopleInThread(emails []string, ignoreEmail string, postURL strin
 		<body>
 			<h2>cms: updates on your recent complaint</h2>
 			<p>
-				<a href="%s" class="button" style="color: white;">Reset!</a>
+				<a href="%s" class="button" style="color: white;">View Updates</a>
 			</p>
 		</body>
 		</html>
