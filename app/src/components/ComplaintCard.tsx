@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  Zap, Hammer, Calendar, MapPin, BedDouble, MessageSquare, ChevronRight,
+  Zap, Hammer, Calendar, MapPin, BedDouble, MessageSquare,
 } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
