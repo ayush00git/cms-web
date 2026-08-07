@@ -14,8 +14,6 @@ import {
   XCircle,
   ChevronRight,
   RefreshCcw,
-  Pencil,
-  Trash2,
   Info,
   Check,
   Clock,

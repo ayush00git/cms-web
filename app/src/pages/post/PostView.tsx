@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Hammer, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
-  MessageSquare, Wrench, ArrowLeft, Send, AlertCircle,
+  MessageSquare, Wrench, ArrowLeft, AlertCircle,
   Clock, Users,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
@@ -82,10 +82,6 @@ function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
-}
-
-function roleLabel(position: string) {
-  return position.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function PostView() {
