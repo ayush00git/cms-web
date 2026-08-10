@@ -173,7 +173,7 @@ export function Landing() {
                 to="/faculty/login"
                 className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
               >
-                Login as Faculty
+                Login as Faculty / Staff
               </Link>
               <Link
                 to="/warden/login"
