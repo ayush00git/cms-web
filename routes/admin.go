@@ -7,7 +7,7 @@ import (
 )
 
 func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
-	// e.POST("/api/auth/admin/signup", h.AdminSignup)           // not to be used as an public API
+	e.POST("/api/auth/admin/signup", h.AdminSignup)           // not to be used as an public API
 	e.POST("/api/auth/admin/login", h.AdminLogin)
 
 	e.GET("/api/admin/comments", middleware.IsAuthenticated(), h.AdminGetComments)
