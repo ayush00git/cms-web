@@ -58,7 +58,7 @@ export function Landing() {
             Estate Office Portal
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] leading-tight tracking-tight mb-4 max-w-2xl">
-            Campus Complaint<br />Management System
+            Construction Cell Complaint<br />Management System
           </h1>
           <p className="text-[#666666] text-base leading-relaxed max-w-xl mb-8">
             A unified platform for NIT Hamirpur faculty, wardens, and centre heads to file,
