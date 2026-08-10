@@ -69,7 +69,7 @@ export function CentreHeadPost() {
 
         {/* Header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
-          <div className="max-w-6xl mx-auto w-full px-8">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
             <h1 className="text-xl font-bold text-[#111111]">Submit a Centre Complaint</h1>
             <p className="text-sm text-[#666666] mt-0.5">Lodge a civil or electrical maintenance complaint for your building.</p>
           </div>
@@ -78,7 +78,7 @@ export function CentreHeadPost() {
         {/* Status banner */}
         {message && (
           <div className={`border-b text-sm ${status === 'success' ? 'bg-[#E6F7ED] border-[#bbf0d0] text-[#15803d]' : 'bg-[#FCEBEA] border-[#f5c6c4] text-[#b91c1c]'}`}>
-            <div className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center gap-2.5">
+            <div className="max-w-6xl mx-auto w-full px-4 sm:px-8 py-3 flex items-center gap-2.5">
               {status === 'success' ? (
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -97,7 +97,7 @@ export function CentreHeadPost() {
         <div className="flex flex-grow divide-x divide-[#E5E5E5] max-w-6xl mx-auto w-full">
 
           {/* LEFT — Form */}
-          <form onSubmit={handleSubmit} className="flex-1 px-8 py-8 space-y-6 min-w-0">
+          <form onSubmit={handleSubmit} className="flex-1 px-4 sm:px-8 py-6 sm:py-8 space-y-6 min-w-0">
 
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Complaint Details</h2>
@@ -160,7 +160,7 @@ export function CentreHeadPost() {
           </form>
 
           {/* RIGHT — Sidebar */}
-          <aside className="w-72 shrink-0 px-6 py-8 space-y-6 bg-white">
+          <aside className="hidden md:block w-72 shrink-0 px-6 py-8 space-y-6 bg-white">
 
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Filing Guidelines</h3>

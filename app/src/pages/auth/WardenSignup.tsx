@@ -17,6 +17,7 @@ export function WardenSignup() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [message, setMessage] = useState('');
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -66,7 +67,7 @@ export function WardenSignup() {
 
         {/* Page header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
-          <div className="max-w-6xl mx-auto w-full px-8">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
             <h1 className="text-xl font-bold text-[#111111]">Warden Registration</h1>
             <p className="text-sm text-[#666666] mt-0.5">Register to manage complaints for your Hostel.</p>
           </div>
@@ -75,7 +76,7 @@ export function WardenSignup() {
         {/* Status banner */}
         {message && (
           <div className={`border-b text-sm ${status === 'success' ? 'bg-[#E6F7ED] border-[#bbf0d0] text-[#15803d]' : 'bg-[#FCEBEA] border-[#f5c6c4] text-[#b91c1c]'}`}>
-          <div className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center gap-2.5">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-8 py-3 flex items-center gap-2.5">
             {status === 'success' ? (
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -94,7 +95,7 @@ export function WardenSignup() {
         <div className="flex flex-grow divide-x divide-[#E5E5E5] max-w-6xl mx-auto w-full">
 
           {/* LEFT — Form */}
-          <form onSubmit={handleSubmit} className="flex-1 px-8 py-8 space-y-6 min-w-0">
+          <form onSubmit={handleSubmit} className="flex-1 px-4 sm:px-8 py-6 sm:py-8 space-y-6 min-w-0">
 
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Account Details</h2>
@@ -186,7 +187,7 @@ export function WardenSignup() {
 
             <div className="border-t border-[#CCCCCC]" />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <button
                 type="submit"
                 disabled={loading}
@@ -203,10 +204,46 @@ export function WardenSignup() {
               </Link>
             </div>
 
+            {/* Mobile-only guidelines accordion */}
+            <div className="md:hidden border-t border-[#CCCCCC]" />
+            <div className="md:hidden">
+              <button
+                type="button"
+                onClick={() => setGuidelinesOpen(prev => !prev)}
+                className="flex items-center justify-between w-full text-xs font-bold uppercase tracking-widest text-[#666666] py-1 cursor-pointer"
+              >
+                <span>Guidelines &amp; Info</span>
+                <span className={`transition-transform duration-200 ${guidelinesOpen ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+              {guidelinesOpen && (
+                <div className="mt-3 space-y-4 text-sm text-[#111111]">
+                  <div>
+                    <p className="font-semibold mb-1">Who can register?</p>
+                    <p className="text-[#444444] leading-relaxed">Only officially assigned NIT Hamirpur wardens with a valid institute email (<span className="font-semibold">@nith.ac.in</span>) are eligible.</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-1">Hostel Complaints</p>
+                    <p className="text-[#444444] leading-relaxed">Wardens are the only role authorised to file complaints for hostel common areas such as corridors, washrooms, and common rooms.</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-1">After Registration</p>
+                    <p className="text-[#444444] leading-relaxed">A verification email will be sent. You must verify your account before filing complaints.</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-2">Other Roles</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link to="/faculty/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Faculty</Link>
+                      <Link to="/centre-head/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Centre Head</Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
           </form>
 
           {/* RIGHT — Sidebar */}
-          <aside className="w-72 shrink-0 px-6 py-8 space-y-6 bg-white">
+          <aside className="hidden md:block w-72 shrink-0 px-6 py-8 space-y-6 bg-white">
 
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Who can register?</h3>

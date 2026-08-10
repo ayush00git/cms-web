@@ -120,8 +120,8 @@ export function ComplaintCard({
         
         {/* Top line: Complaint ID, Category Badge, Status Badge */}
         <div>
-          <div className="flex items-center justify-between gap-2 mb-2.5">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono font-bold text-gray-400">#{post.id}</span>
               
               <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${theme.badge}`}>
@@ -146,8 +146,8 @@ export function ComplaintCard({
         </div>
 
         {/* Footer row: Date, Info fields, Comments and hover arrow */}
-        <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-zinc-100">
-          <div className="flex items-center gap-4 text-zinc-500">
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3.5 border-t border-zinc-100">
+          <div className="flex flex-wrap items-center gap-3 text-zinc-500">
             <span className="inline-flex items-center gap-1.5 text-xs font-normal">
               <Calendar className="w-3.5 h-3.5 text-zinc-400" /> {formatDate(post.created_at)}
             </span>
