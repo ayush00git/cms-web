@@ -6,7 +6,7 @@ export function Header() {
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-5">
           <img
-            src="/logo nith.png"
+            src="/logo_nith.png"
             alt="NITH Logo"
             className="w-16 h-16 object-contain"
           />
@@ -25,7 +25,7 @@ export function Header() {
 
         <div className="hidden md:flex flex-col items-end gap-1">
           <span className="text-xs font-bold uppercase tracking-widest text-[#666666]">Estate Office</span>
-          <span className="text-lg font-bold text-[#111111]">Complaint Management</span>
+          <span className="text-lg font-bold text-[#111111]">Construction Cell Complaint Management</span>
         </div>
       </div>
     </header>
