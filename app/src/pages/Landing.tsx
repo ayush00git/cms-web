@@ -96,60 +96,8 @@ export function Landing() {
       <main className="container mx-auto px-6 py-12 flex-grow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* Notices */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
-            <div className="bg-[#111111] text-white px-5 py-3 flex items-center justify-between">
-              <span className="text-sm font-bold">Estate Office Notices</span>
-              <button className="text-xs border border-white/30 hover:border-white px-2.5 py-1 rounded-lg transition-colors">
-                View All
-              </button>
-            </div>
-            <div className="p-5 flex-grow overflow-y-auto space-y-4">
-              {[
-                { tag: 'Urgent', tagBg: '#FCEBEA', title: 'Scheduled power outage in Main Admin Block due to HT panel maintenance.', date: '20 May 2026' },
-                { tag: 'New', tagBg: '#E6F7ED', title: 'Water supply disruption in Kailash Boys Hostel for pipe repair work.', date: '18 May 2026' },
-                { tag: 'Info', tagBg: '#E8F4F9', title: 'Annual AC servicing schedule released for Departmental Buildings.', date: '15 May 2026' },
-                { tag: 'Notice', tagBg: '#F5F5F5', title: 'Road resurfacing work to begin near Admin block from June 1st.', date: '12 May 2026' },
-              ].map(({ tag, tagBg, title, date }) => (
-                <div key={title} className="border-b border-[#E5E5E5] pb-4 last:border-0 last:pb-0">
-                  <span
-                    className="inline-flex items-center border border-[#111111] rounded-lg px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#111111] mb-1.5"
-                    style={{ backgroundColor: tagBg }}
-                  >
-                    {tag}
-                  </span>
-                  <p className="text-sm text-[#111111] font-medium leading-snug mb-1">{title}</p>
-                  <span className="text-xs text-[#666666]">{date}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Filing Guidelines */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
-            <div className="bg-[#111111] text-white px-5 py-3">
-              <span className="text-sm font-bold">Filing Guidelines</span>
-            </div>
-            <div className="p-5 flex-grow space-y-4">
-              {[
-                { step: '01', text: 'Select the correct category — Civil or Electrical — to ensure proper routing.' },
-                { step: '02', text: 'Provide the exact building and room number in the complaint description.' },
-                { step: '03', text: 'Only Wardens may file complaints for hostel common areas.' },
-                { step: '04', text: 'Do not file duplicate complaints for the same issue.' },
-              ].map(({ step, text }) => (
-                <div key={step} className="flex gap-4 items-start">
-                  <span className="flex-shrink-0 text-xs font-bold text-[#666666] w-6 pt-0.5">{step}</span>
-                  <p className="text-sm text-[#111111] leading-snug">{text}</p>
-                </div>
-              ))}
-              <a href="#" className="inline-flex items-center gap-1 text-sm font-bold text-[#111111] hover:underline mt-2">
-                Read Complete Manual <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Portal Access */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+          {/* Portal Access — first in DOM so it's top on mobile; pushed to col 3 on desktop */}
+          <div className="md:order-3 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
             <div className="bg-[#111111] text-white px-5 py-3">
               <span className="text-sm font-bold">Portal Access</span>
             </div>
@@ -197,6 +145,58 @@ export function Landing() {
                   Staff Login — XEN / AE / JE
                 </Link>
               </div>
+            </div>
+          </div>
+
+          {/* Notices — col 1 on desktop */}
+          <div className="md:order-1 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3 flex items-center justify-between">
+              <span className="text-sm font-bold">Estate Office Notices</span>
+              <button className="text-xs border border-white/30 hover:border-white px-2.5 py-1 rounded-lg transition-colors">
+                View All
+              </button>
+            </div>
+            <div className="p-5 flex-grow overflow-y-auto space-y-4">
+              {[
+                { tag: 'Urgent', tagBg: '#FCEBEA', title: 'Scheduled power outage in Main Admin Block due to HT panel maintenance.', date: '20 May 2026' },
+                { tag: 'New', tagBg: '#E6F7ED', title: 'Water supply disruption in Kailash Boys Hostel for pipe repair work.', date: '18 May 2026' },
+                { tag: 'Info', tagBg: '#E8F4F9', title: 'Annual AC servicing schedule released for Departmental Buildings.', date: '15 May 2026' },
+                { tag: 'Notice', tagBg: '#F5F5F5', title: 'Road resurfacing work to begin near Admin block from June 1st.', date: '12 May 2026' },
+              ].map(({ tag, tagBg, title, date }) => (
+                <div key={title} className="border-b border-[#E5E5E5] pb-4 last:border-0 last:pb-0">
+                  <span
+                    className="inline-flex items-center border border-[#111111] rounded-lg px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#111111] mb-1.5"
+                    style={{ backgroundColor: tagBg }}
+                  >
+                    {tag}
+                  </span>
+                  <p className="text-sm text-[#111111] font-medium leading-snug mb-1">{title}</p>
+                  <span className="text-xs text-[#666666]">{date}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Filing Guidelines — col 2 on desktop */}
+          <div className="md:order-2 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3">
+              <span className="text-sm font-bold">Filing Guidelines</span>
+            </div>
+            <div className="p-5 flex-grow space-y-4">
+              {[
+                { step: '01', text: 'Select the correct category — Civil or Electrical — to ensure proper routing.' },
+                { step: '02', text: 'Provide the exact building and room number in the complaint description.' },
+                { step: '03', text: 'Only Wardens may file complaints for hostel common areas.' },
+                { step: '04', text: 'Do not file duplicate complaints for the same issue.' },
+              ].map(({ step, text }) => (
+                <div key={step} className="flex gap-4 items-start">
+                  <span className="flex-shrink-0 text-xs font-bold text-[#666666] w-6 pt-0.5">{step}</span>
+                  <p className="text-sm text-[#111111] leading-snug">{text}</p>
+                </div>
+              ))}
+              <a href="#" className="inline-flex items-center gap-1 text-sm font-bold text-[#111111] hover:underline mt-2">
+                Read Complete Manual <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
