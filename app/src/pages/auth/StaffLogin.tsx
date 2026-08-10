@@ -66,7 +66,7 @@ export function StaffLogin() {
 
         {/* Header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
-          <div className="max-w-6xl mx-auto w-full px-8">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
             <h1 className="text-xl font-bold text-[#111111]">Staff Login</h1>
             <p className="text-sm text-[#666666] mt-0.5">Secure portal for XEN / AE / JE.</p>
           </div>
@@ -75,7 +75,7 @@ export function StaffLogin() {
         {/* Status banner */}
         {message && (
           <div className={`border-b text-sm ${status === 'success' ? 'bg-[#E6F7ED] border-[#bbf0d0] text-[#15803d]' : 'bg-[#FCEBEA] border-[#f5c6c4] text-[#b91c1c]'}`}>
-            <div className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center gap-2.5">
+            <div className="max-w-6xl mx-auto w-full px-4 sm:px-8 py-3 flex items-center gap-2.5">
               {status === 'success' ? (
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -91,7 +91,7 @@ export function StaffLogin() {
         )}
 
         {/* Form area */}
-        <div className="flex-grow flex items-start justify-center px-8 py-12">
+        <div className="flex-grow flex items-start justify-center px-4 sm:px-8 py-8 sm:py-12">
           <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
 
             <div>
@@ -135,7 +135,7 @@ export function StaffLogin() {
 
             <div className="border-t border-[#CCCCCC]" />
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <button
                 type="submit"
                 disabled={loading}

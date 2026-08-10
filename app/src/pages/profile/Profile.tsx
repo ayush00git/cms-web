@@ -186,12 +186,12 @@ export function Profile() {
   return (
     <MainLayout>
       <div className="flex-grow relative">
-        <div className="container mx-auto px-6 pt-12 pb-16 max-w-7xl">
+        <div className="container mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-12 sm:pb-16 max-w-7xl">
 
           {/* ── Header ── */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#E5E5E5]">
             <div>
-              <h2 className="text-2xl font-bold text-[#111111] tracking-tight">User Dashboard</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#111111] tracking-tight">User Dashboard</h2>
               <p className="text-sm text-[#666666] mt-1">Manage your credentials, residency, and portal access details.</p>
             </div>
 
@@ -220,12 +220,12 @@ export function Profile() {
           {/* ── Profile info card ── */}
           <div className="bg-white border border-[#E5E5E5] rounded-lg mb-10">
             {/* Identity row */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-[#E5E5E5]">
               <div>
                 <p className="text-base font-bold text-[#111111]">{profile.name}</p>
                 <p className="text-sm text-[#666666] mt-0.5">{profile.email}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#111111] bg-[#F5F5F5] text-xs font-bold text-[#111111] uppercase tracking-wide">
                   <ShieldCheck className="w-3 h-3" /> {roleLabel}
                 </span>
@@ -238,7 +238,7 @@ export function Profile() {
             </div>
 
             {/* Details grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-[#E5E5E5]">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 divide-x divide-y divide-[#E5E5E5]">
               <div className="px-6 py-4">
                 <p className="text-xs text-[#666666] mb-1">Phone</p>
                 <p className="text-sm font-semibold text-[#111111]">{profile.phone_number || 'N/A'}</p>

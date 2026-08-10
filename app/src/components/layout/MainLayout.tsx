@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { TopBar } from './TopBar';
 import { Header } from './Header';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
@@ -11,7 +10,6 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <TopBar />
       <Header />
       <Navbar />
 

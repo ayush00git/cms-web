@@ -284,16 +284,16 @@ export function PostView() {
 
   return (
     <MainLayout>
-      <div className="flex-grow flex flex-col max-w-4xl w-full mx-auto px-6 py-6 space-y-6">
+      <div className="flex-grow flex flex-col max-w-4xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
         
         {/* Back Link */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <Link to="/profile" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </Link>
           
           {/* Action buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {!isEditing && !editExpired && (
               <button
                 onClick={startEdit}
@@ -597,7 +597,7 @@ export function PostView() {
                   />
                   
                   {/* Bottom Toolbar */}
-                  <div className="bg-zinc-50/50 border-t border-zinc-100 px-4 py-2.5 flex items-center justify-between gap-4">
+                  <div className="bg-zinc-50/50 border-t border-zinc-100 px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[10px] text-zinc-400 font-medium">
                       Press <kbd className="font-sans font-semibold">Ctrl + Enter</kbd> to send
                     </span>

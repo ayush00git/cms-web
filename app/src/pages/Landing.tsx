@@ -96,8 +96,60 @@ export function Landing() {
       <main className="container mx-auto px-6 py-12 flex-grow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* Notices */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+          {/* Portal Access — first in DOM so it's top on mobile; pushed to col 3 on desktop */}
+          <div className="md:order-3 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+            <div className="bg-[#111111] text-white px-5 py-3">
+              <span className="text-sm font-bold">Portal Access</span>
+            </div>
+            <div className="p-5 flex-grow flex flex-col gap-3">
+
+              {isAuth === true && (
+                <Link
+                  to="/profile"
+                  className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+                >
+                  My Profile
+                </Link>
+              )}
+              {isAuth === false && (
+                <p className="text-xs text-[#666666] text-center pb-1">
+                  <span className="font-semibold text-[#111111]">New here?</span> Sign up to create your profile.
+                </p>
+              )}
+
+              <Link
+                to="/faculty/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
+                Login as Faculty / Staff
+              </Link>
+              <Link
+                to="/warden/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
+                Login as Warden
+              </Link>
+              <Link
+                to="/centre-head/login"
+                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
+              >
+                Login as Centre Head
+              </Link>
+
+              <div className="mt-auto pt-4 border-t border-[#E5E5E5]">
+                <p className="text-xs text-[#666666] mb-2 font-medium">Estate Office Administration</p>
+                <Link
+                  to="/staff/login"
+                  className="w-full bg-[#222222] hover:bg-[#000000] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200 block"
+                >
+                  Staff Login — XEN / AE / JE
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Notices — col 1 on desktop */}
+          <div className="md:order-1 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
             <div className="bg-[#111111] text-white px-5 py-3 flex items-center justify-between">
               <span className="text-sm font-bold">Estate Office Notices</span>
               <button className="text-xs border border-white/30 hover:border-white px-2.5 py-1 rounded-lg transition-colors">
@@ -125,8 +177,8 @@ export function Landing() {
             </div>
           </div>
 
-          {/* Filing Guidelines */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
+          {/* Filing Guidelines — col 2 on desktop */}
+          <div className="md:order-2 border border-[#111111] rounded-lg overflow-hidden flex flex-col">
             <div className="bg-[#111111] text-white px-5 py-3">
               <span className="text-sm font-bold">Filing Guidelines</span>
             </div>
@@ -145,58 +197,6 @@ export function Landing() {
               <a href="#" className="inline-flex items-center gap-1 text-sm font-bold text-[#111111] hover:underline mt-2">
                 Read Complete Manual <ArrowRight className="w-3.5 h-3.5" />
               </a>
-            </div>
-          </div>
-
-          {/* Portal Access */}
-          <div className="border border-[#111111] rounded-lg overflow-hidden flex flex-col">
-            <div className="bg-[#111111] text-white px-5 py-3">
-              <span className="text-sm font-bold">Portal Access</span>
-            </div>
-            <div className="p-5 flex-grow flex flex-col gap-3">
-
-              {isAuth === true && (
-                <Link
-                  to="/profile"
-                  className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
-                >
-                  My Profile
-                </Link>
-              )}
-              {isAuth === false && (
-                <p className="text-xs text-[#666666] text-center pb-1">
-                  <span className="font-semibold text-[#111111]">New here?</span> Sign up to create your profile.
-                </p>
-              )}
-
-              <Link
-                to="/faculty/login"
-                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
-              >
-                Login as Faculty
-              </Link>
-              <Link
-                to="/warden/login"
-                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
-              >
-                Login as Warden
-              </Link>
-              <Link
-                to="/centre-head/login"
-                className="w-full border border-[#111111] bg-white hover:bg-[#F5F5F5] text-[#111111] text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200"
-              >
-                Login as Centre Head
-              </Link>
-
-              <div className="mt-auto pt-4 border-t border-[#E5E5E5]">
-                <p className="text-xs text-[#666666] mb-2 font-medium">Estate Office Administration</p>
-                <Link
-                  to="/staff/login"
-                  className="w-full bg-[#222222] hover:bg-[#000000] text-white text-sm font-semibold py-3 rounded-lg text-center transition-colors duration-200 block"
-                >
-                  Staff Login — XEN / AE / JE
-                </Link>
-              </div>
             </div>
           </div>
 
