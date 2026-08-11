@@ -21,6 +21,7 @@ import { XENPostView } from './pages/admin/XENPostView';
 import { AEPostView } from './pages/admin/AEPostView';
 import { JEPostView } from './pages/admin/JEPostView';
 import { AdminPostView } from './pages/admin/AdminPostView';
+import { GuestRoute } from './components/GuestRoute';
 
 function App() {
   return (
@@ -30,14 +31,14 @@ function App() {
         <Route path="/faculty/signup" element={<FacultySignup />} />
         <Route path="/warden/signup" element={<WardenSignup />} />
         <Route path="/centre-head/signup" element={<CentreHeadSignup />} />
-        <Route path="/faculty/login" element={<FacultyLogin />} />
-        <Route path="/warden/login" element={<WardenLogin />} />
-        <Route path="/centre-head/login" element={<CentreHeadLogin />} />
+        <Route path="/faculty/login" element={<GuestRoute><FacultyLogin /></GuestRoute>} />
+        <Route path="/warden/login" element={<GuestRoute><WardenLogin /></GuestRoute>} />
+        <Route path="/centre-head/login" element={<GuestRoute><CentreHeadLogin /></GuestRoute>} />
         <Route path="/faculty/forgot-password" element={<FacultyForgotPassword />} />
         <Route path="/warden/forgot-password" element={<WardenForgotPassword />} />
         <Route path="/centre-head/forgot-password" element={<CentreHeadForgotPassword />} />
         <Route path="/account/reset-password" element={<AccountResetPass />} />
-        <Route path="/staff/login" element={<StaffLogin />} />
+        <Route path="/staff/login" element={<GuestRoute><StaffLogin /></GuestRoute>} />
         <Route path="/faculty/post" element={<FacultyPost />} />
         <Route path="/warden/post" element={<WardenPost />} />
         <Route path="/centre-head/post" element={<CentreHeadPost />} />
@@ -54,3 +55,4 @@ function App() {
 }
 
 export default App;
+
