@@ -30,7 +30,6 @@ jobs:
       - name: Run tests
         run: go test ./test/... -v -count=1
 
-
   deploy-backend:
     name: Deploy backend
     needs: test
@@ -61,48 +60,48 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
 
-        script: |
-          set -e
+          script: |
+            set -e
 
-          export PATH="/usr/local/go/bin:$PATH"
+            export PATH="/usr/local/go/bin:$PATH"
 
-          echo "===== DEBUG ====="
-          echo "User:"
-          whoami
+            echo "===== DEBUG ====="
+            echo "User:"
+            whoami
 
-          echo "UID:"
-          id
+            echo "UID:"
+            id
 
-          echo "Home:"
-          echo "$HOME"
+            echo "Home:"
+            echo "$HOME"
 
-          echo "Systemctl:"
-          which systemctl
+            echo "Systemctl:"
+            which systemctl
 
-          echo "Sudo permissions:"
-          sudo -n -l
+            echo "Sudo permissions:"
+            sudo -n -l
 
-          echo "================="
+            echo "================="
 
-          go version
+            echo "Go version:"
+            go version
 
-          cd /home/serv-admin/Documents/projects/cms-web
+            cd /home/serv-admin/Documents/projects/cms-web
 
-          git pull --ff-only origin main
+            git pull --ff-only origin main
 
-          echo "Building backend..."
-          go build -o cms-web.new .
+            echo "Building backend..."
+            go build -o cms-web.new .
 
-          mv cms-web.new cms-web
+            mv cms-web.new cms-web
 
-          echo "Restarting CMS..."
-          sudo -n /usr/bin/systemctl restart cms
+            echo "Restarting CMS..."
+            sudo -n /usr/bin/systemctl restart cms
 
-          echo "Checking CMS..."
-          sudo -n /usr/bin/systemctl is-active --quiet cms
+            echo "Checking CMS..."
+            sudo -n /usr/bin/systemctl is-active --quiet cms
 
-          echo "Backend deployed successfully."
-
+            echo "Backend deployed successfully."
 
   deploy-frontend:
     name: Deploy frontend
