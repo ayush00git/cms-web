@@ -61,32 +61,47 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
 
-          script: |
-            set -e
+        script: |
+          set -e
 
-            export PATH="/usr/local/go/bin:$PATH"
+          export PATH="/usr/local/go/bin:$PATH"
 
-            echo "Go version:"
-            go version
+          echo "===== DEBUG ====="
+          echo "User:"
+          whoami
 
-            cd /home/serv-admin/Documents/projects/cms-web
+          echo "UID:"
+          id
 
-            echo "Pulling latest code..."
-            git pull --ff-only origin main
+          echo "Home:"
+          echo "$HOME"
 
-            echo "Building backend..."
-            go build -o cms-web.new .
+          echo "Systemctl:"
+          which systemctl
 
-            echo "Installing backend..."
-            mv cms-web.new cms-web
+          echo "Sudo permissions:"
+          sudo -n -l
 
-            echo "Restarting CMS..."
-            sudo -n systemctl restart cms
+          echo "================="
 
-            echo "Checking CMS..."
-            sudo -n systemctl is-active --quiet cms
+          go version
 
-            echo "Backend deployed successfully."
+          cd /home/serv-admin/Documents/projects/cms-web
+
+          git pull --ff-only origin main
+
+          echo "Building backend..."
+          go build -o cms-web.new .
+
+          mv cms-web.new cms-web
+
+          echo "Restarting CMS..."
+          sudo -n /usr/bin/systemctl restart cms
+
+          echo "Checking CMS..."
+          sudo -n /usr/bin/systemctl is-active --quiet cms
+
+          echo "Backend deployed successfully."
 
 
   deploy-frontend:
