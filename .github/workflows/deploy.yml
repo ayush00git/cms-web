@@ -1,10 +1,13 @@
-name: Push to production
+name: Deploy CMS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   test:
@@ -12,9 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache: true
@@ -25,21 +30,98 @@ jobs:
       - name: Run tests
         run: go test ./test/... -v -count=1
 
-  deploy:
-    name: Deploy via SSH
+
+  deploy-backend:
+    name: Deploy backend
     needs: test
-    runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Server via SSH
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check backend changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qv '^app/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy backend
+        if: steps.changes.outputs.changed == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ~/cms-webb
-            git pull origin main
-            sudo docker compose up -d --build
+            set -e
+
+            cd /home/serv-admin/Documents/projects/cms-web
+
+            git pull --ff-only origin main
+
+            go build -o cms-web.new .
+            mv cms-web.new cms-web
+
+            sudo systemctl restart cms
+            sudo systemctl is-active --quiet cms
+
+            echo "Backend deployed successfully."
+
+
+  deploy-frontend:
+    name: Deploy frontend
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check frontend changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q '^app/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy frontend
+        if: steps.changes.outputs.changed == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            cd /home/serv-admin/Documents/projects/cms-web
+
+            git pull --ff-only origin main
+
+            cd app
+
+            npm ci
+            npm run build
+
+            sudo rm -rf /var/www/cms/*
+            sudo cp -a dist/. /var/www/cms/
+
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            echo "Frontend deployed successfully."
+            
