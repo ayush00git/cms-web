@@ -30,7 +30,6 @@ jobs:
       - name: Run tests
         run: go test ./test/... -v -count=1
 
-
   deploy-backend:
     name: Deploy backend
     needs: test
@@ -66,28 +65,43 @@ jobs:
 
             export PATH="/usr/local/go/bin:$PATH"
 
+            echo "===== DEBUG ====="
+            echo "User:"
+            whoami
+
+            echo "UID:"
+            id
+
+            echo "Home:"
+            echo "$HOME"
+
+            echo "Systemctl:"
+            which systemctl
+
+            echo "Sudo permissions:"
+            sudo -n -l
+
+            echo "================="
+
             echo "Go version:"
             go version
 
             cd /home/serv-admin/Documents/projects/cms-web
 
-            echo "Pulling latest code..."
             git pull --ff-only origin main
 
             echo "Building backend..."
             go build -o cms-web.new .
 
-            echo "Installing backend..."
             mv cms-web.new cms-web
 
             echo "Restarting CMS..."
-            sudo -n systemctl restart cms
+            sudo -n /usr/bin/systemctl restart cms
 
             echo "Checking CMS..."
-            sudo -n systemctl is-active --quiet cms
+            sudo -n /usr/bin/systemctl is-active --quiet cms
 
             echo "Backend deployed successfully."
-
 
   deploy-frontend:
     name: Deploy frontend
