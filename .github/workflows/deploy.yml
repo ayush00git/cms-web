@@ -64,7 +64,6 @@ jobs:
           script: |
             set -e
 
-            # Go installed at /usr/local/go/bin/go
             export PATH="/usr/local/go/bin:$PATH"
 
             echo "Go version:"
@@ -82,10 +81,10 @@ jobs:
             mv cms-web.new cms-web
 
             echo "Restarting CMS..."
-            sudo systemctl restart cms
+            sudo -n systemctl restart cms
 
             echo "Checking CMS..."
-            sudo systemctl is-active --quiet cms
+            sudo -n systemctl is-active --quiet cms
 
             echo "Backend deployed successfully."
 
@@ -123,7 +122,6 @@ jobs:
           script: |
             set -e
 
-            # Node/npm installed through NVM
             export PATH="/home/serv-admin/.nvm/versions/node/v24.19.0/bin:$PATH"
 
             echo "Node version:"
@@ -146,13 +144,13 @@ jobs:
             npm run build
 
             echo "Deploying frontend..."
-            sudo rm -rf /var/www/cms/*
-            sudo cp -a dist/. /var/www/cms/
+            sudo -n rm -rf /var/www/cms/*
+            sudo -n cp -a dist/. /var/www/cms/
 
             echo "Testing Nginx..."
-            sudo nginx -t
+            sudo -n nginx -t
 
             echo "Reloading Nginx..."
-            sudo systemctl reload nginx
+            sudo -n systemctl reload nginx
 
             echo "Frontend deployed successfully."
