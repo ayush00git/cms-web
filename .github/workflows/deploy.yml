@@ -60,17 +60,31 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+
           script: |
             set -e
 
+            # Go installed at /usr/local/go/bin/go
+            export PATH="/usr/local/go/bin:$PATH"
+
+            echo "Go version:"
+            go version
+
             cd /home/serv-admin/Documents/projects/cms-web
 
+            echo "Pulling latest code..."
             git pull --ff-only origin main
 
+            echo "Building backend..."
             go build -o cms-web.new .
+
+            echo "Installing backend..."
             mv cms-web.new cms-web
 
+            echo "Restarting CMS..."
             sudo systemctl restart cms
+
+            echo "Checking CMS..."
             sudo systemctl is-active --quiet cms
 
             echo "Backend deployed successfully."
@@ -105,23 +119,40 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+
           script: |
             set -e
 
+            # Node/npm installed through NVM
+            export PATH="/home/serv-admin/.nvm/versions/node/v24.19.0/bin:$PATH"
+
+            echo "Node version:"
+            node --version
+
+            echo "npm version:"
+            npm --version
+
             cd /home/serv-admin/Documents/projects/cms-web
 
+            echo "Pulling latest code..."
             git pull --ff-only origin main
 
             cd app
 
+            echo "Installing frontend dependencies..."
             npm ci
+
+            echo "Building frontend..."
             npm run build
 
+            echo "Deploying frontend..."
             sudo rm -rf /var/www/cms/*
             sudo cp -a dist/. /var/www/cms/
 
+            echo "Testing Nginx..."
             sudo nginx -t
+
+            echo "Reloading Nginx..."
             sudo systemctl reload nginx
 
             echo "Frontend deployed successfully."
-            
