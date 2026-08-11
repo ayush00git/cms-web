@@ -65,34 +65,18 @@ jobs:
 
             export PATH="/usr/local/go/bin:$PATH"
 
-            echo "===== DEBUG ====="
-            echo "User:"
-            whoami
-
-            echo "UID:"
-            id
-
-            echo "Home:"
-            echo "$HOME"
-
-            echo "Systemctl:"
-            which systemctl
-
-            echo "Sudo permissions:"
-            sudo -n -l
-
-            echo "================="
-
             echo "Go version:"
             go version
 
             cd /home/serv-admin/Documents/projects/cms-web
 
+            echo "Pulling latest code..."
             git pull --ff-only origin main
 
             echo "Building backend..."
             go build -o cms-web.new .
 
+            echo "Installing backend..."
             mv cms-web.new cms-web
 
             echo "Restarting CMS..."
@@ -158,13 +142,13 @@ jobs:
             npm run build
 
             echo "Deploying frontend..."
-            sudo -n rm -rf /var/www/cms/*
-            sudo -n cp -a dist/. /var/www/cms/
+            sudo -n /usr/bin/rm -rf /var/www/cms/*
+            sudo -n /usr/bin/cp -a dist/. /var/www/cms/
 
             echo "Testing Nginx..."
-            sudo -n nginx -t
+            sudo -n /usr/sbin/nginx -t
 
             echo "Reloading Nginx..."
-            sudo -n systemctl reload nginx
+            sudo -n /usr/bin/systemctl reload nginx
 
             echo "Frontend deployed successfully."
