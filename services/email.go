@@ -57,8 +57,8 @@ func SendVerificationMail(userId uint, email, role string) (error) {
 			</style>
 		</head>
 		<body>
-			<h2>Verifying it's you,</h2>
-			<p>Thanks for signing up! get started with cms:</p>
+			<h2>Verifying it's you.</h2>
+			<p>Thanks for signing up! get started with cms.</p>
 			<p>
 				<a href="%s" class="button" style="color: white;">Get Started!</a>
 			</p>
@@ -66,7 +66,7 @@ func SendVerificationMail(userId uint, email, role string) (error) {
 		</html>
 		`, verificationURL)
 	
-	err = SendMail(email, "Verification of cms account", mail)
+	err = SendMail(email, "Verification of your cms account", mail)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func SendPasswordResetMail(userID uint, email, role string) error {
 		</html>
 		`, resetURL)
 
-	err = SendMail(email, "Reset cms account password", mail)
+	err = SendMail(email, "Reset your cms account password", mail)
 	if err != nil {
 		return err
 	}
