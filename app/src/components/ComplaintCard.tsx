@@ -109,7 +109,7 @@ export function ComplaintCard({
 
   return (
     <div
-      onClick={() => navigate(`/post/${role}/${post.id}`)}
+      onClick={() => navigate(`/posts/${role}/${post.id}`)}
       className={`${theme.cardBg} relative border border-gray-200/80 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group flex min-h-[140px]`}
     >
       {/* Left accent bar (Linear / Vercel style) */}

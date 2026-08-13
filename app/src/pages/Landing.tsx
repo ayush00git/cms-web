@@ -6,9 +6,9 @@ import { MainLayout } from '../components/layout/MainLayout';
 type Profile = { department?: string; hostel?: string; building?: string } | null;
 
 function getPostRoute(profile: NonNullable<Profile>): string {
-  if ('department' in profile) return '/faculty/post';
-  if ('hostel' in profile)     return '/warden/post';
-  return '/centre-head/post';
+  if ('department' in profile) return '/faculty/posts';
+  if ('hostel' in profile)     return '/warden/posts';
+  return '/centre-head/posts';
 }
 
 export function Landing() {

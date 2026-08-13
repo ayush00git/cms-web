@@ -30,7 +30,7 @@ export function WardenPost() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/post/warden', {
+      const response = await fetch('/api/posts/warden', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -44,7 +44,7 @@ export function WardenPost() {
         setMessage(data.success || 'Complaint submitted successfully!');
         setFormData({ room_number: '', type_of_post: '', title: '', description: '' });
         if (data.post?.id) {
-          navigate(`/post/warden/${data.post.id}`);
+          navigate(`/posts/warden/${data.post.id}`);
         }
       } else {
         setStatus('error');

@@ -21,7 +21,7 @@ func TestFacultyPost_Create_Success(t *testing.T) {
 		"title":        "Leaking roof",
 		"description":  "Roof leaks in lab 3",
 	}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty", body)
 
 	assertStatus(t, rec, 201)
 
@@ -37,7 +37,7 @@ func TestFacultyPost_Create_Unauthenticated(t *testing.T) {
 	e := newPostRouter(db, noAuth())
 
 	body := map[string]any{"place": "Departmental", "type_of_post": "Civil", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty", body)
 
 	assertStatus(t, rec, 401)
 }
@@ -48,7 +48,7 @@ func TestFacultyPost_Create_InvalidBody(t *testing.T) {
 	e := newPostRouter(db, authAs(f.ID, f.Email))
 
 	// Send a JSON array where an object is expected.
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty", []string{"not", "an", "object"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty", []string{"not", "an", "object"})
 
 	assertStatus(t, rec, 400)
 }
@@ -59,7 +59,7 @@ func TestFacultyPost_Create_UserNotFound(t *testing.T) {
 	e := newPostRouter(db, authAs(999, "ghost@iit.ac.in"))
 
 	body := map[string]any{"place": "Departmental", "type_of_post": "Civil", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty", body)
 
 	assertStatus(t, rec, 401)
 }
@@ -73,7 +73,7 @@ func TestFacultyPostEdit_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/faculty/edit/1", map[string]any{
 		"title":       "new title",
 		"description": "new desc",
 	})
@@ -92,7 +92,7 @@ func TestFacultyPostEdit_NotFound(t *testing.T) {
 	f := seedFaculty(t, db, "fac.editnf@iit.ac.in")
 	e := newPostRouter(db, authAs(f.ID, f.Email))
 
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/424242", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/faculty/edit/424242", map[string]any{"title": "x"})
 
 	assertStatus(t, rec, 404)
 }
@@ -105,7 +105,7 @@ func TestFacultyPostEdit_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{"title": "hijack"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/faculty/edit/1", map[string]any{"title": "hijack"})
 
 	assertStatus(t, rec, 403)
 }
@@ -113,7 +113,7 @@ func TestFacultyPostEdit_WrongAuthor(t *testing.T) {
 func TestFacultyPostEdit_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/faculty/edit/1", map[string]any{"title": "x"})
 	assertStatus(t, rec, 401)
 }
 
@@ -125,7 +125,7 @@ func TestFacultyPostEdit_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/faculty/edit/1", map[string]any{"title": "new"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/faculty/edit/1", map[string]any{"title": "new"})
 	assertStatus(t, rec, 403)
 }
 
@@ -138,7 +138,7 @@ func TestFacultyPostDelete_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/faculty/delete/1", nil)
 
 	assertStatus(t, rec, 200)
 
@@ -153,7 +153,7 @@ func TestFacultyPostDelete_NotFound(t *testing.T) {
 	db := newTestDB(t)
 	f := seedFaculty(t, db, "fac.delnf@iit.ac.in")
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/123", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/faculty/delete/123", nil)
 	assertStatus(t, rec, 404)
 }
 
@@ -165,7 +165,7 @@ func TestFacultyPostDelete_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/faculty/delete/1", nil)
 
 	assertStatus(t, rec, 403)
 }
@@ -173,7 +173,7 @@ func TestFacultyPostDelete_WrongAuthor(t *testing.T) {
 func TestFacultyPostDelete_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/faculty/delete/1", nil)
 	assertStatus(t, rec, 401)
 }
 
@@ -185,7 +185,7 @@ func TestFacultyPostDelete_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/faculty/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/faculty/delete/1", nil)
 	assertStatus(t, rec, 403)
 }
 
@@ -198,7 +198,7 @@ func TestGetFacultyPosts_Success(t *testing.T) {
 	db.Create(&models.FacultyPost{FacultyID: f.ID, Place: models.PlaceResidential, TypeOfPost: models.TypeElectrical, Title: "b", Description: "d"})
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -216,7 +216,7 @@ func TestGetFacultyPosts_OnlyOwn(t *testing.T) {
 	db.Create(&models.FacultyPost{FacultyID: theirs.ID, Place: models.PlaceDepartmental, TypeOfPost: models.TypeCivil, Title: "theirs", Description: "d"})
 
 	e := newPostRouter(db, authAs(mine.ID, mine.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -229,6 +229,6 @@ func TestGetFacultyPosts_OnlyOwn(t *testing.T) {
 func TestGetFacultyPosts_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty", nil)
 	assertStatus(t, rec, 401)
 }

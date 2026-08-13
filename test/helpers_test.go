@@ -133,26 +133,26 @@ func newPostRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e := gin.New()
 	h := &handlers.PostHandler{DB: db}
 
-	e.POST("/api/post/faculty", auth, h.FacultyPost)
-	e.POST("/api/post/warden", auth, h.WardenPost)
-	e.POST("/api/post/centrehead", auth, h.CentreheadPost)
+	e.POST("/api/posts/faculty", auth, h.FacultyPost)
+	e.POST("/api/posts/warden", auth, h.WardenPost)
+	e.POST("/api/posts/centrehead", auth, h.CentreheadPost)
 
-	e.PATCH("/api/post/faculty/edit/:post_id", auth, h.FacultyPostEdit)
-	e.PATCH("/api/post/warden/edit/:post_id", auth, h.WardenPostEdit)
-	e.PATCH("/api/post/centrehead/edit/:post_id", auth, h.CentreheadPostEdit)
+	e.PATCH("/api/posts/faculty/edit/:post_id", auth, h.FacultyPostEdit)
+	e.PATCH("/api/posts/warden/edit/:post_id", auth, h.WardenPostEdit)
+	e.PATCH("/api/posts/centrehead/edit/:post_id", auth, h.CentreheadPostEdit)
 
-	e.DELETE("/api/post/faculty/delete/:post_id", auth, h.FacultyPostDelete)
-	e.DELETE("/api/post/warden/delete/:post_id", auth, h.WardenPostDelete)
-	e.DELETE("/api/post/centrehead/delete/:post_id", auth, h.CentreheadPostDelete)
+	e.DELETE("/api/posts/faculty/delete/:post_id", auth, h.FacultyPostDelete)
+	e.DELETE("/api/posts/warden/delete/:post_id", auth, h.WardenPostDelete)
+	e.DELETE("/api/posts/centrehead/delete/:post_id", auth, h.CentreheadPostDelete)
 
-	e.GET("/api/post/faculty", auth, h.GetFacultyPosts)
-	e.GET("/api/post/warden", auth, h.GetWardenPosts)
-	e.GET("/api/post/centrehead", auth, h.GetCentreheadPosts)
-	e.GET("/api/post/:role/:post_id", auth, h.GetPostByID)
+	e.GET("/api/posts/faculty", auth, h.GetFacultyPosts)
+	e.GET("/api/posts/warden", auth, h.GetWardenPosts)
+	e.GET("/api/posts/centrehead", auth, h.GetCentreheadPosts)
+	e.GET("/api/posts/:role/:post_id", auth, h.GetPostByID)
 
-	e.POST("/api/post/faculty/comment/:post_id", auth, h.FacultyPostComment)
-	e.POST("/api/post/warden/comment/:post_id", auth, h.WardenPostComment)
-	e.POST("/api/post/centrehead/comment/:post_id", auth, h.CentreheadPostComment)
+	e.POST("/api/posts/faculty/comment/:post_id", auth, h.FacultyPostComment)
+	e.POST("/api/posts/warden/comment/:post_id", auth, h.WardenPostComment)
+	e.POST("/api/posts/centrehead/comment/:post_id", auth, h.CentreheadPostComment)
 
 	return e
 }

@@ -39,10 +39,10 @@ function App() {
         <Route path="/centre-head/forgot-password" element={<CentreHeadForgotPassword />} />
         <Route path="/account/reset-password" element={<AccountResetPass />} />
         <Route path="/staff/login" element={<GuestRoute><StaffLogin /></GuestRoute>} />
-        <Route path="/faculty/post" element={<FacultyPost />} />
-        <Route path="/warden/post" element={<WardenPost />} />
-        <Route path="/centre-head/post" element={<CentreHeadPost />} />
-        <Route path="/post/:role/:post_id" element={<PostView />} />
+        <Route path="/faculty/posts" element={<FacultyPost />} />
+        <Route path="/warden/posts" element={<WardenPost />} />
+        <Route path="/centre-head/posts" element={<CentreHeadPost />} />
+        <Route path="/posts/:role/:post_id" element={<PostView />} />
         <Route path="/account/verify" element={<VerifyAccount />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin/xen" element={<XENPostView />} />

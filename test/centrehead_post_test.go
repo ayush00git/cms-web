@@ -20,7 +20,7 @@ func TestCentreheadPost_Create_Success(t *testing.T) {
 		"title":        "Broken door",
 		"description":  "Main entrance door of LHC is jammed",
 	}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead", body)
 
 	assertStatus(t, rec, 201)
 
@@ -35,7 +35,7 @@ func TestCentreheadPost_Create_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
 	body := map[string]any{"type_of_post": "Civil", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead", body)
 	assertStatus(t, rec, 401)
 }
 
@@ -43,7 +43,7 @@ func TestCentreheadPost_Create_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
 	ch := seedCentrehead(t, db, "ch.badbody@iit.ac.in")
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead", []string{"bad"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead", []string{"bad"})
 	assertStatus(t, rec, 400)
 }
 
@@ -51,7 +51,7 @@ func TestCentreheadPost_Create_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, authAs(999, "ghost.ch@iit.ac.in"))
 	body := map[string]any{"type_of_post": "Civil", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead", body)
 	assertStatus(t, rec, 401)
 }
 
@@ -64,7 +64,7 @@ func TestCentreheadPostEdit_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/1", map[string]any{
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/centrehead/edit/1", map[string]any{
 		"title":       "new title",
 		"description": "new desc",
 	})
@@ -82,7 +82,7 @@ func TestCentreheadPostEdit_NotFound(t *testing.T) {
 	db := newTestDB(t)
 	ch := seedCentrehead(t, db, "ch.editnf@iit.ac.in")
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/999", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/centrehead/edit/999", map[string]any{"title": "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -94,14 +94,14 @@ func TestCentreheadPostEdit_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/1", map[string]any{"title": "hijack"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/centrehead/edit/1", map[string]any{"title": "hijack"})
 	assertStatus(t, rec, 403)
 }
 
 func TestCentreheadPostEdit_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/1", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/centrehead/edit/1", map[string]any{"title": "x"})
 	assertStatus(t, rec, 401)
 }
 
@@ -113,7 +113,7 @@ func TestCentreheadPostEdit_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/centrehead/edit/1", map[string]any{"title": "new"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/centrehead/edit/1", map[string]any{"title": "new"})
 	assertStatus(t, rec, 403)
 }
 
@@ -126,7 +126,7 @@ func TestCentreheadPostDelete_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/centrehead/delete/1", nil)
 
 	assertStatus(t, rec, 200)
 
@@ -141,7 +141,7 @@ func TestCentreheadPostDelete_NotFound(t *testing.T) {
 	db := newTestDB(t)
 	ch := seedCentrehead(t, db, "ch.delnf@iit.ac.in")
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/77", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/centrehead/delete/77", nil)
 	assertStatus(t, rec, 404)
 }
 
@@ -153,14 +153,14 @@ func TestCentreheadPostDelete_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/centrehead/delete/1", nil)
 	assertStatus(t, rec, 403)
 }
 
 func TestCentreheadPostDelete_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/centrehead/delete/1", nil)
 	assertStatus(t, rec, 401)
 }
 
@@ -172,7 +172,7 @@ func TestCentreheadPostDelete_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/centrehead/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/centrehead/delete/1", nil)
 	assertStatus(t, rec, 403)
 }
 
@@ -185,7 +185,7 @@ func TestGetCentreheadPosts_Success(t *testing.T) {
 	db.Create(&models.CentreheadPost{CentreheadID: ch.ID, TypeOfPost: models.TypeElectrical, Title: "b", Description: "d"})
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/centrehead", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/centrehead", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -203,7 +203,7 @@ func TestGetCentreheadPosts_OnlyOwn(t *testing.T) {
 	db.Create(&models.CentreheadPost{CentreheadID: theirs.ID, TypeOfPost: models.TypeCivil, Title: "theirs", Description: "d"})
 
 	e := newPostRouter(db, authAs(mine.ID, mine.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/centrehead", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/centrehead", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -215,6 +215,6 @@ func TestGetCentreheadPosts_OnlyOwn(t *testing.T) {
 func TestGetCentreheadPosts_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodGet, "/api/post/centrehead", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/centrehead", nil)
 	assertStatus(t, rec, 401)
 }

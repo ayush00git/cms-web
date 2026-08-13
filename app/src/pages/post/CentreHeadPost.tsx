@@ -29,7 +29,7 @@ export function CentreHeadPost() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/post/centrehead', {
+      const response = await fetch('/api/posts/centrehead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -43,7 +43,7 @@ export function CentreHeadPost() {
         setMessage(data.success || 'Complaint submitted successfully!');
         setFormData({ type_of_post: '', title: '', description: '' });
         if (data.post?.id) {
-          navigate(`/post/centrehead/${data.post.id}`);
+          navigate(`/posts/centrehead/${data.post.id}`);
         }
       } else {
         setStatus('error');

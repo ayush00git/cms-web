@@ -31,7 +31,7 @@ func TestFacultyPost_GetByID_Success(t *testing.T) {
 	db.Create(&comment)
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty/1", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty/1", nil)
 
 	assertStatus(t, rec, 200)
 
@@ -63,7 +63,7 @@ func TestWardenPost_GetByID_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/warden/1", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/warden/1", nil)
 
 	assertStatus(t, rec, 200)
 
@@ -84,7 +84,7 @@ func TestFacultyPost_GetByID_NotFound(t *testing.T) {
 	f := seedFaculty(t, db, "fac.getidnf@iit.ac.in")
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty/999", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty/999", nil)
 
 	assertStatus(t, rec, 404)
 }
@@ -105,7 +105,7 @@ func TestFacultyPost_GetByID_WrongUser(t *testing.T) {
 
 	// User 2 tries to access User 1's post
 	e := newPostRouter(db, authAs(f2.ID, f2.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/faculty/1", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty/1", nil)
 
 	// Should not find the post as it filters by user ID
 	assertStatus(t, rec, 404)
