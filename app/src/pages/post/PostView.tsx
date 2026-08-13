@@ -104,7 +104,7 @@ export function PostView() {
 
   const fetchPost = useCallback(async () => {
     try {
-      const res = await fetch(`/api/post/${role}/${post_id}`, { credentials: 'include' });
+      const res = await fetch(`/api/posts/${role}/${post_id}`, { credentials: 'include' });
       if (!res.ok) {
         throw new Error(`Failed to fetch post details (${res.status})`);
       }
@@ -189,8 +189,8 @@ export function PostView() {
   const comments = post.comments ?? [];
   const editExpired = isEditWindowExpired(post.created_at);
 
-  const editBase = isFaculty ? '/api/post/faculty/edit' : isWarden ? '/api/post/warden/edit' : '/api/post/centrehead/edit';
-  const deleteBase = isFaculty ? '/api/post/faculty/delete' : isWarden ? '/api/post/warden/delete' : '/api/post/centrehead/delete';
+  const editBase = isFaculty ? '/api/posts/faculty/edit' : isWarden ? '/api/posts/warden/edit' : '/api/posts/centrehead/edit';
+  const deleteBase = isFaculty ? '/api/posts/faculty/delete' : isWarden ? '/api/posts/warden/delete' : '/api/posts/centrehead/delete';
 
   function startEdit() {
     if (!post) return;
@@ -261,7 +261,7 @@ export function PostView() {
     setCommentSubmitting(true);
     setCommentError(null);
     try {
-      const res = await fetch(`/api/post/${role}/comment/${post.id}`, {
+      const res = await fetch(`/api/posts/${role}/comment/${post.id}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

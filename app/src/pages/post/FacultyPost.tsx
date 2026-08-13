@@ -30,7 +30,7 @@ export function FacultyPost() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/post/faculty', {
+      const response = await fetch('/api/posts/faculty', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -44,7 +44,7 @@ export function FacultyPost() {
         setMessage(data.success || 'Complaint submitted successfully!');
         setFormData({ place: '', type_of_post: '', title: '', description: '' });
         if (data.post?.id) {
-          navigate(`/post/faculty/${data.post.id}`);
+          navigate(`/posts/faculty/${data.post.id}`);
         }
       } else {
         setStatus('error');

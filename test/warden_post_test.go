@@ -21,7 +21,7 @@ func TestWardenPost_Create_Success(t *testing.T) {
 		"title":        "Fan not working",
 		"description":  "Ceiling fan dead in B-204",
 	}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden", body)
 
 	assertStatus(t, rec, 201)
 
@@ -36,7 +36,7 @@ func TestWardenPost_Create_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
 	body := map[string]any{"type_of_post": "Civil", "room_number": "1", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden", body)
 	assertStatus(t, rec, 401)
 }
 
@@ -44,7 +44,7 @@ func TestWardenPost_Create_InvalidBody(t *testing.T) {
 	db := newTestDB(t)
 	w := seedWarden(t, db, "war.badbody@iit.ac.in")
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden", []string{"bad"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden", []string{"bad"})
 	assertStatus(t, rec, 400)
 }
 
@@ -52,7 +52,7 @@ func TestWardenPost_Create_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, authAs(999, "ghost.warden@iit.ac.in"))
 	body := map[string]any{"type_of_post": "Civil", "room_number": "1", "title": "x", "description": "y"}
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden", body)
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden", body)
 	assertStatus(t, rec, 401)
 }
 
@@ -65,7 +65,7 @@ func TestWardenPostEdit_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/1", map[string]any{
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/warden/edit/1", map[string]any{
 		"room_number": "A-2",
 		"title":       "new title",
 	})
@@ -83,7 +83,7 @@ func TestWardenPostEdit_NotFound(t *testing.T) {
 	db := newTestDB(t)
 	w := seedWarden(t, db, "war.editnf@iit.ac.in")
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/999", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/warden/edit/999", map[string]any{"title": "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -95,14 +95,14 @@ func TestWardenPostEdit_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/1", map[string]any{"title": "hijack"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/warden/edit/1", map[string]any{"title": "hijack"})
 	assertStatus(t, rec, 403)
 }
 
 func TestWardenPostEdit_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/1", map[string]any{"title": "x"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/warden/edit/1", map[string]any{"title": "x"})
 	assertStatus(t, rec, 401)
 }
 
@@ -114,7 +114,7 @@ func TestWardenPostEdit_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPatch, "/api/post/warden/edit/1", map[string]any{"title": "new"})
+	rec := doRequest(t, e, http.MethodPatch, "/api/posts/warden/edit/1", map[string]any{"title": "new"})
 	assertStatus(t, rec, 403)
 }
 
@@ -127,7 +127,7 @@ func TestWardenPostDelete_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/warden/delete/1", nil)
 
 	assertStatus(t, rec, 200)
 
@@ -142,7 +142,7 @@ func TestWardenPostDelete_NotFound(t *testing.T) {
 	db := newTestDB(t)
 	w := seedWarden(t, db, "war.delnf@iit.ac.in")
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/55", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/warden/delete/55", nil)
 	assertStatus(t, rec, 404)
 }
 
@@ -154,14 +154,14 @@ func TestWardenPostDelete_WrongAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/warden/delete/1", nil)
 	assertStatus(t, rec, 403)
 }
 
 func TestWardenPostDelete_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/warden/delete/1", nil)
 	assertStatus(t, rec, 401)
 }
 
@@ -173,7 +173,7 @@ func TestWardenPostDelete_ExpiredWindow(t *testing.T) {
 	db.Model(&post).Update("created_at", time.Now().Add(-31*time.Minute))
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodDelete, "/api/post/warden/delete/1", nil)
+	rec := doRequest(t, e, http.MethodDelete, "/api/posts/warden/delete/1", nil)
 	assertStatus(t, rec, 403)
 }
 
@@ -186,7 +186,7 @@ func TestGetWardenPosts_Success(t *testing.T) {
 	db.Create(&models.WardenPost{WardenID: w.ID, RoomNumber: "A-2", TypeOfPost: models.TypeElectrical, Title: "b", Description: "d"})
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/warden", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/warden", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -204,7 +204,7 @@ func TestGetWardenPosts_OnlyOwn(t *testing.T) {
 	db.Create(&models.WardenPost{WardenID: theirs.ID, RoomNumber: "A-2", TypeOfPost: models.TypeCivil, Title: "theirs", Description: "d"})
 
 	e := newPostRouter(db, authAs(mine.ID, mine.Email))
-	rec := doRequest(t, e, http.MethodGet, "/api/post/warden", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/warden", nil)
 
 	assertStatus(t, rec, 200)
 	out := decodeBody(t, rec)
@@ -216,6 +216,6 @@ func TestGetWardenPosts_OnlyOwn(t *testing.T) {
 func TestGetWardenPosts_Unauthenticated(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, noAuth())
-	rec := doRequest(t, e, http.MethodGet, "/api/post/warden", nil)
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/warden", nil)
 	assertStatus(t, rec, 401)
 }

@@ -21,7 +21,7 @@ func TestFacultyPostComment_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty/comment/1", handlers.CommentType{Content: "my issue persists"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty/comment/1", handlers.CommentType{Content: "my issue persists"})
 	assertStatus(t, rec, 201)
 
 	var doc models.Comment
@@ -47,14 +47,14 @@ func TestFacultyPostComment_NotAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 403)
 }
 
 func TestFacultyPostComment_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, authAs(999, "ghost@iit.ac.in"))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -62,7 +62,7 @@ func TestFacultyPostComment_PostNotFound(t *testing.T) {
 	db := newTestDB(t)
 	f := seedFaculty(t, db, "fac.pnf@iit.ac.in")
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty/comment/9999", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty/comment/9999", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -70,7 +70,7 @@ func TestFacultyPostComment_BadPostID(t *testing.T) {
 	db := newTestDB(t)
 	f := seedFaculty(t, db, "fac.badpid@iit.ac.in")
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/faculty/comment/not-a-number", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/faculty/comment/not-a-number", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 500)
 }
 
@@ -81,7 +81,7 @@ func TestFacultyPostComment_InvalidBody(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(f.ID, f.Email))
-	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/faculty/comment/1", "{not json")
+	rec := doRequestRaw(t, e, http.MethodPost, "/api/posts/faculty/comment/1", "{not json")
 	assertStatus(t, rec, 400)
 }
 
@@ -94,7 +94,7 @@ func TestWardenPostComment_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden/comment/1", handlers.CommentType{Content: "still broken"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden/comment/1", handlers.CommentType{Content: "still broken"})
 	assertStatus(t, rec, 201)
 
 	var doc models.Comment
@@ -120,14 +120,14 @@ func TestWardenPostComment_NotAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 403)
 }
 
 func TestWardenPostComment_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, authAs(999, "ghost@iit.ac.in"))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -135,7 +135,7 @@ func TestWardenPostComment_PostNotFound(t *testing.T) {
 	db := newTestDB(t)
 	w := seedWarden(t, db, "war.pnf@iit.ac.in")
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden/comment/9999", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden/comment/9999", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -143,7 +143,7 @@ func TestWardenPostComment_BadPostID(t *testing.T) {
 	db := newTestDB(t)
 	w := seedWarden(t, db, "war.badpid@iit.ac.in")
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/warden/comment/not-a-number", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/warden/comment/not-a-number", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 500)
 }
 
@@ -154,7 +154,7 @@ func TestWardenPostComment_InvalidBody(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(w.ID, w.Email))
-	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/warden/comment/1", "{not json")
+	rec := doRequestRaw(t, e, http.MethodPost, "/api/posts/warden/comment/1", "{not json")
 	assertStatus(t, rec, 400)
 }
 
@@ -167,7 +167,7 @@ func TestCentreheadPostComment_Success(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead/comment/1", handlers.CommentType{Content: "needs urgent fix"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead/comment/1", handlers.CommentType{Content: "needs urgent fix"})
 	assertStatus(t, rec, 201)
 
 	var doc models.Comment
@@ -193,14 +193,14 @@ func TestCentreheadPostComment_NotAuthor(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(other.ID, other.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 403)
 }
 
 func TestCentreheadPostComment_UserNotFound(t *testing.T) {
 	db := newTestDB(t)
 	e := newPostRouter(db, authAs(999, "ghost@iit.ac.in"))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead/comment/1", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead/comment/1", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -208,7 +208,7 @@ func TestCentreheadPostComment_PostNotFound(t *testing.T) {
 	db := newTestDB(t)
 	ch := seedCentrehead(t, db, "ch.pnf@iit.ac.in")
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead/comment/9999", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead/comment/9999", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 404)
 }
 
@@ -216,7 +216,7 @@ func TestCentreheadPostComment_BadPostID(t *testing.T) {
 	db := newTestDB(t)
 	ch := seedCentrehead(t, db, "ch.badpid@iit.ac.in")
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequest(t, e, http.MethodPost, "/api/post/centrehead/comment/not-a-number", handlers.CommentType{Content: "x"})
+	rec := doRequest(t, e, http.MethodPost, "/api/posts/centrehead/comment/not-a-number", handlers.CommentType{Content: "x"})
 	assertStatus(t, rec, 500)
 }
 
@@ -227,6 +227,6 @@ func TestCentreheadPostComment_InvalidBody(t *testing.T) {
 	db.Create(&post)
 
 	e := newPostRouter(db, authAs(ch.ID, ch.Email))
-	rec := doRequestRaw(t, e, http.MethodPost, "/api/post/centrehead/comment/1", "{not json")
+	rec := doRequestRaw(t, e, http.MethodPost, "/api/posts/centrehead/comment/1", "{not json")
 	assertStatus(t, rec, 400)
 }

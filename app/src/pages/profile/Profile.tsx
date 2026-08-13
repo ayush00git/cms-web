@@ -55,9 +55,9 @@ export function Profile() {
   const fetchPosts = useCallback((silent = false) => {
     if (!profile) return;
     let endpoint: string;
-    if ('department' in profile)    endpoint = '/api/post/faculty';
-    else if ('hostel' in profile)   endpoint = '/api/post/warden';
-    else if ('building' in profile) endpoint = '/api/post/centrehead';
+    if ('department' in profile)    endpoint = '/api/posts/faculty';
+    else if ('hostel' in profile)   endpoint = '/api/posts/warden';
+    else if ('building' in profile) endpoint = '/api/posts/centrehead';
     else return;
 
     if (!silent) setPostsLoading(true);
@@ -116,12 +116,12 @@ export function Profile() {
   let roleLabel    = 'User';
   let registerRoute = '/';
   let role: Role   = 'centrehead';
-  if (isFaculty)         { roleLabel = 'Faculty Member'; registerRoute = '/faculty/post';      role = 'faculty'; }
-  else if (isWarden)     { roleLabel = 'Hostel Warden';  registerRoute = '/warden/post';       role = 'warden'; }
-  else if (isCentreHead) { roleLabel = 'Centre Head';    registerRoute = '/centre-head/post';  role = 'centrehead'; }
+  if (isFaculty)         { roleLabel = 'Faculty Member'; registerRoute = '/faculty/posts';      role = 'faculty'; }
+  else if (isWarden)     { roleLabel = 'Hostel Warden';  registerRoute = '/warden/posts';       role = 'warden'; }
+  else if (isCentreHead) { roleLabel = 'Centre Head';    registerRoute = '/centre-head/posts';  role = 'centrehead'; }
 
-  const editBase   = isFaculty ? '/api/post/faculty/edit'   : isWarden ? '/api/post/warden/edit'   : '/api/post/centrehead/edit';
-  const deleteBase = isFaculty ? '/api/post/faculty/delete' : isWarden ? '/api/post/warden/delete' : '/api/post/centrehead/delete';
+  const editBase   = isFaculty ? '/api/posts/faculty/edit'   : isWarden ? '/api/posts/warden/edit'   : '/api/posts/centrehead/edit';
+  const deleteBase = isFaculty ? '/api/posts/faculty/delete' : isWarden ? '/api/posts/warden/delete' : '/api/posts/centrehead/delete';
 
   const handleLogout = async () => {
     try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }

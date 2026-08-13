@@ -314,9 +314,16 @@ export function AdminPostView() {
       })
       .catch((err: Error & { status?: number }) => {
         if (!silent) {
+          // Not an admin — this is just the non-admin viewer of the same
+          // post, bounce straight to the plain (non-admin) post view instead
+          // of showing an access-denied screen.
+          if (err.status === 403) {
+            navigate(`/posts/${role}/${post_id}`, { replace: true });
+            return;
+          }
           setError({ message: err.message, status: err.status });
           setLoading(false);
-          if (err.status === 401 || err.status === 403) setTimeout(() => navigate('/'), 4000);
+          if (err.status === 401) setTimeout(() => navigate('/'), 4000);
         }
       });
   }, [role, post_id, navigate]);
