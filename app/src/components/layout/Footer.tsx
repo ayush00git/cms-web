@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react';
+import { Mail, MapPin, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 type Profile = { department?: string; hostel?: string; building?: string } | null;
@@ -137,20 +137,11 @@ export function Footer() {
             </li>
             <li>
               <a
-                href="tel:+911972254011"
-                className="flex items-center gap-2.5 hover:text-white transition-colors"
-              >
-                <Phone className="w-4 h-4 shrink-0 text-[#666666]" />
-                <span>+91-1972-254011</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="mailto:registrar@nith.ac.in"
+                href="mailto:admin.cccms@nith.ac.in"
                 className="flex items-center gap-2.5 hover:text-white transition-colors"
               >
                 <Mail className="w-4 h-4 shrink-0 text-[#666666]" />
-                <span>registrar@nith.ac.in</span>
+                <span>admin.cccms@nith.ac.in</span>
               </a>
             </li>
           </ul>
