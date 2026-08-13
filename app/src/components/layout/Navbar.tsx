@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Menu, X, User } from 'lucide-react';
+import { ChevronDown, Menu, X, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Navbar() {
@@ -23,6 +23,11 @@ export function Navbar() {
     setLodgeOpen(false);
     setAdminOpen(false);
     setLoginDropdownOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
+    window.location.href = '/';
   };
 
   return (
@@ -71,19 +76,28 @@ export function Navbar() {
             </li>
 
             <li>
-              <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+              <a href="mailto:admin.cccms@nith.ac.in" className="block px-4 py-3 hover:bg-white/10 transition-colors">
                 Contact Us
-              </button>
+              </a>
             </li>
           </ul>
 
           {/* Desktop Right - Profile / Login */}
           <div className="flex items-center text-sm font-medium">
             {isAuth === true ? (
-              <Link to="/profile" className="flex items-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors text-white">
-                <User className="w-4 h-4" />
-                <span>Profile</span>
-              </Link>
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors text-white cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+                <Link to="/profile" className="flex items-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors text-white">
+                  <User className="w-4 h-4" />
+                  <span>Profile</span>
+                </Link>
+              </>
             ) : (
               <div className="relative group">
                 <button className="flex items-center gap-1.5 px-4 py-3 hover:bg-white/10 transition-colors text-white">
@@ -108,10 +122,19 @@ export function Navbar() {
           <span className="text-sm font-semibold text-white/80">Menu</span>
           <div className="flex items-center gap-2">
             {isAuth === true ? (
-              <Link to="/profile" className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
-                <User className="w-3.5 h-3.5" />
-                Profile
-              </Link>
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Logout
+                </button>
+                <Link to="/profile" className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
+                  <User className="w-3.5 h-3.5" />
+                  Profile
+                </Link>
+              </>
             ) : (
               <Link to="/faculty/login" className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
                 <User className="w-3.5 h-3.5" />
@@ -138,10 +161,19 @@ export function Navbar() {
 
           {/* User Profile / Login Option in Mobile Drawer */}
           {isAuth === true ? (
-            <Link to="/profile" onClick={closeMobile} className="flex items-center gap-2 px-5 py-3 hover:bg-white/10 transition-colors border-b border-white/5 text-[#16a34a] font-semibold">
-              <User className="w-4 h-4" />
-              <span>Profile</span>
-            </Link>
+            <div className="flex items-stretch border-b border-white/5">
+              <button
+                onClick={() => { closeMobile(); handleLogout(); }}
+                className="flex items-center gap-2 px-5 py-3 hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+              <Link to="/profile" onClick={closeMobile} className="flex items-center gap-2 px-5 py-3 hover:bg-white/10 transition-colors text-[#16a34a] font-semibold">
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </Link>
+            </div>
           ) : (
             <div className="border-b border-white/5">
               <button
@@ -207,9 +239,9 @@ export function Navbar() {
             Guidelines
           </button>
 
-          <button className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors">
+          <a href="mailto:admin.cccms@nith.ac.in" className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors">
             Contact Us
-          </button>
+          </a>
         </div>
       )}
     </nav>
