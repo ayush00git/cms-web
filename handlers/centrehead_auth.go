@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
 
@@ -12,6 +13,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+type CentreheadProfileEditType struct {
+	Building		string		`json:"building"`
+	PhoneNumber 	string		`json:"phone_number"`
+}
 
 
 // CentreheadSignup registers the head of adminstrations.
@@ -197,4 +203,31 @@ func (h *AuthHandler) CentreheadResetPassword(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"success": "password changed successfully", "role": "centrehead"})
+}
+
+//CentreheadProfileEdit edits the profile of user type centrehead
+func (h *AuthHandler) CentreheadProfileEdit(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		return
+	}
+
+	var head models.Centrehead
+	if err := h.DB.Where("email = ?", email).Take(&head).Error; err != nil {
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	var updatedProfile CentreheadProfileEditType
+	if err := c.ShouldBindJSON(&updatedProfile); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	if err := h.DB.Model(&head).Updates(updatedProfile).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to update the profile"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "profile updated successfully!"})
 }
