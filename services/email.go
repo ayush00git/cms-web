@@ -43,33 +43,54 @@ func buildEmailHTML(heading, message, buttonText, buttonURL string) string {
 			<head>
 				<meta charset="utf-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<meta name="color-scheme" content="light dark">
+				<meta name="supported-color-schemes" content="light dark">
 				<title>%s</title>
+				<style>
+					body, .bg { background-color: #ffffff; }
+					.heading { color: #09090b; }
+					.message { color: #52525b; }
+					.button { background-color: #09090b; }
+					.button-text { color: #ffffff; }
+					.footer { border-top: 1px solid #f4f4f5; }
+					.footer-text { color: #a1a1aa; }
+
+					@media (prefers-color-scheme: dark) {
+						body, .bg { background-color: #09090b !important; }
+						.heading { color: #fafafa !important; }
+						.message { color: #a1a1aa !important; }
+						.button { background-color: #fafafa !important; }
+						.button-text { color: #09090b !important; }
+						.footer { border-top: 1px solid #27272a !important; }
+						.footer-text { color: #71717a !important; }
+					}
+				</style>
 			</head>
-			<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #18181b;">
+			<body class="bg" style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #18181b;">
 
 				<!-- Outer Wrapper -->
-				<table border="0" cellpadding="0" cellspacing="0" width="100%%" style="background-color: #f4f4f5; padding: 40px 20px;">
+				<table border="0" cellpadding="0" cellspacing="0" width="100%%" class="bg" style="background-color: #ffffff; padding: 40px 20px;">
 					<tr>
 						<td align="center">
 
-							<!-- Main Card Container -->
-							<table border="0" cellpadding="0" cellspacing="0" width="100%%" style="max-width: 520px; background-color: #ffffff; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; text-align: left;">
+							<!-- Main Content Container -->
+							<table border="0" cellpadding="0" cellspacing="0" width="100%%" style="max-width: 480px; text-align: left;">
 
 								<!-- Main Body Content -->
 								<tr>
-									<td style="padding: 40px 32px 32px 32px;">
-										<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #09090b; letter-spacing: -0.02em;">
+									<td style="padding: 0 0 32px 0;">
+										<h2 class="heading" style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #09090b; letter-spacing: -0.02em;">
 											%s
 										</h2>
-										<p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #52525b;">
+										<p class="message" style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #52525b;">
 											%s
 										</p>
 
 										<!-- Call to Action Button -->
 										<table border="0" cellpadding="0" cellspacing="0">
 											<tr>
-												<td align="center" style="border-radius: 6px; background-color: #09090b;">
-													<a href="%s" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 500; color: #ffffff; text-decoration: none; border-radius: 6px; background-color: #09090b;">
+												<td align="center" class="button" style="border-radius: 6px; background-color: #09090b;">
+													<a href="%s" target="_blank" class="button-text" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 500; color: #ffffff; text-decoration: none; border-radius: 6px;">
 														%s
 													</a>
 												</td>
@@ -80,15 +101,15 @@ func buildEmailHTML(heading, message, buttonText, buttonURL string) string {
 
 								<!-- Minimal Footer -->
 								<tr>
-									<td style="padding: 20px 32px; background-color: #fafafa; border-top: 1px solid #f4f4f5;">
-										<p style="margin: 0; font-size: 12px; line-height: 18px; color: #a1a1aa;">
+									<td class="footer" style="padding: 20px 0 0 0; border-top: 1px solid #f4f4f5;">
+										<p class="footer-text" style="margin: 0; font-size: 12px; line-height: 18px; color: #a1a1aa;">
 											&copy; %d CMS. All rights reserved.
 										</p>
 									</td>
 								</tr>
 
 							</table>
-							<!-- End Main Card -->
+							<!-- End Main Content -->
 
 						</td>
 					</tr>
