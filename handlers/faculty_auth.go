@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
 
@@ -25,10 +26,18 @@ type ForgetPassword struct {
 	Email		string		`json:"email" binding:"required"`
 }
 
+type FacultyProfileEditType struct {
+	Name			string		`json:"name"`
+	Department		string		`json:"department"`
+	HouseNumber		string		`json:"house_number"`
+	Block			string		`json:"block"`
+	Type			string		`json:"type"`
+	PhoneNumber		string		`json:"phone_number"`
+}
 
 // FacultySignup registers a new faculty member.
 // On success, sends a verification email with a JWT token link.
-func (h *AuthHandler) FacultySignup (c *gin.Context) {
+func (h *AuthHandler) FacultySignup(c *gin.Context) {
 	var inputs models.FacultySignup
 
 	// bind the request body in a json format
@@ -94,7 +103,7 @@ func (h *AuthHandler) FacultySignup (c *gin.Context) {
 
 // FacultyLogin authenticates a faculty member using email and password.
 // On success, signs a JWT and stores it in an httpOnly cookie.
-func (h *AuthHandler) FacultyLogin (c *gin.Context) {
+func (h *AuthHandler) FacultyLogin(c *gin.Context) {
 	var inputs models.FacultyLogin
 
 	if err := c.ShouldBindJSON(&inputs); err != nil {
@@ -219,4 +228,38 @@ func (h *AuthHandler) FacultyResetPassword(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"success": "password changed successfully", "role": "faculty"})
+}
+
+// FacultyProfileEdit edits the profile of user type faculty.
+func (h *AuthHandler) FacultyProfileEdit(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(403, gin.H{"error": "unauthorized access!"})
+		return
+	}
+
+	var profile models.Faculty
+	result := h.DB.Where("email = ?", email).Take(&profile)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "profile not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch profile"})
+		return
+	}
+
+	var updatedProfile FacultyProfileEditType
+	if err := c.ShouldBindJSON(&updatedProfile); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	result = h.DB.Model(profile).Updates(updatedProfile)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to update profile"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": "profile updated successfully!"})
 }

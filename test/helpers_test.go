@@ -202,6 +202,10 @@ func newAuthRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e.GET("/api/auth/verify", h.VerifyAccount)
 	e.GET("/api/profile", auth, h.UserProfile)
 
+	e.PATCH("/api/faculty/profile/edit", auth, h.FacultyProfileEdit)
+	e.PATCH("/api/warden/profile/edit", auth, h.WardenProfileEdit)
+	e.PATCH("/api/centrehead/profile/edit", auth, h.CentreheadProfileEdit)
+
 	return e
 }
 
