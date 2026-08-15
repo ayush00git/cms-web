@@ -30,11 +30,14 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 	}
 	e.POST("/api/auth/logout", h.Logout)
 
-	// for account verifications
+	// for account verifications.
 	e.GET("/api/auth/verify", h.VerifyAccount)
 
-	// for returning the user's profile
+	// for returning the user's profile.
 	e.GET("/api/profile", middleware.IsAuthenticated(), h.UserProfile)
+
+	// for editing user's profile.
 	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), h.FacultyProfileEdit)
+	e.PATCH("/api/warden/profile/edit", middleware.IsAuthenticated(), h.WardenProfileEdit)
 	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), h.CentreheadProfileEdit)
 }
