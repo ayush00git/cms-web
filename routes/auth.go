@@ -38,11 +38,14 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 	// for account verifications.
 	e.GET("/api/auth/verify", h.VerifyAccount)
 
+	// 20 tokens maximum with a refill rate of 1 token per 5 seconds.
+	profileRoutesRateLimiting := middleware.NewRateLimiter(20, 1.0/5.0)
+
 	// for returning the user's profile.
-	e.GET("/api/profile", middleware.IsAuthenticated(), h.UserProfile)
+	e.GET("/api/profile", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.UserProfile)
 
 	// for editing user's profile.
-	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), h.FacultyProfileEdit)
-	e.PATCH("/api/warden/profile/edit", middleware.IsAuthenticated(), h.WardenProfileEdit)
-	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), h.CentreheadProfileEdit)
+	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.FacultyProfileEdit)
+	e.PATCH("/api/warden/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.WardenProfileEdit)
+	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.CentreheadProfileEdit)
 }
