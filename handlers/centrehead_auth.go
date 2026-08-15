@@ -209,7 +209,7 @@ func (h *AuthHandler) CentreheadResetPassword(c *gin.Context) {
 func (h *AuthHandler) CentreheadProfileEdit(c *gin.Context) {
 	email, ok := c.Get(middleware.EmailKey)
 	if !ok {
-		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		c.JSON(403, gin.H{"error": "unauthorized access!"})
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
 
@@ -12,6 +13,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+type WardenProfileEditType struct {
+	Name			string		`json:"name"`
+	Hostel			string		`json:"hostel"`
+	PhoneNumber		string		`json:"phone_number"`
+}
+
 
 // WardenSignup registers a warden.
 // On success, sends a verification email with a JWT token link.
@@ -124,7 +132,6 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 }
 
 
-
 // WardenForgetPassword sends an password reset email to the user
 func (h* AuthHandler) WardenForgetPassword(c *gin.Context) {
 	var input ForgetPassword
@@ -198,4 +205,38 @@ func (h *AuthHandler) WardenResetPassword(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"success": "password changed successfully", "role": "warden"})
+}
+
+
+// WardenProfileEdit dits the profile of user type warden.
+func (h *AuthHandler) WardenProfileEdit(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(403, gin.H{"error": "unauthorized access!"})
+		return
+	}
+
+	var profile models.Warden
+	result := h.DB.Where("email = ?", email).Take(&profile)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch profile"})
+		return
+	}
+
+	var updatedProfile WardenProfileEditType
+	if err := c.ShouldBindJSON(&updatedProfile); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	result = h.DB.Model(profile).Updates(updatedProfile)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed updating profile"})
+		return
+	}
+	c.JSON(200, gin.H{"success": "profile updated successfully!"})
 }

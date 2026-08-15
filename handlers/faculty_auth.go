@@ -234,7 +234,7 @@ func (h *AuthHandler) FacultyResetPassword(c *gin.Context) {
 func (h *AuthHandler) FacultyProfileEdit(c *gin.Context) {
 	email, ok := c.Get(middleware.EmailKey)
 	if !ok {
-		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		c.JSON(403, gin.H{"error": "unauthorized access!"})
 		return
 	}
 
