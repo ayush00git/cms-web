@@ -8,7 +8,7 @@ import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
 import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
 import { Loader } from '../../components/Loader';
-import { BUILDINGS } from '../../constants/models';
+import { BUILDINGS, HOSTELS, DEPARTMENTS, BLOCK_LABELS, BLOCK_TYPES } from '../../constants/models';
 
 interface ProfileData {
   name?: string;
@@ -40,7 +40,10 @@ export function Profile() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ building: '', phone_number: '' });
+  const [profileForm, setProfileForm] = useState({
+    name: '', phone_number: '', building: '', hostel: '',
+    department: '', house_number: '', block: '', type: '',
+  });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -189,10 +192,22 @@ export function Profile() {
     }
   }
 
+  const profileEditEndpoint = isFaculty
+    ? '/api/faculty/profile/edit'
+    : isWarden
+    ? '/api/warden/profile/edit'
+    : '/api/centrehead/profile/edit';
+
   function openProfileEdit() {
     setProfileForm({
-      building: profile.building ?? '',
+      name:         profile.name         ?? '',
       phone_number: profile.phone_number ?? '',
+      building:     profile.building     ?? '',
+      hostel:       profile.hostel       ?? '',
+      department:   profile.department   ?? '',
+      house_number: profile.house_number ?? '',
+      block:        profile.block        ?? '',
+      type:         profile.type         ?? '',
     });
     setProfileError(null);
     setIsEditingProfile(true);
@@ -201,18 +216,29 @@ export function Profile() {
   async function handleSaveProfile() {
     setProfileSaving(true);
     setProfileError(null);
+
+    const body = isFaculty
+      ? {
+          name: profileForm.name, phone_number: profileForm.phone_number,
+          department: profileForm.department, house_number: profileForm.house_number,
+          block: profileForm.block, type: profileForm.type,
+        }
+      : isWarden
+      ? { name: profileForm.name, phone_number: profileForm.phone_number, hostel: profileForm.hostel }
+      : { phone_number: profileForm.phone_number, building: profileForm.building };
+
     try {
-      const res = await fetch('/api/centrehead/profile/edit', {
+      const res = await fetch(profileEditEndpoint, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileForm),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
         throw new Error(b.error ?? `Failed to update profile (${res.status})`);
       }
-      setProfile((prev) => prev ? { ...prev, ...profileForm } : null);
+      setProfile((prev) => prev ? { ...prev, ...body } : null);
       setIsEditingProfile(false);
     } catch (err) {
       setProfileError((err as Error).message);
@@ -241,7 +267,7 @@ export function Profile() {
                 <PlusCircle className="w-4 h-4" /> Register Complaint
               </Link>
               <button
-                onClick={isCentreHead ? openProfileEdit : () => alert('Edit profile functionality coming soon')}
+                onClick={openProfileEdit}
                 className="inline-flex items-center gap-2 bg-[#222222] hover:bg-[#000000] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 cursor-pointer"
               >
                 <Pencil className="w-4 h-4" /> Profile
@@ -347,8 +373,13 @@ export function Profile() {
           {!postsLoading && !postsError && posts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-dashed border-[#E5E5E5]">
               <Inbox className="w-10 h-10 mb-3 text-[#E5E5E5]" />
-              <span className="text-sm font-semibold text-[#111111]">No complaints filed yet.</span>
-              <span className="text-xs mt-1 text-[#666666]">Use "Register Complaint" above to file your first one.</span>
+              <span className="text-sm font-semibold text-[#111111] mb-4">No complaints filed yet.</span>
+              <Link
+                to={registerRoute}
+                className="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 active:scale-[0.98] cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" /> Register Complaint
+              </Link>
             </div>
           )}
 
@@ -376,7 +407,7 @@ export function Profile() {
         </div>
       </div>
 
-      {isCentreHead && isEditingProfile && (
+      {isEditingProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white border border-[#E5E5E5] rounded-lg w-full max-w-sm">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E5E5]">
@@ -390,6 +421,19 @@ export function Profile() {
             </div>
 
             <div className="px-5 py-4 flex flex-col gap-4">
+              {(isFaculty || isWarden) && (
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-1.5">Full Name</label>
+                  <input
+                    type="text"
+                    value={profileForm.name}
+                    onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                    placeholder="Full name"
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-semibold text-[#111111] mb-1.5">Phone Number</label>
                 <input
@@ -401,19 +445,95 @@ export function Profile() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-[#111111] mb-1.5">Assigned Building / Centre</label>
-                <select
-                  value={profileForm.building}
-                  onChange={(e) => setProfileForm((f) => ({ ...f, building: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
-                >
-                  <option value="" disabled>Select your Building</option>
-                  {BUILDINGS.map((building) => (
-                    <option key={building.value} value={building.value}>{building.label}</option>
-                  ))}
-                </select>
-              </div>
+              {isCentreHead && (
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-1.5">Assigned Building / Centre</label>
+                  <select
+                    value={profileForm.building}
+                    onChange={(e) => setProfileForm((f) => ({ ...f, building: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                  >
+                    <option value="" disabled>Select your Building</option>
+                    {BUILDINGS.map((building) => (
+                      <option key={building.value} value={building.value}>{building.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {isWarden && (
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-1.5">Hostel</label>
+                  <select
+                    value={profileForm.hostel}
+                    onChange={(e) => setProfileForm((f) => ({ ...f, hostel: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                  >
+                    <option value="" disabled>Select your Hostel</option>
+                    {HOSTELS.map((hostel) => (
+                      <option key={hostel.value} value={hostel.value}>{hostel.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {isFaculty && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#111111] mb-1.5">Department</label>
+                    <select
+                      value={profileForm.department}
+                      onChange={(e) => setProfileForm((f) => ({ ...f, department: e.target.value }))}
+                      className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                    >
+                      <option value="" disabled>Select your Department</option>
+                      {DEPARTMENTS.map((dept) => (
+                        <option key={dept.value} value={dept.value}>{dept.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#111111] mb-1.5">House Number</label>
+                      <input
+                        type="text"
+                        value={profileForm.house_number}
+                        onChange={(e) => setProfileForm((f) => ({ ...f, house_number: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                        placeholder="e.g. 104"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#111111] mb-1.5">Block</label>
+                      <select
+                        value={profileForm.block}
+                        onChange={(e) => setProfileForm((f) => ({ ...f, block: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                      >
+                        <option value="" disabled>Select Block</option>
+                        {BLOCK_LABELS.map((block) => (
+                          <option key={block.value} value={block.value}>{block.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#111111] mb-1.5">Type</label>
+                    <select
+                      value={profileForm.type}
+                      onChange={(e) => setProfileForm((f) => ({ ...f, type: e.target.value }))}
+                      className="w-full px-3.5 py-2.5 border border-[#CCCCCC] rounded-lg focus:outline-none focus:border-[#111111] text-sm text-[#111111] bg-white transition-colors"
+                    >
+                      <option value="" disabled>Select Type</option>
+                      {BLOCK_TYPES.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
 
               {profileError && (
                 <p className="text-sm text-[#B91C1C]">{profileError}</p>
