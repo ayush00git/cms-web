@@ -54,7 +54,10 @@ export function Profile() {
     setPostsError(null);
     fetch(endpoint, { credentials: 'include' })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`Server error (${res.status})`);
+        if (!res.ok) {
+          const b = await res.json().catch(() => ({}));
+          throw new Error(b.error ?? `Server error (${res.status})`);
+        }
         return res.json();
       })
       .then((data) => {

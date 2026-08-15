@@ -39,5 +39,4 @@ func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
 		posts.POST("/warden/comment/:post_id", h.WardenPostComment)
 		posts.POST("/centrehead/comment/:post_id", h.CentreheadPostComment)
 	}
-
 }
