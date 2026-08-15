@@ -23,35 +23,38 @@ import { JEPostView } from './pages/admin/JEPostView';
 import { AdminPostView } from './pages/admin/AdminPostView';
 import { GuestRoute } from './components/GuestRoute';
 import { NotFound } from './pages/NotFound';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/faculty/signup" element={<FacultySignup />} />
-        <Route path="/warden/signup" element={<WardenSignup />} />
-        <Route path="/centre-head/signup" element={<CentreHeadSignup />} />
-        <Route path="/faculty/login" element={<GuestRoute><FacultyLogin /></GuestRoute>} />
-        <Route path="/warden/login" element={<GuestRoute><WardenLogin /></GuestRoute>} />
-        <Route path="/centre-head/login" element={<GuestRoute><CentreHeadLogin /></GuestRoute>} />
-        <Route path="/faculty/forgot-password" element={<FacultyForgotPassword />} />
-        <Route path="/warden/forgot-password" element={<WardenForgotPassword />} />
-        <Route path="/centre-head/forgot-password" element={<CentreHeadForgotPassword />} />
-        <Route path="/account/reset-password" element={<AccountResetPass />} />
-        <Route path="/staff/login" element={<GuestRoute><StaffLogin /></GuestRoute>} />
-        <Route path="/faculty/posts" element={<FacultyPost />} />
-        <Route path="/warden/posts" element={<WardenPost />} />
-        <Route path="/centre-head/posts" element={<CentreHeadPost />} />
-        <Route path="/posts/:role/:post_id" element={<PostView />} />
-        <Route path="/account/verify" element={<VerifyAccount />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/admin/xen" element={<XENPostView />} />
-        <Route path="/admin/ae" element={<AEPostView />} />
-        <Route path="/admin/je" element={<JEPostView />} />
-        <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/faculty/signup" element={<FacultySignup />} />
+          <Route path="/warden/signup" element={<WardenSignup />} />
+          <Route path="/centre-head/signup" element={<CentreHeadSignup />} />
+          <Route path="/faculty/login" element={<GuestRoute><FacultyLogin /></GuestRoute>} />
+          <Route path="/warden/login" element={<GuestRoute><WardenLogin /></GuestRoute>} />
+          <Route path="/centre-head/login" element={<GuestRoute><CentreHeadLogin /></GuestRoute>} />
+          <Route path="/faculty/forgot-password" element={<FacultyForgotPassword />} />
+          <Route path="/warden/forgot-password" element={<WardenForgotPassword />} />
+          <Route path="/centre-head/forgot-password" element={<CentreHeadForgotPassword />} />
+          <Route path="/account/reset-password" element={<AccountResetPass />} />
+          <Route path="/staff/login" element={<GuestRoute><StaffLogin /></GuestRoute>} />
+          <Route path="/faculty/posts" element={<FacultyPost />} />
+          <Route path="/warden/posts" element={<WardenPost />} />
+          <Route path="/centre-head/posts" element={<CentreHeadPost />} />
+          <Route path="/posts/:role/:post_id" element={<PostView />} />
+          <Route path="/account/verify" element={<VerifyAccount />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin/xen" element={<XENPostView />} />
+          <Route path="/admin/ae" element={<AEPostView />} />
+          <Route path="/admin/je" element={<JEPostView />} />
+          <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

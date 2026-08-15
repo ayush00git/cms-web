@@ -2,31 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil,
-  Inbox, ServerCrash, Info, X,
+  Inbox, ServerCrash, Info, X, Clock,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { ComplaintCard } from '../../components/ComplaintCard';
 import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCard';
 import { Loader } from '../../components/Loader';
 import { BUILDINGS, HOSTELS, DEPARTMENTS, BLOCK_LABELS, BLOCK_TYPES } from '../../constants/models';
-
-interface ProfileData {
-  name?: string;
-  email?: string;
-  is_verified?: boolean;
-  phone_number?: string;
-  department?: string;
-  house_number?: string;
-  block?: string;
-  type?: string;
-  hostel?: string;
-  building?: string;
-}
+import { useAuth } from '../../context/auth-context';
 
 export function Profile() {
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const { profile, status, errorMessage, patchProfile } = useAuth();
   const navigate = useNavigate();
 
   const [posts, setPosts]               = useState<ComplaintPost[]>([]);
@@ -47,19 +33,14 @@ export function Profile() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
+  // Only bounce unauthenticated/broken sessions home — a rate-limited response
+  // isn't a login problem, so it's left for the user to just wait it out.
   useEffect(() => {
-    fetch('/api/profile', { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch profile. Please login.');
-        return res.json();
-      })
-      .then((data) => { setProfile(data); setLoading(false); })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-        setTimeout(() => navigate('/'), 3000);
-      });
-  }, [navigate]);
+    if (status === 'unauthenticated' || status === 'error') {
+      const timer = setTimeout(() => navigate('/'), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, navigate]);
 
   const fetchPosts = useCallback((silent = false) => {
     if (!profile) return;
@@ -80,15 +61,15 @@ export function Profile() {
         setPosts(data.posts ?? []);
         setPostsLoading(false);
         if (data.name) {
-          setProfile((prev) => prev ? { ...prev, name: data.name } : null);
+          patchProfile({ name: data.name });
         }
       })
       .catch((err: Error) => { setPostsError(err.message); setPostsLoading(false); });
-  }, [profile]);
+  }, [profile, patchProfile]);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <MainLayout>
         <div className="flex-grow flex items-center justify-center py-12">
@@ -101,14 +82,28 @@ export function Profile() {
     );
   }
 
-  if (error) {
+  if (status === 'rate-limited') {
+    return (
+      <MainLayout>
+        <div className="flex-grow flex items-center justify-center py-12">
+          <div className="max-w-md w-full mx-4 bg-white border border-[#E5E5E5] border-t-2 border-t-[#111111] rounded-lg p-6 shadow-sm text-center">
+            <Clock className="w-10 h-10 text-[#111111] mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-[#111111] mb-2">Slow Down</h3>
+            <p className="text-sm text-[#666666]">{errorMessage}</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (status === 'unauthenticated' || status === 'error') {
     return (
       <MainLayout>
         <div className="flex-grow flex items-center justify-center py-12">
           <div className="max-w-md w-full mx-4 bg-white border border-[#E5E5E5] border-t-2 border-t-[#111111] rounded-lg p-6 shadow-sm text-center">
             <AlertCircle className="w-10 h-10 text-[#111111] mx-auto mb-4" />
             <h3 className="text-lg font-bold text-[#111111] mb-2">Access Denied</h3>
-            <p className="text-sm text-[#666666] mb-4">{error}</p>
+            <p className="text-sm text-[#666666] mb-4">{errorMessage ?? 'Failed to fetch profile. Please login.'}</p>
             <p className="text-xs text-[#666666]">Redirecting to Homepage…</p>
           </div>
         </div>
@@ -238,7 +233,7 @@ export function Profile() {
         const b = await res.json().catch(() => ({}));
         throw new Error(b.error ?? `Failed to update profile (${res.status})`);
       }
-      setProfile((prev) => prev ? { ...prev, ...body } : null);
+      patchProfile(body);
       setIsEditingProfile(false);
     } catch (err) {
       setProfileError((err as Error).message);
