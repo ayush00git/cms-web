@@ -205,7 +205,7 @@ func (h *AuthHandler) CentreheadResetPassword(c *gin.Context) {
 	c.JSON(200, gin.H{"success": "password changed successfully", "role": "centrehead"})
 }
 
-//CentreheadProfileEdit edits the profile of user type centrehead
+//CentreheadProfileEdit edits the profile of user type centrehead.
 func (h *AuthHandler) CentreheadProfileEdit(c *gin.Context) {
 	email, ok := c.Get(middleware.EmailKey)
 	if !ok {
@@ -214,8 +214,12 @@ func (h *AuthHandler) CentreheadProfileEdit(c *gin.Context) {
 	}
 
 	var head models.Centrehead
-	if err := h.DB.Where("email = ?", email).Take(&head).Error; err != nil {
-		c.JSON(500, gin.H{"error": "internal server error"})
+	result := h.DB.Where("email = ?", email).Take(&head)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "user not found"})
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch profile"})
 		return
 	}
 
@@ -225,7 +229,8 @@ func (h *AuthHandler) CentreheadProfileEdit(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Model(&head).Updates(updatedProfile).Error; err != nil {
+	result = h.DB.Model(&head).Updates(updatedProfile)
+	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "failed to update the profile"})
 		return
 	}
