@@ -184,3 +184,4 @@ jobs:
             sudo -n /usr/bin/systemctl reload nginx
 
             echo "Frontend deployed successfully."
+            
