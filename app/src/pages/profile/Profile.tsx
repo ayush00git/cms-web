@@ -200,14 +200,14 @@ export function Profile() {
 
   function openProfileEdit() {
     setProfileForm({
-      name:         profile.name         ?? '',
-      phone_number: profile.phone_number ?? '',
-      building:     profile.building     ?? '',
-      hostel:       profile.hostel       ?? '',
-      department:   profile.department   ?? '',
-      house_number: profile.house_number ?? '',
-      block:        profile.block        ?? '',
-      type:         profile.type         ?? '',
+      name:         profile?.name         ?? '',
+      phone_number: profile?.phone_number ?? '',
+      building:     profile?.building     ?? '',
+      hostel:       profile?.hostel       ?? '',
+      department:   profile?.department   ?? '',
+      house_number: profile?.house_number ?? '',
+      block:        profile?.block        ?? '',
+      type:         profile?.type         ?? '',
     });
     setProfileError(null);
     setIsEditingProfile(true);

@@ -30,9 +30,41 @@ jobs:
       - name: Run tests
         run: go test ./test/... -v -count=1
 
+  build:
+    name: Build check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build backend
+        run: go build ./...
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: app
+        run: npm run build
+
   deploy-backend:
     name: Deploy backend
-    needs: test
+    needs: [test, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -89,7 +121,7 @@ jobs:
 
   deploy-frontend:
     name: Deploy frontend
-    needs: test
+    needs: [test, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -152,3 +184,4 @@ jobs:
             sudo -n /usr/bin/systemctl reload nginx
 
             echo "Frontend deployed successfully."
+            
