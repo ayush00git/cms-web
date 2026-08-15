@@ -38,8 +38,8 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 	// for account verifications.
 	e.GET("/api/auth/verify", h.VerifyAccount)
 
-	// 20 tokens maximum with a refill rate of 1 token per 5 seconds.
-	profileRoutesRateLimiting := middleware.NewRateLimiter(20, 1.0/5.0)
+	// 100 tokens maximum with a refill rate of 1 token per 5 seconds.
+	profileRoutesRateLimiting := middleware.NewRateLimiter(100, 1.0/5.0)
 
 	// for returning the user's profile.
 	e.GET("/api/profile", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.UserProfile)
