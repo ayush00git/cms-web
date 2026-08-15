@@ -35,5 +35,6 @@ func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 
 	// for returning the user's profile
 	e.GET("/api/profile", middleware.IsAuthenticated(), h.UserProfile)
+	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), h.FacultyProfileEdit)
 	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), h.CentreheadProfileEdit)
 }
