@@ -22,6 +22,7 @@ import { AEPostView } from './pages/admin/AEPostView';
 import { JEPostView } from './pages/admin/JEPostView';
 import { AdminPostView } from './pages/admin/AdminPostView';
 import { GuestRoute } from './components/GuestRoute';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
         <Route path="/admin/ae" element={<AEPostView />} />
         <Route path="/admin/je" element={<JEPostView />} />
         <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
