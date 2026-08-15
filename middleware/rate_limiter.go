@@ -56,7 +56,7 @@ func (rl *RateLimiter) GetBucket(ip string) *TokenBucket {
 
 	bucket, exists := rl.buckets[ip]
 	if !exists {
-		bucket := &TokenBucket{
+		bucket = &TokenBucket{
 			tokens: rl.max,
 			maxTokens: rl.max,
 			refillRate: rl.refill,
