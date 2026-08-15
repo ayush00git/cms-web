@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
+import { useAuth } from '../context/auth-context';
 
 type Profile = { department?: string; hostel?: string; building?: string } | null;
 
@@ -12,23 +13,13 @@ function getPostRoute(profile: NonNullable<Profile>): string {
 }
 
 export function Landing() {
-  const [profile, setProfile]           = useState<Profile>(null);
-  const [isAuth, setIsAuth]             = useState<boolean | null>(null);
+  const { profile, status }             = useAuth();
+  const isAuth                          = status === 'loading' ? null : status === 'authenticated';
   const [showLoginMenu, setShowLoginMenu]   = useState(false);
   const [showSignupMenu, setShowSignupMenu] = useState(false);
   const menuRef                         = useRef<HTMLDivElement>(null);
   const signupMenuRef                   = useRef<HTMLDivElement>(null);
   const navigate                        = useNavigate();
-
-  useEffect(() => {
-    fetch('/api/profile', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) { setIsAuth(false); return null; }
-        return res.json();
-      })
-      .then(data => { if (data) { setProfile(data); setIsAuth(true); } })
-      .catch(() => setIsAuth(false));
-  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {

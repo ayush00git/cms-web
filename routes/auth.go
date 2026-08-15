@@ -7,37 +7,45 @@ import (
 )
 
 func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
+
+	// maximum of 3 tokens and 1 refill per 15 seconds.
+	mailRoutesRateLimiter := middleware.NewRateLimiter(3, 1.0/30.0)
+	standardRateLimiter := middleware.NewRateLimiter(10, 1.0/6.0)
+
 	faculty := e.Group("/api/auth/faculty")
 	{
-		faculty.POST("/signup", h.FacultySignup)
-		faculty.POST("/login", h.FacultyLogin)
-		faculty.POST("/forget-password", h.FacultyForgetPassword)
-		faculty.PATCH("/reset-password", h.FacultyResetPassword)
+		faculty.POST("/signup", mailRoutesRateLimiter.Limit(), h.FacultySignup)
+		faculty.POST("/login", standardRateLimiter.Limit(), h.FacultyLogin)
+		faculty.POST("/forget-password", mailRoutesRateLimiter.Limit(), h.FacultyForgetPassword)
+		faculty.PATCH("/reset-password", standardRateLimiter.Limit(), h.FacultyResetPassword)
 	}
 	warden := e.Group("/api/auth/warden")
 	{
-		warden.POST("/signup", h.WardenSignup)
-		warden.POST("/login", h.WardenLogin)
-		warden.POST("/forget-password", h.WardenForgetPassword)
-		warden.PATCH("/reset-password", h.WardenResetPassword)
+		warden.POST("/signup", mailRoutesRateLimiter.Limit(), h.WardenSignup)
+		warden.POST("/login", standardRateLimiter.Limit(), h.WardenLogin)
+		warden.POST("/forget-password", mailRoutesRateLimiter.Limit(), h.WardenForgetPassword)
+		warden.PATCH("/reset-password", standardRateLimiter.Limit(), h.WardenResetPassword)
 	}
 	centrehead := e.Group("/api/auth/centrehead")
 	{
-		centrehead.POST("/signup", h.CentreheadSignup)
-		centrehead.POST("/login", h.CentreheadLogin)
-		centrehead.POST("/forget-password", h.CentreheadForgetPassword)
-		centrehead.PATCH("/reset-password", h.CentreheadResetPassword)
+		centrehead.POST("/signup", mailRoutesRateLimiter.Limit(), h.CentreheadSignup)
+		centrehead.POST("/login", standardRateLimiter.Limit(), h.CentreheadLogin)
+		centrehead.POST("/forget-password", mailRoutesRateLimiter.Limit(), h.CentreheadForgetPassword)
+		centrehead.PATCH("/reset-password", standardRateLimiter.Limit(), h.CentreheadResetPassword)
 	}
 	e.POST("/api/auth/logout", h.Logout)
 
 	// for account verifications.
 	e.GET("/api/auth/verify", h.VerifyAccount)
 
+	// 100 tokens maximum with a refill rate of 1 token per 5 seconds.
+	profileRoutesRateLimiting := middleware.NewRateLimiter(100, 1.0/5.0)
+
 	// for returning the user's profile.
-	e.GET("/api/profile", middleware.IsAuthenticated(), h.UserProfile)
+	e.GET("/api/profile", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.UserProfile)
 
 	// for editing user's profile.
-	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), h.FacultyProfileEdit)
-	e.PATCH("/api/warden/profile/edit", middleware.IsAuthenticated(), h.WardenProfileEdit)
-	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), h.CentreheadProfileEdit)
+	e.PATCH("/api/faculty/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.FacultyProfileEdit)
+	e.PATCH("/api/warden/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.WardenProfileEdit)
+	e.PATCH("/api/centrehead/profile/edit", middleware.IsAuthenticated(), profileRoutesRateLimiting.LimitByAuth(), h.CentreheadProfileEdit)
 }

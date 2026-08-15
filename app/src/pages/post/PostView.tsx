@@ -106,7 +106,8 @@ export function PostView() {
     try {
       const res = await fetch(`/api/posts/${role}/${post_id}`, { credentials: 'include' });
       if (!res.ok) {
-        throw new Error(`Failed to fetch post details (${res.status})`);
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.error ?? `Failed to fetch post details (${res.status})`);
       }
       const data = await res.json();
       setPost(data.post);

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/models"
@@ -11,26 +10,26 @@ import (
 	"gorm.io/gorm"
 )
 
-// // Use AdminSignup only when registering admins to the database.
-// // Not to be used as a public API.
-func (h *AdminHandler) AdminSignup (c *gin.Context) {
-	var inputs models.Admin
-	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "invalid request body"})
-		return
-	}
+// // // Use AdminSignup only when registering admins to the database.
+// // // Not to be used as a public API.
+// func (h *AdminHandler) AdminSignup (c *gin.Context) {
+// 	var inputs models.Admin
+// 	if err := c.ShouldBindJSON(&inputs); err != nil {
+// 		c.JSON(400, gin.H{"error": "invalid request body"})
+// 		return
+// 	}
 
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "internal server error"})
-		return
-	}
-	inputs.Password = string(hashedPass)
+// 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(inputs.Password), 10)
+// 	if err != nil {
+// 		c.JSON(500, gin.H{"error": "internal server error"})
+// 		return
+// 	}
+// 	inputs.Password = string(hashedPass)
 
-	inputs.CreatedAt = time.Now()
-	_ = h.DB.Create(&inputs)
-	c.JSON(201, gin.H{"success": "admin registered successfully!"})
-}
+// 	inputs.CreatedAt = time.Now()
+// 	_ = h.DB.Create(&inputs)
+// 	c.JSON(201, gin.H{"success": "admin registered successfully!"})
+// }
 
 // Note that for admins as they are pre-set to the service the
 // isVerified field is always by default true.

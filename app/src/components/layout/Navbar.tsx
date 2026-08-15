@@ -1,22 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, Menu, X, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/auth-context';
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [lodgeOpen, setLodgeOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    fetch('/api/profile', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) { setIsAuth(false); return; }
-        setIsAuth(true);
-      })
-      .catch(() => setIsAuth(false));
-  }, []);
+  const { status } = useAuth();
+  const isAuth = status === 'loading' ? null : status === 'authenticated';
 
   const closeMobile = () => {
     setMobileOpen(false);

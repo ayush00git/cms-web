@@ -1,28 +1,16 @@
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Loader } from './Loader';
+import { useAuth } from '../context/auth-context';
 
 interface GuestRouteProps {
   children: ReactNode;
 }
 
 export function GuestRoute({ children }: GuestRouteProps) {
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const { status } = useAuth();
 
-  useEffect(() => {
-    fetch('/api/profile', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) {
-          setIsAuth(false);
-          return;
-        }
-        setIsAuth(true);
-      })
-      .catch(() => setIsAuth(false));
-  }, []);
-
-  if (isAuth === null) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader size="lg" color="dark" />
@@ -30,7 +18,7 @@ export function GuestRoute({ children }: GuestRouteProps) {
     );
   }
 
-  if (isAuth) {
+  if (status === 'authenticated') {
     return <Navigate to="/profile" replace />;
   }
 
