@@ -40,14 +40,14 @@ type Centrehead struct {
 }
 
 type CentreheadSignup struct {
-	Name        string       `json:"name" binding:"required"`
-	Email       string       `json:"email" binding:"required"`
-	Password    string       `json:"password" binding:"required"`
-	Building    BuildingName `json:"building" binding:"required"`
-	PhoneNumber string       `json:"phone_number" binding:"required"`
+	Name        string       `json:"name" binding:"required,min=3,max=50"`
+	Email       string       `json:"email" binding:"required,email,max=255"`
+	Password    string       `json:"password" binding:"required,max=72"`
+	Building    BuildingName `json:"building" binding:"required,min=7,max=75"`
+	PhoneNumber string       `json:"phone_number" binding:"required,min=10,max=15"`
 }
 
 type CentreheadLogin struct {
-	Email       string       `json:"email" binding:"required"`
-	Password    string       `json:"password" binding:"required"`
+	Email       string       `json:"email" binding:"required,email,max=255"`
+	Password    string       `json:"password" binding:"required,max=72"`
 }

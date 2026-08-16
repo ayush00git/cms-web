@@ -57,17 +57,17 @@ type Faculty struct {
 }
 
 type FacultySignup struct {
-	Name				string			`json:"name" binding:"required"`
-	Email				string			`json:"email" binding:"required"`
-	Password			string			`json:"password" binding:"required"`
-	Department			DepartmentName	`json:"department" binding:"required"`
-	HouseNumber			string			`json:"house_number" binding:"required"`
-	Block				BlockLabel		`json:"block" binding:"required"`
-	Type				BlockType		`json:"type" binding:"required"`
-	PhoneNumber			string			`json:"phone_number" binding:"required"`
+	Name				string			`json:"name" binding:"required,min=3,max=50"`
+	Email				string			`json:"email" binding:"required,email,max=255"`
+	Password			string			`json:"password" binding:"required,max=72"`
+	Department			DepartmentName	`json:"department" binding:"required,min=5,max=50"`
+	HouseNumber			string			`json:"house_number" binding:"required,max=4"`
+	Block				BlockLabel		`json:"block" binding:"required,max=1"`
+	Type				BlockType		`json:"type" binding:"required,max=1"`
+	PhoneNumber			string			`json:"phone_number" binding:"required,min=10,max=15"`
 }
 
 type FacultyLogin struct {
-	Email				string			`json:"email" binding:"required"`
-	Password			string			`json:"password" binding:"required"`
+	Email				string			`json:"email" binding:"required,email,max=255"`
+	Password			string			`json:"password" binding:"required,max=72"`
 }
