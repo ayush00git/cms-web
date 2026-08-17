@@ -71,7 +71,7 @@ export function Landing() {
                 }`}
               >
                 <Link to="/faculty/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
-                  Login as Faculty
+                  Login as Employee
                 </Link>
                 <Link to="/warden/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
                   Login as Warden
@@ -96,7 +96,7 @@ export function Landing() {
                   }`}
                 >
                   <Link to="/faculty/signup" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
-                    Signup as Faculty / Staff
+                    Signup as Employee
                   </Link>
                   <Link to="/warden/signup" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
                     Signup as Warden

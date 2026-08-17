@@ -35,7 +35,7 @@ function getRoleConfig(role: string) {
   const norm = (role || '').toLowerCase();
   if (norm.includes('faculty')) {
     return {
-      label: 'Faculty',
+      label: 'Employee',
       badgeClass: 'bg-violet-50/80 text-violet-700 border-violet-100',
     };
   }

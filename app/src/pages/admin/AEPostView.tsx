@@ -262,7 +262,7 @@ export function AEPostView() {
               </h2>
             </div>
             <p className="text-sm text-gray-500">
-              Complaints assigned at the AE level — Faculty, Warden, and Centre Head.
+              Complaints assigned at the AE level — Employee, Warden, and Centre Head.
             </p>
           </div>
 
@@ -297,7 +297,7 @@ export function AEPostView() {
           {/* Tiles — stacked vertically, full-width */}
           <div className="flex flex-col gap-6">
             <PostTile
-              label="Faculty Posts"
+              label="Employee Posts"
               icon={<GraduationCap className="w-4 h-4" />}
               role="faculty"
               posts={facultyPosts.filter(matchesFilter)}
