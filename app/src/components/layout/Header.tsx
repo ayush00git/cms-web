@@ -24,7 +24,6 @@ export function Header() {
         </Link>
 
         <div className="hidden md:flex flex-col items-end gap-1 shrink-0">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#666666]">Estate Office</span>
           <span className="text-lg font-bold text-[#111111]">Construction Cell Complaint Management</span>
         </div>
       </div>
