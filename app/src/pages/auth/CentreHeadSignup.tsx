@@ -223,7 +223,7 @@ export function CentreHeadSignup() {
                   </div>
                   <div>
                     <p className="font-semibold mb-1">Building Complaints</p>
-                    <p className="text-[#444444] leading-relaxed">Centre Heads can file complaints for academic and administrative buildings assigned to them by the Estate Office.</p>
+                    <p className="text-[#444444] leading-relaxed">Centre Heads can file complaints for academic and administrative buildings assigned to them by the Construction Cell.</p>
                   </div>
                   <div>
                     <p className="font-semibold mb-1">After Registration</p>
@@ -257,7 +257,7 @@ export function CentreHeadSignup() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Building Complaints</h3>
               <p className="text-sm text-[#111111] leading-relaxed">
-                Centre Heads can file complaints for academic and administrative buildings assigned to them by the Estate Office.
+                Centre Heads can file complaints for academic and administrative buildings assigned to them by the Construction Cell.
               </p>
             </div>
 

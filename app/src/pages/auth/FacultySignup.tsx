@@ -72,7 +72,7 @@ export function FacultySignup() {
         <div className="border-b border-[#E5E5E5] py-5">
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
             <h1 className="text-xl font-bold text-[#111111]">Faculty Registration</h1>
-            <p className="text-sm text-[#666666] mt-0.5">Register to lodge and track Estate Office complaints.</p>
+            <p className="text-sm text-[#666666] mt-0.5">Register to lodge and track Construction Cell complaints.</p>
           </div>
         </div>
 

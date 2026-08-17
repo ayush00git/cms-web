@@ -32,7 +32,7 @@ export function Footer() {
           <h3 className="font-bold text-base mb-3">NIT Hamirpur</h3>
           <p className="text-sm text-[#999999] leading-relaxed">
             National Institute of Technology Hamirpur is a public technical university in Himachal Pradesh.
-            The Estate Office oversees campus maintenance and infrastructure.
+            The Construction Cell oversees campus maintenance and infrastructure.
           </p>
         </div>
 
