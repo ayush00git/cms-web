@@ -153,7 +153,7 @@ export function StaffLogin() {
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Other Roles</h2>
               <div className="flex flex-wrap gap-2">
                 <Link to="/faculty/login" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors cursor-pointer">
-                  Login as Faculty
+                  Login as Employee
                 </Link>
                 <Link to="/warden/login" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors cursor-pointer">
                   Login as Warden

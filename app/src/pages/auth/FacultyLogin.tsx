@@ -56,7 +56,7 @@ export function FacultyLogin() {
         {/* Header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
-            <h1 className="text-xl font-bold text-[#111111]">Faculty Login</h1>
+            <h1 className="text-xl font-bold text-[#111111]">Employee Login</h1>
             <p className="text-sm text-[#666666] mt-0.5">Access your complaint dashboard.</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export function FacultyLogin() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className={inputCls}
-                    placeholder="faculty@nith.ac.in"
+                    placeholder="employee@nith.ac.in"
                     required
                   />
                 </div>

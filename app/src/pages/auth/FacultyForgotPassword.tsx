@@ -82,7 +82,7 @@ export function FacultyForgotPassword() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className={inputCls}
-                placeholder="faculty@nith.ac.in"
+                placeholder="employee@nith.ac.in"
                 required
               />
             </div>

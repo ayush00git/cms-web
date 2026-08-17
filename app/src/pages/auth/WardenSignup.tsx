@@ -232,7 +232,7 @@ export function WardenSignup() {
                   <div>
                     <p className="font-semibold mb-2">Other Roles</p>
                     <div className="flex flex-wrap gap-2">
-                      <Link to="/faculty/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Faculty</Link>
+                      <Link to="/faculty/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Employee</Link>
                       <Link to="/centre-head/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Centre Head</Link>
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export function WardenSignup() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Other Roles</h3>
               <div className="space-y-2">
-                <Link to="/faculty/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Faculty</Link>
+                <Link to="/faculty/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Employee</Link>
                 <Link to="/centre-head/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Centre Head</Link>
               </div>
             </div>

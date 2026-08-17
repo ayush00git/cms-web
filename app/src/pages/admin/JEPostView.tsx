@@ -263,7 +263,7 @@ export function JEPostView() {
               </h2>
             </div>
             <p className="text-sm text-gray-500">
-              Complaints assigned at the JE level — Faculty, Warden, and Centre Head.
+              Complaints assigned at the JE level — Employee, Warden, and Centre Head.
             </p>
           </div>
 
@@ -295,7 +295,7 @@ export function JEPostView() {
           {/* Sections — each a responsive card grid */}
           <div className="flex flex-col gap-10">
             <PostTile
-              label="Faculty Posts"
+              label="Employee Posts"
               icon={<GraduationCap className="w-4 h-4" />}
               role="faculty"
               posts={byFilter(faculty)}

@@ -260,7 +260,7 @@ export function XENPostView() {
               </h2>
             </div>
             <p className="text-sm text-gray-500">
-              Incoming complaints routed through the XEN pipeline — Faculty, Warden, and Centre Head.
+              Incoming complaints routed through the XEN pipeline — Employee, Warden, and Centre Head.
             </p>
           </div>
 
@@ -294,7 +294,7 @@ export function XENPostView() {
           {/* Tiles — stacked vertically, full-width */}
           <div className="flex flex-col gap-6">
             <PostTile
-              label="Faculty Posts"
+              label="Employee Posts"
               icon={<GraduationCap className="w-4 h-4" />}
               role="faculty"
               posts={applyFilter(facultyPosts)}

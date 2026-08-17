@@ -71,7 +71,7 @@ export function FacultyPost() {
         {/* Header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
-            <h1 className="text-xl font-bold text-[#111111]">Submit a Faculty Complaint</h1>
+            <h1 className="text-xl font-bold text-[#111111]">Submit an Employee Complaint</h1>
             <p className="text-sm text-[#666666] mt-0.5">Lodge a residential or departmental maintenance complaint.</p>
           </div>
         </div>
@@ -205,7 +205,7 @@ export function FacultyPost() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Complaint Areas</h3>
               <p className="text-sm text-[#111111] leading-relaxed">
-                Faculty may file for <span className="font-semibold">residential quarters</span> and <span className="font-semibold">departmental buildings</span> only.
+                Employees may file for <span className="font-semibold">residential quarters</span> and <span className="font-semibold">departmental buildings</span> only.
               </p>
             </div>
 
