@@ -99,7 +99,7 @@ export function Navbar() {
                   <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                 </button>
                 <div className="absolute top-full right-0 hidden group-hover:block bg-white text-[#111111] shadow-lg border border-[#E5E5E5] rounded-b-lg min-w-[180px] z-50">
-                  <Link to="/faculty/login" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Employee / Staff Login</Link>
+                  <Link to="/faculty/login" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Employee Login</Link>
                   <Link to="/warden/login" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Warden Login</Link>
                   <Link to="/centre-head/login" className="block px-4 py-2.5 text-sm hover:bg-[#F5F5F5] transition-colors">Centre Head Login</Link>
                   <div className="border-t border-[#E5E5E5] my-1"></div>
@@ -181,7 +181,7 @@ export function Navbar() {
               </button>
               {loginDropdownOpen && (
                 <div className="bg-white/5">
-                  <Link to="/faculty/login" onClick={closeMobile} className="block px-8 py-2.5 hover:bg-white/10 transition-colors">Employee / Staff Login</Link>
+                  <Link to="/faculty/login" onClick={closeMobile} className="block px-8 py-2.5 hover:bg-white/10 transition-colors">Employee Login</Link>
                   <Link to="/warden/login" onClick={closeMobile} className="block px-8 py-2.5 hover:bg-white/10 transition-colors">Warden Login</Link>
                   <Link to="/centre-head/login" onClick={closeMobile} className="block px-8 py-2.5 hover:bg-white/10 transition-colors">Centre Head Login</Link>
                   <Link to="/staff/login" onClick={closeMobile} className="block px-8 py-2.5 hover:bg-white/10 transition-colors font-semibold text-white/90">Admin Staff Login</Link>
