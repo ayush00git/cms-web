@@ -15,9 +15,9 @@ import (
 )
 
 type WardenProfileEditType struct {
-	Name			string		`json:"name"`
-	Hostel			string		`json:"hostel"`
-	PhoneNumber		string		`json:"phone_number"`
+	Name			string		`json:"name" binding:"omitempty,min=3,max=50"`
+	Hostel			string		`json:"hostel" binding:"omitempty,min=3,max=30"`
+	PhoneNumber		string		`json:"phone_number" binding:"omitempty,min=10,max=15"`
 }
 
 

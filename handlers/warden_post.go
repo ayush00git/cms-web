@@ -18,18 +18,18 @@ import (
 
 // WardenPostEditType
 type WardenPostEditType struct {
-	RoomNumber		string		`json:"room_number"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
+	RoomNumber		string		`json:"room_number" binding:"omitempty,max=50"`
+	Title			string		`json:"title" binding:"omitempty,max=50"`
+	Description		string		`json:"description" binding:"omitempty,max=5000"`
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
 // WardenPostType
 type WardenPostType struct {
-	TypeOfPost		string		`json:"type_of_post"`
-	RoomNumber		string		`json:"room_number"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
+	TypeOfPost		string		`json:"type_of_post" binding:"required,max=20"`
+	RoomNumber		string		`json:"room_number" binding:"required,max=50"`
+	Title			string		`json:"title" binding:"required,max=50"`
+	Description		string		`json:"description" binding:"required,max=5000"`
 }
 
 

@@ -15,8 +15,8 @@ import (
 )
 
 type CentreheadProfileEditType struct {
-	Building		string		`json:"building"`
-	PhoneNumber 	string		`json:"phone_number"`
+	Building		string		`json:"building" binding:"omitempty,min=7,max=75"`
+	PhoneNumber 	string		`json:"phone_number" binding:"omitempty,min=10,max=15"`
 }
 
 

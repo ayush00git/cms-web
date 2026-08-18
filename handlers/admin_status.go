@@ -24,8 +24,8 @@ import (
 )
 
 type AdminReview struct {
-	Review     string `json:"Review"`
-	JeToAssign string `json:"JeToAssign"`
+	Review     string `json:"Review" binding:"required,max=20"`
+	JeToAssign string `json:"JeToAssign" binding:"omitempty,email,max=255"`
 }
 
 // PostStatus

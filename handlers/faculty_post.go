@@ -22,17 +22,17 @@ type PostHandler struct {
 
 // FacultyPostType
 type FacultyPostType struct {
-	Place			string		`json:"place"`
-	TypeOfPost		string		`json:"type_of_post"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
+	Place			string		`json:"place" binding:"required,max=20"`
+	TypeOfPost		string		`json:"type_of_post" binding:"required,max=20"`
+	Title			string		`json:"title" binding:"required,max=50"`
+	Description		string		`json:"description" binding:"required,max=5000"`
 }
 
 // FacultyPostEditType
 type FacultyPostEditType struct {
-	Place			string		`json:"place"`
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
+	Place			string		`json:"place" binding:"omitempty,max=20"`
+	Title			string		`json:"title" binding:"omitempty,max=50"`
+	Description		string		`json:"description" binding:"omitempty,max=5000"`
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
