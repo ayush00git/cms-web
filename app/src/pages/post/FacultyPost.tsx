@@ -124,7 +124,10 @@ export function FacultyPost() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className={labelCls}>Title</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-[#111111]">Title</label>
+                    <span className="text-[11px] text-[#999999]">{formData.title.length}/50</span>
+                  </div>
                   <input
                     type="text"
                     name="title"
@@ -142,7 +145,10 @@ export function FacultyPost() {
             <div className="border-t border-[#CCCCCC]" />
 
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Description</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666]">Description</h2>
+                <span className="text-[11px] text-[#999999]">{formData.description.length}/5000</span>
+              </div>
               <textarea
                 name="description"
                 value={formData.description}
@@ -150,6 +156,7 @@ export function FacultyPost() {
                 className={`${inputCls} resize-none`}
                 placeholder="Provide a detailed description of the issue, including the exact location..."
                 rows={6}
+                maxLength={5000}
                 required
               />
             </div>

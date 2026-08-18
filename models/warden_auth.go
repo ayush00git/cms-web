@@ -34,14 +34,14 @@ type Warden struct {
 }
 
 type WardenSignup struct {
-	Name				string			`json:"name" binding:"required"`
-	Email				string			`json:"email" binding:"required"`
-	Password			string			`json:"password" binding:"required"`
-	Hostel				HostelName		`json:"hostel" binding:"required"`
-	PhoneNumber			string			`json:"phone_number" binding:"required"`	
+	Name				string			`json:"name" binding:"required,min=3,max=50"`
+	Email				string			`json:"email" binding:"required,email,max=255"`
+	Password			string			`json:"password" binding:"required,max=72"`
+	Hostel				HostelName		`json:"hostel" binding:"required,min=3,max=30"`
+	PhoneNumber			string			`json:"phone_number" binding:"required,min=10,max=15"`
 }
 
 type WardenLogin struct {
-	Email				string			`json:"email" binding:"required"`
-	Password			string			`json:"password" binding:"required"`
+	Email				string			`json:"email" binding:"required,email,max=255"`
+	Password			string			`json:"password" binding:"required,max=72"`
 }

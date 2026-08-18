@@ -118,7 +118,10 @@ export function CentreHeadPost() {
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Title & Description</h2>
               <div className="space-y-5">
                 <div>
-                  <label className={labelCls}>Title</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-[#111111]">Title</label>
+                    <span className="text-[11px] text-[#999999]">{formData.title.length}/50</span>
+                  </div>
                   <input
                     type="text"
                     name="title"
@@ -126,11 +129,15 @@ export function CentreHeadPost() {
                     onChange={handleChange}
                     className={inputCls}
                     placeholder="e.g. Faulty wiring in corridor"
+                    maxLength={50}
                     required
                   />
                 </div>
                 <div>
-                  <label className={labelCls}>Description</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-[#111111]">Description</label>
+                    <span className="text-[11px] text-[#999999]">{formData.description.length}/5000</span>
+                  </div>
                   <textarea
                     name="description"
                     value={formData.description}
@@ -138,6 +145,7 @@ export function CentreHeadPost() {
                     className={`${inputCls} resize-none`}
                     placeholder="Provide a detailed description including the floor or zone..."
                     rows={6}
+                    maxLength={5000}
                     required
                   />
                 </div>

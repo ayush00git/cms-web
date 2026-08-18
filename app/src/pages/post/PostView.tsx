@@ -353,11 +353,15 @@ export function PostView() {
                 </div>
                 {isEditing ? (
                   <div className="mt-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Title</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Title</label>
+                      <span className="text-[10px] text-gray-400">{editForm.title.length}/50</span>
+                    </div>
                     <input
                       type="text"
                       value={editForm.title}
                       onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                      maxLength={50}
                       className="w-full text-base text-gray-800 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400/40 focus:border-gray-600"
                     />
                   </div>
@@ -380,12 +384,18 @@ export function PostView() {
 
             {/* Description */}
             <div className="space-y-1.5">
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Description</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Description</h4>
+                {isEditing && (
+                  <span className="text-[10px] text-gray-400">{editForm.description.length}/5000</span>
+                )}
+              </div>
               {isEditing ? (
                 <textarea
                   rows={5}
                   value={editForm.description}
                   onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  maxLength={5000}
                   className="w-full text-sm text-gray-800 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400/40 focus:border-gray-600 resize-none"
                 />
               ) : (
@@ -593,16 +603,19 @@ export function PostView() {
                     }}
                     disabled={commentSubmitting}
                     rows={3}
+                    maxLength={2000}
                     placeholder="Add a reply or update..."
                     className="w-full text-[13px] text-zinc-800 placeholder-zinc-400 bg-transparent px-4 py-3.5 resize-none focus:outline-none disabled:opacity-50"
                   />
                   
                   {/* Bottom Toolbar */}
                   <div className="bg-zinc-50/50 border-t border-zinc-100 px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[10px] text-zinc-400 font-medium">
+                    <span className="text-[10px] text-zinc-400 font-medium flex items-center gap-2">
                       Press <kbd className="font-sans font-semibold">Ctrl + Enter</kbd> to send
+                      <span className="text-zinc-300">·</span>
+                      {commentText.length}/2000
                     </span>
-                    
+
                     <button
                       onClick={submitComment}
                       disabled={commentSubmitting || !commentText.trim()}

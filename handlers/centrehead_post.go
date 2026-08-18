@@ -18,16 +18,16 @@ import (
 
 // CentreheadPostEditType
 type CentreheadPostEditType struct {
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
+	Title			string		`json:"title" binding:"omitempty,max=50"`
+	Description		string		`json:"description" binding:"omitempty,max=5000"`
 	UpdatedAt		time.Time	`json:"updated_at"`
 }
 
 // CentreheadPostType
 type CentreheadPostType struct {
-	Title			string		`json:"title"`
-	Description		string		`json:"description"`
-	TypeOfPost		string		`json:"type_of_post"`
+	Title			string		`json:"title" binding:"required,max=50"`
+	Description		string		`json:"description" binding:"required,max=5000"`
+	TypeOfPost		string		`json:"type_of_post" binding:"required,max=20"`
 }
 
 // CentreheadPost registers the post of centre-head members.

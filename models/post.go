@@ -43,10 +43,10 @@ type FacultyPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	FacultyID       uint        	`gorm:"not null" json:"faculty_id"`
 	Author			Faculty			`gorm:"foreignKey:FacultyID"`
-	Place           PostPlace  	    `gorm:"type:varchar(20);not null" json:"place" binding:"required"`
-	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
-	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required"`
-	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	Place           PostPlace  	    `gorm:"type:varchar(20);not null" json:"place" binding:"required,max=20"`
+	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required,max=20"`
+	Title           string          `gorm:"type:varchar(50);not null" json:"title" binding:"required,max=50"`
+	Description     string          `gorm:"type:text;not null" json:"description" binding:"required,max=5000"`
 	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
@@ -61,10 +61,10 @@ type WardenPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	WardenID        uint         	`gorm:"not null" json:"warden_id"`
 	Author			Warden			`gorm:"foreignKey:WardenID"`
-	RoomNumber      string          `gorm:"type:varchar(50)" json:"room_number" binding:"required"`
-	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
-	Title           string          `gorm:"not null" json:"title" binding:"required"`
-	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	RoomNumber      string          `gorm:"type:varchar(50)" json:"room_number" binding:"required,max=50"`
+	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required,max=20"`
+	Title           string          `gorm:"not null" json:"title" binding:"required,max=50"`
+	Description     string          `gorm:"type:text;not null" json:"description" binding:"required,max=5000"`
 	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`
@@ -79,9 +79,9 @@ type CentreheadPost struct {
 	ID              uint            `gorm:"primaryKey;autoIncrement" json:"id"`
 	CentreheadID    uint        	`gorm:"not null" json:"centrehead_id"`
 	Author			Centrehead		`gorm:"foreignKey:CentreheadID"`
-	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required"`
-	Title           string          `gorm:"not null" json:"title" binding:"required"`
-	Description     string          `gorm:"type:text;not null" json:"description" binding:"required"`
+	TypeOfPost 	    PostType   	    `gorm:"type:varchar(20);not null" json:"type_of_post" binding:"required,max=20"`
+	Title           string          `gorm:"not null" json:"title" binding:"required,max=50"`
+	Description     string          `gorm:"type:text;not null" json:"description" binding:"required,max=5000"`
 	PeopleInThread	[]string		`gorm:"serializer:json;" json:"people_in_thread"`
 	Status          string	 	    `gorm:"type:varchar(20);not null;default:'pending_xen'" json:"status"`
 	StatusAuditLogs	[]StatusAudit 	`gorm:"serializer:json;" json:"status_audit_logs"`

@@ -24,6 +24,6 @@ type Admin struct {
 }
 
 type AdminLogin struct {
-	Email			string			`json:"email" binding:"required"`
-	Password		string			`json:"password" binding:"required"`
+	Email			string			`json:"email" binding:"required,email,max=255"`
+	Password		string			`json:"password" binding:"required,max=72"`
 }

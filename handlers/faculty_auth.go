@@ -19,20 +19,20 @@ type AuthHandler struct {
 }
 
 type ResetPassword struct {
-	Password	string		`json:"password" binding:"required"`
+	Password	string		`json:"password" binding:"required,max=72"`
 }
 
 type ForgetPassword struct {
-	Email		string		`json:"email" binding:"required"`
+	Email		string		`json:"email" binding:"required,email,max=255"`
 }
 
 type FacultyProfileEditType struct {
-	Name			string		`json:"name"`
-	Department		string		`json:"department"`
-	HouseNumber		string		`json:"house_number"`
-	Block			string		`json:"block"`
-	Type			string		`json:"type"`
-	PhoneNumber		string		`json:"phone_number"`
+	Name			string		`json:"name" binding:"omitempty,min=3,max=50"`
+	Department		string		`json:"department" binding:"omitempty,min=5,max=50"`
+	HouseNumber		string		`json:"house_number" binding:"omitempty,max=4"`
+	Block			string		`json:"block" binding:"omitempty,max=1"`
+	Type			string		`json:"type" binding:"omitempty,max=1"`
+	PhoneNumber		string		`json:"phone_number" binding:"omitempty,min=10,max=15"`
 }
 
 // FacultySignup registers a new faculty member.

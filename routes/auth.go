@@ -9,7 +9,7 @@ import (
 func AuthRoute (e *gin.Engine, h *handlers.AuthHandler) {
 
 	// maximum of 3 tokens and 1 refill per 15 seconds.
-	mailRoutesRateLimiter := middleware.NewRateLimiter(3, 1.0/30.0)
+	mailRoutesRateLimiter := middleware.NewRateLimiter(10, 1.0/30.0)
 	standardRateLimiter := middleware.NewRateLimiter(10, 1.0/6.0)
 
 	faculty := e.Group("/api/auth/faculty")

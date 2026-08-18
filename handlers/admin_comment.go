@@ -20,7 +20,7 @@ type AdminHandler struct {
 }
 
 type CommentType struct {
-	Content	string
+	Content	string	`binding:"required,max=2000"`
 }
 
 
