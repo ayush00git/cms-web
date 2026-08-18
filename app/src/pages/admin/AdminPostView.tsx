@@ -655,7 +655,7 @@ export function AdminPostView() {
 
   const comments   = post.comments ?? [];
 
-  const roleLabel  = isFaculty ? 'Faculty' : isWarden ? 'Warden' : 'Centre Head';
+  const roleLabel  = isFaculty ? 'Employee' : isWarden ? 'Warden' : 'Centre Head';
   const RoleIcon   = isFaculty ? GraduationCap : isWarden ? BedDouble : Building2;
   const statusCls  = STATUS_STYLES[post.status.toLowerCase()] ?? 'bg-gray-100 text-gray-700 border-gray-200';
   const statusDot  = STATUS_DOT[post.status.toLowerCase()] ?? 'bg-gray-400';

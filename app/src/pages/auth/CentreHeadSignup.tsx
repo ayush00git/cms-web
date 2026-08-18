@@ -223,7 +223,7 @@ export function CentreHeadSignup() {
                   </div>
                   <div>
                     <p className="font-semibold mb-1">Building Complaints</p>
-                    <p className="text-[#444444] leading-relaxed">Centre Heads can file complaints for academic and administrative buildings assigned to them by the Estate Office.</p>
+                    <p className="text-[#444444] leading-relaxed">Centre Heads can file complaints for academic and administrative buildings assigned to them by the Construction Cell.</p>
                   </div>
                   <div>
                     <p className="font-semibold mb-1">After Registration</p>
@@ -232,7 +232,7 @@ export function CentreHeadSignup() {
                   <div>
                     <p className="font-semibold mb-2">Other Roles</p>
                     <div className="flex flex-wrap gap-2">
-                      <Link to="/faculty/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Faculty</Link>
+                      <Link to="/faculty/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Employee</Link>
                       <Link to="/warden/signup" className="bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">Register as Warden</Link>
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export function CentreHeadSignup() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Building Complaints</h3>
               <p className="text-sm text-[#111111] leading-relaxed">
-                Centre Heads can file complaints for academic and administrative buildings assigned to them by the Estate Office.
+                Centre Heads can file complaints for academic and administrative buildings assigned to them by the Construction Cell.
               </p>
             </div>
 
@@ -275,7 +275,7 @@ export function CentreHeadSignup() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-3">Other Roles</h3>
               <div className="space-y-2">
-                <Link to="/faculty/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Faculty</Link>
+                <Link to="/faculty/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Employee</Link>
                 <Link to="/warden/signup" className="block w-full bg-[#222222] hover:bg-[#000000] text-white text-xs font-semibold px-3 py-2 rounded-lg text-center transition-colors cursor-pointer">Register as Warden</Link>
               </div>
             </div>

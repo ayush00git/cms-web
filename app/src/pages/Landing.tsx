@@ -50,9 +50,6 @@ export function Landing() {
       <section className="relative bg-white flex-grow flex flex-col">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1111111a_1px,transparent_1px),linear-gradient(to_bottom,#1111111a_1px,transparent_1px)] bg-[size:32px_32px]" />
         <div className="relative z-10 container mx-auto px-6 py-16 flex flex-col items-center text-center">
-          <div className="inline-flex items-center border border-[#111111] rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#111111] mb-6">
-            Estate Office Portal
-          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] leading-tight tracking-tight mb-4 max-w-2xl">
             Construction Cell Complaint<br />Management System
           </h1>
@@ -74,7 +71,7 @@ export function Landing() {
                 }`}
               >
                 <Link to="/faculty/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
-                  Login as Faculty
+                  Login as Employee
                 </Link>
                 <Link to="/warden/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
                   Login as Warden
@@ -99,7 +96,7 @@ export function Landing() {
                   }`}
                 >
                   <Link to="/faculty/signup" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
-                    Signup as Faculty / Staff
+                    Signup as Employee
                   </Link>
                   <Link to="/warden/signup" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
                     Signup as Warden

@@ -123,7 +123,7 @@ export function Profile() {
   let roleLabel    = 'User';
   let registerRoute = '/';
   let role: Role   = 'centrehead';
-  if (isFaculty)         { roleLabel = 'Faculty Member'; registerRoute = '/faculty/posts';      role = 'faculty'; }
+  if (isFaculty)         { roleLabel = 'Employee'; registerRoute = '/faculty/posts';      role = 'faculty'; }
   else if (isWarden)     { roleLabel = 'Hostel Warden';  registerRoute = '/warden/posts';       role = 'warden'; }
   else if (isCentreHead) { roleLabel = 'Centre Head';    registerRoute = '/centre-head/posts';  role = 'centrehead'; }
 

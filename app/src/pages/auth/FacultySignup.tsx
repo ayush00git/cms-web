@@ -71,8 +71,8 @@ export function FacultySignup() {
         {/* Page header strip */}
         <div className="border-b border-[#E5E5E5] py-5">
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
-            <h1 className="text-xl font-bold text-[#111111]">Faculty Registration</h1>
-            <p className="text-sm text-[#666666] mt-0.5">Register to lodge and track Estate Office complaints.</p>
+            <h1 className="text-xl font-bold text-[#111111]">Employee Registration</h1>
+            <p className="text-sm text-[#666666] mt-0.5">Register to lodge and track Construction Cell complaints.</p>
           </div>
         </div>
 
@@ -254,7 +254,7 @@ export function FacultySignup() {
                 className={`inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2.5 px-8 rounded-lg transition-colors duration-200 text-sm active:scale-[0.98] ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 {loading && <Loader size="sm" color="white" />}
-                {loading ? 'Registering…' : 'Register as Faculty'}
+                {loading ? 'Registering…' : 'Register as Employee'}
               </button>
               <Link
                 to="/faculty/login"

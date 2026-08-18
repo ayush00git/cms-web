@@ -32,7 +32,7 @@ export function Footer() {
           <h3 className="font-bold text-base mb-3">NIT Hamirpur</h3>
           <p className="text-sm text-[#999999] leading-relaxed">
             National Institute of Technology Hamirpur is a public technical university in Himachal Pradesh.
-            The Estate Office oversees campus maintenance and infrastructure.
+            The Construction Cell oversees campus maintenance and infrastructure.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export function Footer() {
               </button>
               {!isAuth && lodgeOpen && (
                 <div className="mt-2 bg-[#222222] border border-[#333333] rounded-lg p-2 space-y-1 text-xs">
-                  <Link to="/faculty/login" className="block px-3 py-1.5 hover:bg-[#333333] rounded transition-colors text-white">Faculty / Staff Login</Link>
+                  <Link to="/faculty/login" className="block px-3 py-1.5 hover:bg-[#333333] rounded transition-colors text-white">Employee Login</Link>
                   <Link to="/warden/login" className="block px-3 py-1.5 hover:bg-[#333333] rounded transition-colors text-white">Warden Login</Link>
                   <Link to="/centre-head/login" className="block px-3 py-1.5 hover:bg-[#333333] rounded transition-colors text-white">Centre Head Login</Link>
                 </div>
