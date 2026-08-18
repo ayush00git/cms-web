@@ -905,13 +905,16 @@ export function AdminPostView() {
                       ? 'Add a comment and select an action below...'
                       : 'No actions available.'}
                     rows={3}
+                    maxLength={2000}
                     className="w-full text-[13px] text-zinc-800 placeholder-zinc-400 bg-transparent px-4 py-3.5 resize-none focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   />
 
                   {/* Bottom Toolbar */}
                   <div className="bg-zinc-50/50 border-t border-zinc-100 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-2">
                       Comment &amp; Update Status
+                      <span className="normal-case font-medium tracking-normal text-zinc-300">·</span>
+                      <span className="normal-case font-medium tracking-normal">{commentText.length}/2000</span>
                     </span>
 
                     {/* Action buttons */}

@@ -157,24 +157,28 @@ export function CommentBox({
                   onChange={(e) => onEditingTextChange?.(e.target.value)}
                   disabled={isBusy}
                   rows={2}
+                  maxLength={2000}
                   className="w-full text-[12.5px] text-zinc-800 bg-white border border-zinc-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-4 focus:ring-zinc-800/5 focus:border-zinc-400 transition resize-none"
                 />
-                <div className="mt-2.5 flex justify-end gap-2">
-                  <button
-                    onClick={onCancelEdit}
-                    disabled={isBusy}
-                    className="border border-zinc-200 text-zinc-500 hover:bg-zinc-50 font-semibold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={onSaveEdit}
-                    disabled={isBusy || !editingText.trim()}
-                    className="bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-xs px-4.5 py-1.5 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
-                  >
-                    {isBusy && <Loader size="xs" color="white" />}
-                    Save
-                  </button>
+                <div className="mt-2.5 flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-zinc-400 font-medium">{editingText.length}/2000</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={onCancelEdit}
+                      disabled={isBusy}
+                      className="border border-zinc-200 text-zinc-500 hover:bg-zinc-50 font-semibold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={onSaveEdit}
+                      disabled={isBusy || !editingText.trim()}
+                      className="bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-xs px-4.5 py-1.5 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+                    >
+                      {isBusy && <Loader size="xs" color="white" />}
+                      Save
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
