@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
+import { useAuth } from '../../context/auth-context';
 
 export function WardenLogin() {
   const [email, setEmail]           = useState('');
@@ -12,6 +13,7 @@ export function WardenLogin() {
   const [status, setStatus]         = useState<'success' | 'error' | null>(null);
   const [message, setMessage]       = useState('');
   const navigate = useNavigate();
+  const { refetch } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +34,7 @@ export function WardenLogin() {
       if (response.ok) {
         setStatus('success');
         setMessage(data.success || 'Logged in successfully!');
+        refetch();
         setTimeout(() => navigate('/profile'), 1000);
       } else {
         setStatus('error');
