@@ -210,11 +210,9 @@ func newAuthRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 }
 
 // newAdminAuthRouter exposes the admin auth routes against the AdminHandler.
-// sendAccessMail stubs out the real mailer so tests never dial SMTP; pass nil
-// only when the mail path is unreachable in the scenario under test.
-func newAdminAuthRouter(db *gorm.DB, sendAccessMail func(adminID uint, email string) error) *gin.Engine {
+func newAdminAuthRouter(db *gorm.DB) *gin.Engine {
 	e := gin.New()
-	h := &handlers.AdminHandler{DB: db, SendAccessMail: sendAccessMail}
+	h := &handlers.AdminHandler{DB: db}
 	e.POST("/api/auth/admin/login", h.AdminLogin)
 	e.GET("/api/auth/admin/access", h.AdminAccess)
 	return e

@@ -60,11 +60,7 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		return
 	}
 
-	sendAccessMail := h.SendAccessMail
-	if sendAccessMail == nil {
-		sendAccessMail = services.SendProfileAccessMailToAdmins
-	}
-	if err := sendAccessMail(admin.ID, admin.Email); err != nil {
+	if err := services.SendProfileAccessMailToAdmins(admin.ID, admin.Email); err != nil {
 		c.JSON(500, gin.H{"error": "failed to send the access mail"})
 		return
 	}
