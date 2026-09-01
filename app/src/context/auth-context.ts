@@ -11,6 +11,8 @@ export interface ProfileData {
   type?: string;
   hostel?: string;
   building?: string;
+  /** Only present for admin (XEN / AE / JE) sessions. */
+  position?: string;
 }
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'rate-limited' | 'error';

@@ -134,7 +134,28 @@ func TestUserProfile_Unauthenticated(t *testing.T) {
 func TestUserProfile_UndefinedRole(t *testing.T) {
 	db := newTestDB(t)
 	// authenticated, but with a role the handler does not recognise
-	e := newAuthRouter(db, authAsRole(1, "someone@iit.ac.in", "admin"))
+	e := newAuthRouter(db, authAsRole(1, "someone@iit.ac.in", "alien"))
 	rec := doRequest(t, e, http.MethodGet, "/api/profile", nil)
 	assertStatus(t, rec, 404)
+}
+
+func TestUserProfile_Admin(t *testing.T) {
+	db := newTestDB(t)
+	admin := seedAdmin(t, db, "admin.profile@iit.ac.in", models.TypeJEElectrical)
+
+	e := newAuthRouter(db, authAsRole(admin.ID, admin.Email, "admin"))
+	rec := doRequest(t, e, http.MethodGet, "/api/profile", nil)
+
+	assertStatus(t, rec, 200)
+	out := decodeBody(t, rec)
+	if out["position"] != string(models.TypeJEElectrical) {
+		t.Fatalf("expected position %s, got %v", models.TypeJEElectrical, out)
+	}
+	if out["email"] != admin.Email {
+		t.Fatalf("expected email %s, got %v", admin.Email, out)
+	}
+	// the password hash must never be exposed
+	if _, leaked := out["password"]; leaked {
+		t.Fatalf("admin profile response leaked the password field: %v", out)
+	}
 }

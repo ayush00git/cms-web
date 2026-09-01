@@ -3,13 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
 import { useAuth } from '../../context/auth-context';
-
-function dashboardFor(position: string): string {
-  if (position.startsWith('XEN')) return '/admin/xen';
-  if (position.startsWith('AE'))  return '/admin/ae';
-  if (position.startsWith('JE'))  return '/admin/je';
-  return '/';
-}
+import { adminDashboardFor } from '../../constants/adminDashboard';
 
 type AccessStatus = 'idle' | 'loading' | 'error' | 'no-token';
 
@@ -40,7 +34,7 @@ export function AdminAccess() {
       const data = await response.json();
 
       if (response.ok) {
-        const dest = dashboardFor(data.position ?? '');
+        const dest = adminDashboardFor(data.position ?? '');
         if (dest === '/') {
           setStatus('error');
           setMessage(`Unknown position "${data.position}" — contact admin.`);
