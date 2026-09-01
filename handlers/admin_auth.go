@@ -5,8 +5,8 @@ import (
 
 	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -33,8 +33,9 @@ import (
 
 // Note that for admins as they are pre-set to the service the
 // isVerified field is always by default true.
-// AdminLogin authenticates the admin using email and password.
-// On success, signs a JWT and stores it in an httpOnly cookie.
+// AdminLogin authenticates the admin using only email. It mails a signed
+// access link to the admin; no cookie is set here, the session starts
+// only when the admin clicks the link (handled by AdminAccess).
 func (h *AdminHandler) AdminLogin (c *gin.Context) {
 	var inputs models.AdminLogin
 
@@ -47,7 +48,7 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 	result := h.DB.Where("email = ?", inputs.Email).Take(&admin)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			c.JSON(404, gin.H{"error": "admin record not found"})
+			c.JSON(403, gin.H{"error": "admin record not found"})
 			return
 		}
 		c.JSON(500, gin.H{"error": "internal server error"})
@@ -59,9 +60,36 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(inputs.Password))
+	sendAccessMail := h.SendAccessMail
+	if sendAccessMail == nil {
+		sendAccessMail = services.SendProfileAccessMailToAdmins
+	}
+	if err := sendAccessMail(admin.ID, admin.Email); err != nil {
+		c.JSON(500, gin.H{"error": "failed to send the access mail"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": "access mail sent!"})
+}
+
+// AdminAccess completes the passwordless login. It verifies the token from
+// the emailed access link, signs a fresh session JWT and stores it in an
+// httpOnly cookie.
+func (h *AdminHandler) AdminAccess (c *gin.Context) {
+	claims, err := helpers.VerifyToken(c.Query("token"))
 	if err != nil {
-		c.JSON(401, gin.H{"error": "incorrect password!"})
+		c.JSON(401, gin.H{"error": "invalid or expired access link"})
+		return
+	}
+
+	var admin models.Admin
+	result := h.DB.Where("email = ?", claims.Email).Take(&admin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "admin record not found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -74,7 +102,7 @@ func (h *AdminHandler) AdminLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60,
+		7 * 24 * 60 * 60,
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,

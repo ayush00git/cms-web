@@ -17,6 +17,10 @@ import (
 
 type AdminHandler struct {
 	DB *gorm.DB
+
+	// SendAccessMail lets tests stub out the real mailer; when nil the
+	// handler falls back to services.SendProfileAccessMailToAdmins.
+	SendAccessMail func(adminID uint, email string) error
 }
 
 type CommentType struct {

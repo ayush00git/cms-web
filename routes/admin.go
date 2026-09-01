@@ -13,6 +13,7 @@ func AdminRoutes (e *gin.Engine, h *handlers.AdminHandler) {
 	adminLoginRateLimiter := middleware.NewRateLimiter(10, 1.0/6.0)
 	
 	e.POST("/api/auth/admin/login", adminLoginRateLimiter.Limit(), h.AdminLogin)
+	e.GET("/api/auth/admin/access", adminLoginRateLimiter.Limit(), h.AdminAccess)
 
 	e.GET("/api/admin/comments", middleware.IsAuthenticated(), h.AdminGetComments)
 	e.POST("/api/admin/comment/:type/:id", middleware.IsAuthenticated(), h.AdminPostComment)

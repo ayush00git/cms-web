@@ -1,21 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
 
-function dashboardFor(position: string): string {
-  if (position.startsWith('XEN')) return '/admin/xen';
-  if (position.startsWith('AE'))  return '/admin/ae';
-  if (position.startsWith('JE'))  return '/admin/je';
-  return '/';
-}
-
 export function StaffLogin() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [message, setMessage] = useState('');
@@ -30,20 +19,15 @@ export function StaffLogin() {
       const response = await fetch('/api/auth/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
         credentials: 'include',
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        const dest = dashboardFor(data.position ?? '');
-        if (dest === '/') {
-          setStatus('error');
-          setMessage(`Unknown position "${data.position}" — contact admin.`);
-        } else {
-          navigate(dest);
-        }
+        setStatus('success');
+        setMessage(`A login link has been sent to ${email}. Check your inbox to continue.`);
       } else {
         setStatus('error');
         const errorMsg = data.error || data.email || Object.values(data)[0] || 'An error occurred';
@@ -68,7 +52,7 @@ export function StaffLogin() {
         <div className="border-b border-[#E5E5E5] py-5">
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-8">
             <h1 className="text-xl font-bold text-[#111111]">Staff Login</h1>
-            <p className="text-sm text-[#666666] mt-0.5">Secure portal for XEN / AE / JE.</p>
+            <p className="text-sm text-[#666666] mt-0.5">Secure portal for XEN / AE / JE. We'll email you a login link.</p>
           </div>
         </div>
 
@@ -95,7 +79,7 @@ export function StaffLogin() {
           <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
 
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Credentials</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Passwordless Login</h2>
               <div className="space-y-4">
                 <div>
                   <label className={labelCls}>Staff Email Address</label>
@@ -107,28 +91,6 @@ export function StaffLogin() {
                     placeholder="staff@nith.ac.in"
                     required
                   />
-                </div>
-
-                <div>
-                  <label className={labelCls}>Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className={`${inputCls} pr-10`}
-                      placeholder="••••••••"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(prev => !prev)}
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-[#666666] hover:text-[#111111] cursor-pointer transition-colors"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -142,7 +104,7 @@ export function StaffLogin() {
                 className={`inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2.5 px-8 rounded-lg transition-colors duration-200 text-sm active:scale-[0.98] ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 {loading && <Loader size="sm" color="white" />}
-                {loading ? 'Logging in…' : 'Login to Portal'}
+                {loading ? 'Sending link…' : 'Mail me a login link'}
               </button>
             </div>
 
