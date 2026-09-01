@@ -212,3 +212,31 @@ func SendMailToPeopleInThread(emails []string, ignoreEmail string, postURL strin
 	}
 	return nil
 }
+
+// SendProfileAccessMailToAdmins mails a signed access link to the admin,
+// completing the passwordless login when clicked
+func SendProfileAccessMailToAdmins(adminID uint, email string) error {
+	token, err := helpers.GenerateToken(adminID, email, "admin")
+	if err != nil {
+		return err
+	}
+
+	// create the access url
+	frontendURL := helpers.GetEnvWithDefault("FRONTEND_URL", "http://localhost:5173")
+	accessURL := fmt.Sprintf(`%s/admin/access?token=%s`, frontendURL, token)
+
+	mail := buildEmailHTML(
+		"cms: access your account",
+		"We received a request from you to get in.",
+		"Log In",
+		accessURL,
+	)
+
+	// sends the email
+	err = SendMail(email, "Log in to your cms admin account", mail)
+	if err != nil {
+		return err
+	}
+	log.Printf("admin access mail was sent to %s", email)
+	return nil
+}

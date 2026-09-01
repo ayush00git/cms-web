@@ -209,11 +209,12 @@ func newAuthRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	return e
 }
 
-// newAdminAuthRouter exposes the admin login route against the AdminHandler.
+// newAdminAuthRouter exposes the admin auth routes against the AdminHandler.
 func newAdminAuthRouter(db *gorm.DB) *gin.Engine {
 	e := gin.New()
 	h := &handlers.AdminHandler{DB: db}
 	e.POST("/api/auth/admin/login", h.AdminLogin)
+	e.GET("/api/auth/admin/access", h.AdminAccess)
 	return e
 }
 
