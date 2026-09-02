@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 import { useAuth } from '../context/auth-context';
+import { adminDashboardFor } from '../constants/adminDashboard';
 
 type Profile = { department?: string; hostel?: string; building?: string } | null;
 
@@ -34,10 +35,14 @@ export function Landing() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // admins (profile carries a position) get a dashboard button instead of
+  // the complaint-lodging flow
+  const isAdmin = Boolean(profile?.position);
+
   function handleComplaintClick() {
     if (isAuth === null) return;
     if (isAuth && profile) {
-      navigate(getPostRoute(profile));
+      navigate(isAdmin ? adminDashboardFor(profile.position!) : getPostRoute(profile));
     } else {
       setShowLoginMenu(prev => !prev);
     }
@@ -63,7 +68,7 @@ export function Landing() {
                 onClick={handleComplaintClick}
                 className="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
               >
-                Lodge a Complaint <ArrowRight className="w-4 h-4" />
+                {isAdmin ? 'Dashboard' : 'Lodge a Complaint'} <ArrowRight className="w-4 h-4" />
               </button>
               <div
                 className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#222222] border border-[#333333] rounded-lg shadow-xl overflow-hidden z-50 min-w-[190px] transition-all duration-200 origin-top ${
@@ -106,6 +111,15 @@ export function Landing() {
                   </Link>
                 </div>
               </div>
+            )}
+
+            {isAuth !== true && (
+              <Link
+                to="/staff/login"
+                className="inline-flex items-center gap-2 bg-[#111111] hover:bg-[#000000] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
+                Admin Logins (XEN, AE, JE)
+              </Link>
             )}
           </div>
         </div>
