@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import {
   ShieldCheck, LogOut, PlusCircle, AlertCircle, Pencil,
   Inbox, ServerCrash, Info, X, Clock,
@@ -10,6 +10,7 @@ import type { ComplaintPost, EditForm, Role } from '../../components/ComplaintCa
 import { Loader } from '../../components/Loader';
 import { BUILDINGS, HOSTELS, DEPARTMENTS, BLOCK_LABELS, BLOCK_TYPES } from '../../constants/models';
 import { useAuth } from '../../context/auth-context';
+import { adminDashboardFor } from '../../constants/adminDashboard';
 
 export function Profile() {
   const { profile, status, errorMessage, patchProfile } = useAuth();
@@ -115,6 +116,12 @@ export function Profile() {
   }
 
   if (!profile) return null;
+
+  // admins (role "admin" — their profile carries a position) have no profile
+  // page; send them to their XEN / AE / JE dashboard instead
+  if (profile.position) {
+    return <Navigate to={adminDashboardFor(profile.position)} replace />;
+  }
 
   const isFaculty    = 'department' in profile;
   const isWarden     = 'hostel' in profile;
