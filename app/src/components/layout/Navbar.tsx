@@ -57,9 +57,9 @@ export function Navbar() {
                 </li>
 
                 <li>
-                  <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+                  <Link to="/profile" className="block px-4 py-3 hover:bg-white/10 transition-colors">
                     Track Status
-                  </button>
+                  </Link>
                 </li>
 
                 <li className="relative group">
@@ -72,9 +72,9 @@ export function Navbar() {
                 </li>
 
                 <li>
-                  <button className="block px-4 py-3 hover:bg-white/10 transition-colors">
+                  <Link to="/guidelines" className="block px-4 py-3 hover:bg-white/10 transition-colors">
                     Guidelines
-                  </button>
+                  </Link>
                 </li>
               </>
             )}
@@ -222,9 +222,9 @@ export function Navbar() {
                 )}
               </div>
 
-              <button className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors border-b border-white/5">
+              <Link to="/profile" onClick={closeMobile} className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors border-b border-white/5">
                 Track Status
-              </button>
+              </Link>
 
               {/* Administration accordion */}
               <div className="border-b border-white/5">
@@ -242,9 +242,9 @@ export function Navbar() {
                 )}
               </div>
 
-              <button className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors border-b border-white/5">
+              <Link to="/guidelines" onClick={closeMobile} className="block w-full text-left px-5 py-3 hover:bg-white/10 transition-colors border-b border-white/5">
                 Guidelines
-              </button>
+              </Link>
             </>
           )}
 
