@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Landing } from './pages/Landing';
+import { Guidelines } from './pages/Guidelines';
 import { FacultySignup } from './pages/auth/FacultySignup';
 import { WardenSignup } from './pages/auth/WardenSignup';
 import { CentreHeadSignup } from './pages/auth/CentreHeadSignup';
@@ -32,6 +33,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/guidelines" element={<Guidelines />} />
           <Route path="/faculty/signup" element={<FacultySignup />} />
           <Route path="/warden/signup" element={<WardenSignup />} />
           <Route path="/centre-head/signup" element={<CentreHeadSignup />} />
