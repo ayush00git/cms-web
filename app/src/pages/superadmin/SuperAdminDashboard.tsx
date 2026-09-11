@@ -103,6 +103,7 @@ interface PostsPage {
   posts: Post[];
   hasMore: boolean;
   nextOffset: number;
+  total: number;
 }
 
 async function fetchPosts(endpoint: string, offset = 0): Promise<PostsPage> {
@@ -123,6 +124,7 @@ async function fetchPosts(endpoint: string, offset = 0): Promise<PostsPage> {
     posts,
     hasMore: Boolean(json.has_more),
     nextOffset: typeof json.next_offset === 'number' ? json.next_offset : offset + posts.length,
+    total: typeof json.total_posts === 'number' ? json.total_posts : offset + posts.length,
   };
 }
 
@@ -256,18 +258,22 @@ function PostCard({ post, source }: { post: Post; source: Source }) {
 interface SectionTileProps {
   section: Section;
   posts: Post[];
+  loaded: number;
+  total: number;
   hasMore: boolean;
   loadingMore: boolean;
   onLoadMore: () => void;
 }
 
-function SectionTile({ section, posts, hasMore, loadingMore, onLoadMore }: SectionTileProps) {
+function SectionTile({ section, posts, loaded, total, hasMore, loadingMore, onLoadMore }: SectionTileProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
       <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
         <span className="text-gray-500">{section.icon}</span>
         <h3 className="text-sm font-bold text-gray-800 tracking-tight">{section.label}</h3>
-        <span className="ml-auto bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">{posts.length}</span>
+        <span className="ml-auto text-xs text-gray-400">
+          {posts.length !== loaded ? `${posts.length} shown · ` : ''}{loaded} of {total} loaded
+        </span>
       </div>
       {posts.length === 0 ? (
         <div className="px-5 py-8 text-center text-xs text-gray-400 italic">No posts match this filter.</div>
@@ -330,6 +336,7 @@ export function SuperAdminDashboard() {
           posts: [...prev[source].posts, ...page.posts],
           hasMore: page.hasMore,
           nextOffset: page.nextOffset,
+          total: page.total,
         },
       } : prev);
     } catch (err) {
@@ -437,6 +444,8 @@ export function SuperAdminDashboard() {
                 key={s.key}
                 section={s}
                 posts={applyFilter(data![s.key].posts)}
+                loaded={data![s.key].posts.length}
+                total={data![s.key].total}
                 hasMore={data![s.key].hasMore}
                 loadingMore={loadingMore === s.key}
                 onLoadMore={() => loadMore(s.key)}

@@ -47,6 +47,14 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 	// paginated: 25 per page via ?offset=N.
 	var posts []models.FacultyPost
 	offset := pageOffset(c)
+
+	// total rows in the table, so the client can show "x of y".
+	var total int64
+	if err := h.DB.Model(&models.FacultyPost{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
 	result = h.DB.Order("created_at DESC").
 	Offset(offset).
 	Limit(superAdminPageSize + 1).
@@ -76,6 +84,7 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 		"posts": posts,
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
+		"total_posts": total,
 	})
 }
 
@@ -104,6 +113,14 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 	// paginated: 25 per page via ?offset=N.
 	var posts []models.WardenPost
 	offset := pageOffset(c)
+
+	// total rows in the table, so the client can show "x of y".
+	var total int64
+	if err := h.DB.Model(&models.WardenPost{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
 	result = h.DB.Order("created_at DESC").
 	Offset(offset).
 	Limit(superAdminPageSize + 1).
@@ -133,6 +150,7 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 		"posts": posts,
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
+		"total_posts": total,
 	})
 }
 
@@ -160,6 +178,14 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 	// paginated: 25 per page via ?offset=N.
 	var posts []models.CentreheadPost
 	offset := pageOffset(c)
+
+	// total rows in the table, so the client can show "x of y".
+	var total int64
+	if err := h.DB.Model(&models.CentreheadPost{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
 	result = h.DB.Order("created_at DESC").
 	Offset(offset).
 	Limit(superAdminPageSize + 1).
@@ -189,5 +215,6 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 		"posts": posts,
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
+		"total_posts": total,
 	})
 }
