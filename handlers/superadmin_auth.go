@@ -134,7 +134,7 @@ func (h *SuperAdminHandler) SuperAdminAssignNewAdmin(c *gin.Context) {
 
 	// send an email to the newly assigned.
 	go func(email string) {
-		err := services.SendAccessMailToAssignedSuperAdmins(newAdmin.Email)
+		err := services.SendAccessMailToAssignedSuperAdmins(email)
 		if err != nil {
 			log.Printf("superadmin invite mail to %s failed: %v", email, err)
 		}
