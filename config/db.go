@@ -38,6 +38,7 @@ func ConnectDB() {
 		&models.WardenPost{},
 		&models.CentreheadPost{},
 		&models.Comment{},
+		&models.SuperAdmin{},
 	)
 
 	log.Println("Database connected")

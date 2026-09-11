@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// Load .env file if it exists, ignore error if missing (e.g. in docker containers)
+	// Load .env file if it exists, ignore error if missing (for docker containers)
 	_ = godotenv.Load()
 
 	// db connection
@@ -48,10 +48,15 @@ func main() {
 		DB: config.DB,
 	}
 
+	superadminHandler := &handlers.SuperAdminHandler{
+		DB:	config.DB,
+	}
+
 	// register routes
 	routes.AuthRoute(r, authHandler)
 	routes.PostRoute(r, postHandler)
 	routes.AdminRoutes(r, adminHandler)
+	routes.SuperAdminRoute(r, superadminHandler)
 
 	r.Run(":8080")
 	fmt.Println("Sevrer running on port 8080")
