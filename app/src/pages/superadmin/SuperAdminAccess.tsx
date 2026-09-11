@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { ShieldCheck, AlertCircle } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
+import { useAuth } from '../../context/auth-context';
 
 type AccessStatus = 'idle' | 'loading' | 'error' | 'no-token';
 
@@ -11,6 +12,7 @@ type AccessStatus = 'idle' | 'loading' | 'error' | 'no-token';
 export function SuperAdminAccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { refetch } = useAuth();
   const token = searchParams.get('token');
 
   const [status, setStatus] = useState<AccessStatus>(token ? 'idle' : 'no-token');
@@ -26,6 +28,7 @@ export function SuperAdminAccess() {
       });
       const data = await response.json();
       if (response.ok) {
+        refetch();
         navigate('/superadmin', { replace: true });
       } else {
         setStatus('error');

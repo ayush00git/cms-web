@@ -60,7 +60,7 @@ function App() {
           <Route path="/admin/je" element={<JEPostView />} />
           <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
           <Route path="/superadmin" element={<SuperAdminDashboard />} />
-          <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+          <Route path="/superadmin/login" element={<GuestRoute><SuperAdminLogin /></GuestRoute>} />
           <Route path="/superadmin/access" element={<SuperAdminAccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

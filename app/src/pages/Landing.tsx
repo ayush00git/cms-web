@@ -42,12 +42,13 @@ export function Landing() {
 
   // admins (profile carries a position) get a dashboard button instead of
   // the complaint-lodging flow
-  const isAdmin = Boolean(profile?.position);
+  const isSuperAdmin = profile?.role === 'superadmin';
+  const isAdmin = Boolean(profile?.position) || isSuperAdmin;
 
   function handleComplaintClick() {
     if (isAuth === null) return;
     if (isAuth && profile) {
-      navigate(isAdmin ? adminDashboardFor(profile.position!) : getPostRoute(profile));
+      navigate(isSuperAdmin ? '/superadmin' : profile.position ? adminDashboardFor(profile.position) : getPostRoute(profile));
     } else {
       setShowLoginMenu(prev => !prev);
     }

@@ -8,7 +8,7 @@ interface GuestRouteProps {
 }
 
 export function GuestRoute({ children }: GuestRouteProps) {
-  const { status } = useAuth();
+  const { status, profile } = useAuth();
 
   if (status === 'loading') {
     return (
@@ -19,7 +19,7 @@ export function GuestRoute({ children }: GuestRouteProps) {
   }
 
   if (status === 'authenticated') {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to={profile?.role === 'superadmin' ? '/superadmin' : '/profile'} replace />;
   }
 
   return <>{children}</>;

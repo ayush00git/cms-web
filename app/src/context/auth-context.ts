@@ -13,6 +13,8 @@ export interface ProfileData {
   building?: string;
   /** Only present for admin (XEN / AE / JE) sessions. */
   position?: string;
+  /** "superadmin" for super admin sessions; absent otherwise. */
+  role?: string;
 }
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'rate-limited' | 'error';
