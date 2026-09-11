@@ -33,13 +33,13 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 	// fetch all faculty posts.
 	// limit set to 25 latest posts in a single fetch.
 	var posts []models.FacultyPost
-	result = h.DB.Find(&posts).
-	Order("created_at DESC").
+	result = h.DB.Order("created_at DESC").
 	Limit(25).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, department, house_number, block, type, phone_number")
-	})
+	}).
+	Find(&posts)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -80,13 +80,13 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 	// fetch all warden posts.
 	// limit set to 25 latest posts in a single fetch.
 	var posts []models.WardenPost
-	result = h.DB.Find(&posts).
-	Order("created_at DESC").
+	result = h.DB.Order("created_at DESC").
 	Limit(25).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, hostel, phone_number")
-	})
+	}).
+	Find(&posts)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -126,13 +126,13 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 	// fetch all warden posts.
 	// limit set to 25 latest posts in a single fetch.
 	var posts []models.CentreheadPost
-	result = h.DB.Find(&posts).
-	Order("created_at DESC").
+	result = h.DB.Order("created_at DESC").
 	Limit(25).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, building, phone_number")
-	})
+	}).
+	Find(&posts)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
