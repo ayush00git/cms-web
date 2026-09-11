@@ -103,6 +103,21 @@ func (h *AuthHandler) UserProfile (c *gin.Context) {
 			"is_verified": profile.IsVerified,
 			"created_at":  profile.CreatedAt,
 		}
+	case "superadmin":
+		var profile models.SuperAdmin
+		result := h.DB.Where("email = ?", email).Take(&profile)
+		if result.Error != nil {
+			c.JSON(500, gin.H{"error": "failed to fetch user profile"})
+			return
+		}
+		userProfile = gin.H{
+			"id":         profile.ID,
+			"name":       profile.Name,
+			"email":      profile.Email,
+			"role":       "superadmin",
+			"visited_at": profile.VisitedAt,
+			"created_at": profile.CreatedAt,
+		}
 	default:
 		c.JSON(404, gin.H{"error": "undefined role"})
 		return

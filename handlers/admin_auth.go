@@ -98,7 +98,7 @@ func (h *AdminHandler) AdminAccess (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		7 * 24 * 60 * 60,
+		3 * 24 * 60 * 60,
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,

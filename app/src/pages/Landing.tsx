@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 import { useAuth } from '../context/auth-context';
@@ -18,8 +18,10 @@ export function Landing() {
   const isAuth                          = status === 'loading' ? null : status === 'authenticated';
   const [showLoginMenu, setShowLoginMenu]   = useState(false);
   const [showSignupMenu, setShowSignupMenu] = useState(false);
+  const [showAdminMenu, setShowAdminMenu]   = useState(false);
   const menuRef                         = useRef<HTMLDivElement>(null);
   const signupMenuRef                   = useRef<HTMLDivElement>(null);
+  const adminMenuRef                    = useRef<HTMLDivElement>(null);
   const navigate                        = useNavigate();
 
   useEffect(() => {
@@ -30,6 +32,9 @@ export function Landing() {
       if (signupMenuRef.current && !signupMenuRef.current.contains(e.target as Node)) {
         setShowSignupMenu(false);
       }
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setShowAdminMenu(false);
+      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -37,12 +42,13 @@ export function Landing() {
 
   // admins (profile carries a position) get a dashboard button instead of
   // the complaint-lodging flow
-  const isAdmin = Boolean(profile?.position);
+  const isSuperAdmin = profile?.role === 'superadmin';
+  const isAdmin = Boolean(profile?.position) || isSuperAdmin;
 
   function handleComplaintClick() {
     if (isAuth === null) return;
     if (isAuth && profile) {
-      navigate(isAdmin ? adminDashboardFor(profile.position!) : getPostRoute(profile));
+      navigate(isSuperAdmin ? '/superadmin' : profile.position ? adminDashboardFor(profile.position) : getPostRoute(profile));
     } else {
       setShowLoginMenu(prev => !prev);
     }
@@ -114,12 +120,26 @@ export function Landing() {
             )}
 
             {isAuth !== true && (
-              <Link
-                to="/staff/login"
-                className="inline-flex items-center gap-2 bg-[#111111] hover:bg-[#000000] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
-              >
-                Admin Logins (XEN, AE, JE)
-              </Link>
+              <div className="relative" ref={adminMenuRef}>
+                <button
+                  onClick={() => setShowAdminMenu(prev => !prev)}
+                  className="inline-flex items-center gap-2 bg-[#111111] hover:bg-[#000000] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+                >
+                  Admin <ChevronDown className={`w-4 h-4 opacity-70 transition-transform ${showAdminMenu ? 'rotate-180' : ''}`} />
+                </button>
+                <div
+                  className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#222222] border border-[#333333] rounded-lg shadow-xl overflow-hidden z-50 min-w-[190px] transition-all duration-200 origin-top ${
+                    showAdminMenu ? 'opacity-100 scale-y-100 pointer-events-auto' : 'opacity-0 scale-y-95 pointer-events-none'
+                  }`}
+                >
+                  <Link to="/staff/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors border-b border-[#333333] cursor-pointer">
+                    XEN, AE, JE
+                  </Link>
+                  <Link to="/superadmin/login" className="block px-5 py-3 text-sm font-medium text-white hover:bg-[#333333] transition-colors cursor-pointer">
+                    SuperAdmin
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         </div>

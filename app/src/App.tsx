@@ -23,6 +23,9 @@ import { XENPostView } from './pages/admin/XENPostView';
 import { AEPostView } from './pages/admin/AEPostView';
 import { JEPostView } from './pages/admin/JEPostView';
 import { AdminPostView } from './pages/admin/AdminPostView';
+import { SuperAdminLogin } from './pages/superadmin/SuperAdminLogin';
+import { SuperAdminAccess } from './pages/superadmin/SuperAdminAccess';
+import { SuperAdminDashboard } from './pages/superadmin/SuperAdminDashboard';
 import { GuestRoute } from './components/GuestRoute';
 import { NotFound } from './pages/NotFound';
 import { AuthProvider } from './context/AuthContext';
@@ -56,6 +59,9 @@ function App() {
           <Route path="/admin/ae" element={<AEPostView />} />
           <Route path="/admin/je" element={<JEPostView />} />
           <Route path="/admin/posts/:role/:post_id" element={<AdminPostView />} />
+          <Route path="/superadmin" element={<SuperAdminDashboard />} />
+          <Route path="/superadmin/login" element={<GuestRoute><SuperAdminLogin /></GuestRoute>} />
+          <Route path="/superadmin/access" element={<SuperAdminAccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>

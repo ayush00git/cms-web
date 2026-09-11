@@ -12,9 +12,11 @@ export function Navbar() {
   const { status, profile } = useAuth();
   const isAuth = status === 'loading' ? null : status === 'authenticated';
 
-  // admins have no /profile page — their "Profile" entry points at the dashboard
-  const isAdmin = Boolean(profile?.position);
-  const profileHref = isAdmin ? adminDashboardFor(profile!.position!) : '/profile';
+  // admins and super admins have no /profile page — their "Profile" entry
+  // points at their dashboard instead
+  const isSuperAdmin = profile?.role === 'superadmin';
+  const isAdmin = Boolean(profile?.position) || isSuperAdmin;
+  const profileHref = isSuperAdmin ? '/superadmin' : profile?.position ? adminDashboardFor(profile.position) : '/profile';
   const profileLabel = isAdmin ? 'Dashboard' : 'Profile';
 
   const closeMobile = () => {

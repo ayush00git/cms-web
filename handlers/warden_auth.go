@@ -121,7 +121,7 @@ func (h *AuthHandler) WardenLogin (c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60,
+		3 * 24 * 60 * 60,
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,

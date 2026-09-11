@@ -144,7 +144,7 @@ func (h *AuthHandler) FacultyLogin(c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		30 * 24 * 60 * 60,			// 30 days
+		3 * 24 * 60 * 60,			// 30 days
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		false,						// set to true during deployment (secure bool)
