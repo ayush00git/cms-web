@@ -19,7 +19,8 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 	}
 
 	// check if the user is a superadmin.
-	result := h.DB.Where("email = ?", email)
+	var admin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&admin)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
@@ -65,7 +66,8 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 	}
 
 	// check if the user is a superadmin.
-	result := h.DB.Where("email = ?", email)
+	var admin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&admin)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
@@ -110,7 +112,8 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 	}
 
 	// check if the user is a superadmin.
-	result := h.DB.Where("email = ?", email)
+	var admin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&admin)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
