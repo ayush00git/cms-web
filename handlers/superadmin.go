@@ -22,6 +22,26 @@ func pageOffset(c *gin.Context) int {
 	return offset
 }
 
+// countBy groups the rows of model by column and returns value -> count.
+func countBy(db *gorm.DB, model any, column string) (map[string]int64, error) {
+	var rows []struct {
+		Key   string
+		Count int64
+	}
+	err := db.Model(model).
+		Select(column + " AS key, COUNT(*) AS count").
+		Group(column).
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]int64, len(rows))
+	for _, r := range rows {
+		out[r.Key] = r.Count
+	}
+	return out, nil
+}
+
 // SuperAdminGetFacultyPosts fetches faculty authored posts with a limit
 // of 25 latest ones.
 func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
@@ -51,6 +71,18 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 	// total rows in the table, so the client can show "x of y".
 	var total int64
 	if err := h.DB.Model(&models.FacultyPost{}).Count(&total).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
+	// whole-table breakdowns, so the client can chart every post, not just the loaded page.
+	statusCounts, err := countBy(h.DB, &models.FacultyPost{}, "status")
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+	typeCounts, err := countBy(h.DB, &models.FacultyPost{}, "type_of_post")
+	if err != nil {
 		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
 		return
 	}
@@ -85,6 +117,8 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
 		"total_posts": total,
+		"status_counts": statusCounts,
+		"type_counts": typeCounts,
 	})
 }
 
@@ -121,6 +155,18 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 		return
 	}
 
+	// whole-table breakdowns, so the client can chart every post, not just the loaded page.
+	statusCounts, err := countBy(h.DB, &models.WardenPost{}, "status")
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+	typeCounts, err := countBy(h.DB, &models.WardenPost{}, "type_of_post")
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
 	result = h.DB.Order("created_at DESC").
 	Offset(offset).
 	Limit(superAdminPageSize + 1).
@@ -151,6 +197,8 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
 		"total_posts": total,
+		"status_counts": statusCounts,
+		"type_counts": typeCounts,
 	})
 }
 
@@ -186,6 +234,18 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 		return
 	}
 
+	// whole-table breakdowns, so the client can chart every post, not just the loaded page.
+	statusCounts, err := countBy(h.DB, &models.CentreheadPost{}, "status")
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+	typeCounts, err := countBy(h.DB, &models.CentreheadPost{}, "type_of_post")
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to count posts at the moment."})
+		return
+	}
+
 	result = h.DB.Order("created_at DESC").
 	Offset(offset).
 	Limit(superAdminPageSize + 1).
@@ -216,5 +276,7 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 		"has_more": hasMore,
 		"next_offset": offset + len(posts),
 		"total_posts": total,
+		"status_counts": statusCounts,
+		"type_counts": typeCounts,
 	})
 }
