@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/ayush00git/cms-web/helpers"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
@@ -55,4 +56,37 @@ func (h *SuperAdminHandler) SuperAdminLogin(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"success": "an email has been sent to you with the access link"})
+}
+
+// SuperAdminAccess opens from the magic login link, and verifies
+// the user's identity through the jwt token.
+func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
+	token := c.Query("token")
+	claims, err := helpers.VerifyToken(token)
+	if err != nil {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		return
+	}
+
+	email := claims.Email
+
+	// check for this email in superadmin table.
+	var superAdmin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&superAdmin)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to lookup at the moment"})
+		return
+	}
+
+	c.SetCookie(
+		"token",
+		token,
+		24 * 60 * 60,	// 24 hours
+		"/",
+		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
+		true,
+		false,
+	)
+
+	c.JSON(200, gin.H{"success": "logged in successfully!"})
 }
