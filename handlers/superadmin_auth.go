@@ -86,8 +86,8 @@ func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
 		3 * 24 * 60 * 60,	// 3 days.
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
-		true,
 		false,
+		true,
 	)
 
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
