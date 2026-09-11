@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, Menu, X, User, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/auth-context';
 import { adminDashboardFor } from '../../constants/adminDashboard';
 
@@ -10,7 +10,14 @@ export function Navbar() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
   const { status, profile } = useAuth();
-  const isAuth = status === 'loading' ? null : status === 'authenticated';
+  const { pathname } = useLocation();
+
+  // Super admins log in via their own magic link and /api/profile does not
+  // know their role, so the auth context reads as logged out on their pages.
+  // Never offer the regular Login menu there; on the dashboard itself, offer Logout.
+  const isSuperAdminArea = pathname.startsWith('/superadmin');
+  const isSuperAdminDashboard = pathname === '/superadmin';
+  const isAuth = status === 'loading' ? null : status === 'authenticated' || isSuperAdminDashboard;
 
   // admins have no /profile page — their "Profile" entry points at the dashboard
   const isAdmin = Boolean(profile?.position);
@@ -97,12 +104,14 @@ export function Navbar() {
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
-                <Link to={profileHref} className="flex items-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors text-white">
-                  <User className="w-4 h-4" />
-                  <span>{profileLabel}</span>
-                </Link>
+                {!isSuperAdminDashboard && (
+                  <Link to={profileHref} className="flex items-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors text-white">
+                    <User className="w-4 h-4" />
+                    <span>{profileLabel}</span>
+                  </Link>
+                )}
               </>
-            ) : (
+            ) : isSuperAdminArea ? null : (
               <div className="relative group">
                 <button className="flex items-center gap-1.5 px-4 py-3 hover:bg-white/10 transition-colors text-white">
                   <User className="w-4 h-4" />
@@ -134,12 +143,14 @@ export function Navbar() {
                   <LogOut className="w-3.5 h-3.5" />
                   Logout
                 </button>
-                <Link to={profileHref} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
-                  <User className="w-3.5 h-3.5" />
-                  {profileLabel}
-                </Link>
+                {!isSuperAdminDashboard && (
+                  <Link to={profileHref} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
+                    <User className="w-3.5 h-3.5" />
+                    {profileLabel}
+                  </Link>
+                )}
               </>
-            ) : (
+            ) : isSuperAdminArea ? null : (
               <Link to="/faculty/login" className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors">
                 <User className="w-3.5 h-3.5" />
                 Login
@@ -173,12 +184,14 @@ export function Navbar() {
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
               </button>
-              <Link to={profileHref} onClick={closeMobile} className="flex items-center gap-2 px-5 py-3 hover:bg-white/10 transition-colors text-[#16a34a] font-semibold">
-                <User className="w-4 h-4" />
-                <span>{profileLabel}</span>
-              </Link>
+              {!isSuperAdminDashboard && (
+                <Link to={profileHref} onClick={closeMobile} className="flex items-center gap-2 px-5 py-3 hover:bg-white/10 transition-colors text-[#16a34a] font-semibold">
+                  <User className="w-4 h-4" />
+                  <span>{profileLabel}</span>
+                </Link>
+              )}
             </div>
-          ) : (
+          ) : isSuperAdminArea ? null : (
             <div className="border-b border-white/5">
               <button
                 onClick={() => setLoginDropdownOpen(prev => !prev)}
