@@ -284,7 +284,7 @@ function SectionTile({ section, posts, hasMore, loadingMore, onLoadMore }: Secti
             className={`inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg border transition-colors ${loadingMore ? 'opacity-70 cursor-not-allowed bg-white text-gray-500 border-gray-200' : 'bg-white text-gray-700 border-gray-300 hover:border-[#ff9900] hover:text-[#ff9900] cursor-pointer'}`}
           >
             {loadingMore && <Loader size="sm" color="orange" />}
-            {loadingMore ? 'Loading…' : 'Load 25 more'}
+            {loadingMore ? 'Loading…' : 'Load more'}
           </button>
         </div>
       )}
@@ -392,7 +392,7 @@ export function SuperAdminDashboard() {
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Super Admin Dashboard</h2>
             </div>
             <p className="text-sm text-gray-500">
-              Read-only view of every complaint, 25 at a time per source, with author details, status history, and comments.
+              Read-only view of every complaint, with author details, status history, and comments.
             </p>
           </div>
 

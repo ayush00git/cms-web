@@ -2,12 +2,25 @@ package handlers
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+// superAdminPageSize is how many posts a single fetch returns.
+const superAdminPageSize = 25
+
+// pageOffset reads the "offset" query param, defaulting to 0.
+func pageOffset(c *gin.Context) int {
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil || offset < 0 {
+		return 0
+	}
+	return offset
+}
 
 // SuperAdminGetFacultyPosts fetches faculty authored posts with a limit
 // of 25 latest ones.
@@ -31,10 +44,12 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 	}
 
 	// fetch all faculty posts.
-	// limit set to 25 latest posts in a single fetch.
+	// paginated: 25 per page via ?offset=N.
 	var posts []models.FacultyPost
+	offset := pageOffset(c)
 	result = h.DB.Order("created_at DESC").
-	Limit(25).
+	Offset(offset).
+	Limit(superAdminPageSize + 1).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, department, house_number, block, type, phone_number")
@@ -50,9 +65,17 @@ func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
 		return
 	}
 
+	// one extra row was fetched only to know whether a next page exists.
+	hasMore := len(posts) > superAdminPageSize
+	if hasMore {
+		posts = posts[:superAdminPageSize]
+	}
+
 	c.JSON(200, gin.H{
 		"success": "faculty posts fetched successfully!",
 		"posts": posts,
+		"has_more": hasMore,
+		"next_offset": offset + len(posts),
 	})
 }
 
@@ -78,10 +101,12 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 	}
 
 	// fetch all warden posts.
-	// limit set to 25 latest posts in a single fetch.
+	// paginated: 25 per page via ?offset=N.
 	var posts []models.WardenPost
+	offset := pageOffset(c)
 	result = h.DB.Order("created_at DESC").
-	Limit(25).
+	Offset(offset).
+	Limit(superAdminPageSize + 1).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, hostel, phone_number")
@@ -97,9 +122,17 @@ func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
 		return
 	}
 
+	// one extra row was fetched only to know whether a next page exists.
+	hasMore := len(posts) > superAdminPageSize
+	if hasMore {
+		posts = posts[:superAdminPageSize]
+	}
+
 	c.JSON(200, gin.H{
 		"success": "warden posts fetched successfully!",
 		"posts": posts,
+		"has_more": hasMore,
+		"next_offset": offset + len(posts),
 	})
 }
 
@@ -124,10 +157,12 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 	}
 
 	// fetch all warden posts.
-	// limit set to 25 latest posts in a single fetch.
+	// paginated: 25 per page via ?offset=N.
 	var posts []models.CentreheadPost
+	offset := pageOffset(c)
 	result = h.DB.Order("created_at DESC").
-	Limit(25).
+	Offset(offset).
+	Limit(superAdminPageSize + 1).
 	Preload("Comments").
 	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
 		return db.Select("id, name, email, building, phone_number")
@@ -143,8 +178,16 @@ func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
 		return
 	}
 
+	// one extra row was fetched only to know whether a next page exists.
+	hasMore := len(posts) > superAdminPageSize
+	if hasMore {
+		posts = posts[:superAdminPageSize]
+	}
+
 	c.JSON(200, gin.H{
 		"success": "centrehead posts fetched successfully!",
 		"posts": posts,
+		"has_more": hasMore,
+		"next_offset": offset + len(posts),
 	})
 }
