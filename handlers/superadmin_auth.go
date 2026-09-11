@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
@@ -130,5 +131,14 @@ func (h *SuperAdminHandler) SuperAdminAssignNewAdmin(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "failed to assign an new admin."})
 		return
 	}
+
+	// send an email to the newly assigned.
+	go func(email string) {
+		err := services.SendAccessMailToAssignedSuperAdmins(newAdmin.Email)
+		if err != nil {
+			log.Printf("superadmin invite mail to %s failed: %v", email, err)
+		}
+	}(newAdmin.Email)
+
 	c.JSON(201, gin.H{"success": "new superadmin assigned!", "admin": newAdmin})
 }
