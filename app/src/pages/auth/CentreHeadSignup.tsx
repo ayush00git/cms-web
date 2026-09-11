@@ -5,6 +5,8 @@ import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
 import { BUILDINGS } from '../../constants/models';
 
+const OTHERS_OPTION = '__others__';
+
 export function CentreHeadSignup() {
   const [formData, setFormData] = useState({
     name: '',
@@ -13,6 +15,7 @@ export function CentreHeadSignup() {
     phone_number: '',
     building: '',
   });
+  const [customBuilding, setCustomBuilding] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
@@ -34,7 +37,10 @@ export function CentreHeadSignup() {
       const response = await fetch('/api/auth/centrehead/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          building: formData.building === OTHERS_OPTION ? customBuilding.trim() : formData.building,
+        }),
         credentials: 'include',
       });
 
@@ -169,7 +175,10 @@ export function CentreHeadSignup() {
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-[#666666] mb-4">Building Assignment</h2>
               <div className="max-w-sm">
-                <label className={labelCls}>Assigned Building / Centre</label>
+                <label className={labelCls}>
+                  Assigned Building / Centre{' '}
+                  <span className="font-normal text-[#666666]">(select others if your's is not mentioned.)</span>
+                </label>
                 <select
                   name="building"
                   value={formData.building}
@@ -181,7 +190,19 @@ export function CentreHeadSignup() {
                   {BUILDINGS.map(building => (
                     <option key={building.value} value={building.value}>{building.label}</option>
                   ))}
+                  <option value={OTHERS_OPTION}>Others</option>
                 </select>
+                {formData.building === OTHERS_OPTION && (
+                  <input
+                    type="text"
+                    name="customBuilding"
+                    value={customBuilding}
+                    onChange={e => setCustomBuilding(e.target.value)}
+                    className={`${inputCls} mt-3`}
+                    placeholder="Enter your Building / Centre name"
+                    required
+                  />
+                )}
               </div>
             </div>
 
