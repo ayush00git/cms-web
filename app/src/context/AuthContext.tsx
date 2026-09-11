@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AuthContext } from './auth-context';
 import type { AuthStatus, ProfileData } from './auth-context';
 
@@ -11,8 +12,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { pathname } = useLocation();
+
+  // Super admins log in through their own magic link and /api/profile does
+  // not know their role, so on /superadmin routes the call is skipped.
+  const skipProfile = pathname.startsWith('/superadmin');
 
   const refetch = useCallback(() => {
+    if (skipProfile) {
+      setProfile(null);
+      setStatus('unauthenticated');
+      setErrorMessage(null);
+      return;
+    }
     setStatus('loading');
     setErrorMessage(null);
     fetch('/api/profile', { credentials: 'include' })
@@ -40,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setErrorMessage('Failed to reach the server.');
         setStatus('error');
       });
-  }, []);
+  }, [skipProfile]);
 
   const patchProfile = useCallback((patch: Partial<ProfileData>) => {
     setProfile((prev) => prev ? { ...prev, ...patch } : prev);
