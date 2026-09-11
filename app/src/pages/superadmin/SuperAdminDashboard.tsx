@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle, ServerCrash, ShieldCheck, GraduationCap, BedDouble, Building2,
-  Zap, Hammer, Calendar, MapPin, MessageSquare, ChevronDown, Users, History, Phone, Mail,
+  Zap, Hammer, Calendar, MapPin, MessageSquare, ChevronDown, Users, History, Phone, Mail, UserPlus,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Loader } from '../../components/Loader';
+import { DonutChart } from '../../components/charts/DonutChart';
+import type { DonutSegment } from '../../components/charts/DonutChart';
+import { Meter } from '../../components/charts/Meter';
+import { AssignAdminModal } from '../../components/AssignAdminModal';
 
 // ── Types (mirror models/post.go + the Author selects in handlers/superadmin.go) ──
 
@@ -93,6 +97,30 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const prettyStatus = (s: string) => STATUS_LABELS[s.toLowerCase()] ?? s.replace(/_/g, ' ');
+
+// ── Chart palette (validated with the dataviz palette checker, light surface) ──
+
+// Categorical slots 1-3: identity of the three sources. Fixed order, never cycled.
+const SOURCE_COLORS: Record<Source, string> = {
+  faculty: '#2a78d6',
+  warden: '#eb6834',
+  centrehead: '#1baf7a',
+};
+
+// Pipeline stages are ordered, so they take one hue stepped light→dark.
+type Stage = 'xen' | 'ae' | 'je' | 'done';
+const STAGES: { key: Stage; label: string; statuses: string[]; color: string }[] = [
+  { key: 'xen',  label: 'With XEN',  statuses: ['pending_xen'],               color: '#86b6ef' },
+  { key: 'ae',   label: 'With AE',   statuses: ['pending_ae', 'resolved_ae'], color: '#5598e7' },
+  { key: 'je',   label: 'With JE',   statuses: ['pending_je', 'resolved_je'], color: '#2a78d6' },
+  { key: 'done', label: 'Resolved',  statuses: ['resolved_all'],              color: '#0d366b' },
+];
+const stageOf = (status: string): Stage =>
+  STAGES.find(st => st.statuses.includes(status.toLowerCase()))?.key ?? 'xen';
+
+// Civil vs Electrical is a two-way split: one hue, fill on a same-ramp track.
+const TYPE_FILL = '#2a78d6';
+const TYPE_TRACK = '#b7d3f6';
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -298,6 +326,87 @@ function SectionTile({ section, posts, loaded, total, hasMore, loadingMore, onLo
   );
 }
 
+// ── Insights ──────────────────────────────────────────────────────────────────
+
+function StatTile({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm px-5 py-4 min-w-0">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">{label}</div>
+      <div className="text-2xl font-extrabold text-gray-900 tabular-nums mt-1 leading-none">{value}</div>
+      {hint && <div className="text-[11px] text-gray-400 mt-1.5">{hint}</div>}
+    </div>
+  );
+}
+
+interface InsightsProps {
+  data: Record<Source, PostsPage>;
+  activeSource: Source | 'all';
+  onSourceSelect: (s: Source | 'all') => void;
+  activeStage: Stage | null;
+  onStageSelect: (s: Stage | null) => void;
+}
+
+function Insights({ data, activeSource, onSourceSelect, activeStage, onStageSelect }: InsightsProps) {
+  const loaded = [...data.faculty.posts, ...data.warden.posts, ...data.centrehead.posts];
+  const grandTotal = SECTIONS.reduce((a, s) => a + data[s.key].total, 0);
+  const resolved = loaded.filter(p => p.status.toLowerCase() === 'resolved_all').length;
+  const comments = loaded.reduce((a, p) => a + (p.comments?.length ?? 0), 0);
+
+  const sourceSegments: DonutSegment[] = SECTIONS.map(s => ({
+    key: s.key,
+    label: s.label.replace(' Posts', ''),
+    value: data[s.key].total,
+    color: SOURCE_COLORS[s.key],
+    detail: `${data[s.key].posts.length} loaded`,
+  }));
+
+  const stageSegments: DonutSegment[] = STAGES.map(st => {
+    const inStage = loaded.filter(p => stageOf(p.status) === st.key);
+    const pending = inStage.filter(p => p.status.toLowerCase().startsWith('pending')).length;
+    const detail = st.statuses.length > 1 ? `${pending} pending · ${inStage.length - pending} resolved` : undefined;
+    return { key: st.key, label: st.label, value: inStage.length, color: st.color, detail };
+  });
+
+  const civil = loaded.filter(p => p.type_of_post.toLowerCase() === 'civil').length;
+  const electrical = loaded.length - civil;
+
+  return (
+    <div className="mb-8 flex flex-col gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatTile label="Total complaints" value={grandTotal} hint="across all sources" />
+        <StatTile label="Loaded on this page" value={loaded.length} hint={`${Math.round(grandTotal ? (loaded.length / grandTotal) * 100 : 0)}% of total`} />
+        <StatTile label="Fully resolved" value={resolved} hint={`${loaded.length - resolved} still in pipeline`} />
+        <StatTile label="Comments" value={comments} hint="on loaded complaints" />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-[1fr_1fr_minmax(16rem,0.7fr)]">
+        <DonutChart
+          title="Complaints by source"
+          caption="Every complaint on record, by who raised it."
+          segments={sourceSegments}
+          centreLabel="complaints"
+          selected={activeSource === 'all' ? null : activeSource}
+          onSelect={key => onSourceSelect((key as Source | null) ?? 'all')}
+        />
+        <DonutChart
+          title="Where complaints sit in the pipeline"
+          caption="Loaded complaints, by the desk currently holding them."
+          segments={stageSegments}
+          centreLabel="loaded"
+          selected={activeStage}
+          onSelect={key => onStageSelect(key as Stage | null)}
+        />
+        <Meter
+          title="Civil vs Electrical"
+          caption="Loaded complaints, by works category."
+          a={{ label: 'Civil', value: civil, color: TYPE_FILL }}
+          b={{ label: 'Electrical', value: electrical, color: TYPE_TRACK }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function SuperAdminDashboard() {
@@ -307,6 +416,8 @@ export function SuperAdminDashboard() {
   const [error, setError] = useState<{ message: string; status?: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const [activeSource, setActiveSource] = useState<Source | 'all'>('all');
+  const [activeStage, setActiveStage] = useState<Stage | null>(null);
+  const [assignOpen, setAssignOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -382,7 +493,9 @@ export function SuperAdminDashboard() {
 
   const all = [...data!.faculty.posts, ...data!.warden.posts, ...data!.centrehead.posts];
   const applyFilter = (posts: Post[]) =>
-    activeFilter === 'All' ? posts : posts.filter(p => p.status.toLowerCase() === activeFilter);
+    posts.filter(p =>
+      (activeFilter === 'All' || p.status.toLowerCase() === activeFilter) &&
+      (activeStage === null || stageOf(p.status) === activeStage));
   const count = (status: string) =>
     status === 'All' ? all.length : all.filter(p => p.status.toLowerCase() === status).length;
   const visibleSections = SECTIONS.filter(s => activeSource === 'all' || s.key === activeSource);
@@ -393,15 +506,34 @@ export function SuperAdminDashboard() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
 
         <div className="px-6 relative z-10">
-          <div className="mb-8 pb-4 border-b border-gray-200">
-            <div className="flex items-center gap-3 mb-1">
-              <ShieldCheck className="w-6 h-6 text-[#ff9900]" />
-              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Super Admin Dashboard</h2>
+          <div className="mb-8 pb-4 border-b border-gray-200 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <ShieldCheck className="w-6 h-6 text-[#ff9900]" />
+                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Super Admin Dashboard</h2>
+              </div>
+              <p className="text-sm text-gray-500">
+                Read-only view of every complaint, with author details, status history, and comments.
+              </p>
             </div>
-            <p className="text-sm text-gray-500">
-              Read-only view of every complaint, with author details, status history, and comments.
-            </p>
+            <button
+              onClick={() => setAssignOpen(true)}
+              className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-lg bg-[#222222] hover:bg-[#111111] text-white transition-colors cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4" />
+              Assign super admin
+            </button>
           </div>
+
+          <AssignAdminModal open={assignOpen} onClose={() => setAssignOpen(false)} />
+
+          <Insights
+            data={data!}
+            activeSource={activeSource}
+            onSourceSelect={setActiveSource}
+            activeStage={activeStage}
+            onStageSelect={setActiveStage}
+          />
 
           {/* Source tabs */}
           <div className="mb-4 flex flex-wrap gap-2">
