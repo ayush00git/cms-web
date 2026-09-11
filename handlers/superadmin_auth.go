@@ -1,0 +1,92 @@
+package handlers
+
+import (
+	"errors"
+	"time"
+
+	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/models"
+	"github.com/ayush00git/cms-web/services"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type SuperAdminHandler struct {
+	DB 	*gorm.DB
+}
+
+// Passwordless login via a magic link,
+// considering a pre-seeded database here.
+type SuperAdminLogin struct {
+	Email		string		`json:"email" binding:"required,max=255"`
+}
+
+func (h *SuperAdminHandler) SuperAdminLogin(c *gin.Context) {
+	var inputs SuperAdminLogin
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	// read db for verifying is user a superadmin or not.
+	var superAdmin models.SuperAdmin
+	result := h.DB.Where("email = ?", inputs.Email).Take(&superAdmin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to lookup rn"})
+		return
+	}
+	
+	// send email to the user.
+	err := services.SendProfileAccessMailToSuperAdmins(superAdmin.ID, superAdmin.Email)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed sending an access email"})
+		return
+	}
+
+	// just for keeping a latest login track.
+	// do not return if this action fails.
+	superAdmin.VisitedAt = time.Now()
+	result = h.DB.Updates(&superAdmin)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed updating visited-at at the moment"})
+	}
+
+	c.JSON(200, gin.H{"success": "an email has been sent to you with the access link"})
+}
+
+// SuperAdminAccess opens from the magic login link, and verifies
+// the user's identity through the jwt token.
+func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
+	token := c.Query("token")
+	claims, err := helpers.VerifyToken(token)
+	if err != nil {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		return
+	}
+
+	email := claims.Email
+
+	// check for this email in superadmin table.
+	var superAdmin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&superAdmin)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"error": "failed to lookup at the moment"})
+		return
+	}
+
+	c.SetCookie(
+		"token",
+		token,
+		24 * 60 * 60,	// 24 hours
+		"/",
+		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
+		true,
+		false,
+	)
+
+	c.JSON(200, gin.H{"success": "logged in successfully!"})
+}

@@ -2,91 +2,146 @@ package handlers
 
 import (
 	"errors"
-	"time"
 
-	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
-	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-type SuperAdminHandler struct {
-	DB 	*gorm.DB
-}
-
-// Passwordless login via a magic link,
-// considering a pre-seeded database here.
-type SuperAdminLogin struct {
-	Email		string		`json:"email" binding:"required,max=255"`
-}
-
-func (h *SuperAdminHandler) SuperAdminLogin(c *gin.Context) {
-	var inputs SuperAdminLogin
-	if err := c.ShouldBindJSON(&inputs); err != nil {
-		c.JSON(400, gin.H{"error": "invalid request body"})
+// SuperAdminGetFacultyPosts fetches faculty authored posts with a limit
+// of 25 latest ones.
+func (h *SuperAdminHandler) SuperAdminGetFacultyPosts(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
 		return
 	}
 
-	// read db for verifying is user a superadmin or not.
-	var superAdmin models.SuperAdmin
-	result := h.DB.Where("email = ?", inputs.Email).Take(&superAdmin)
+	// check if the user is a superadmin.
+	result := h.DB.Where("email = ?", email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
 			return
 		}
-		c.JSON(500, gin.H{"error": "failed to lookup rn"})
-		return
-	}
-	
-	// send email to the user.
-	err := services.SendProfileAccessMailToSuperAdmins(superAdmin.ID, superAdmin.Email)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "failed sending an access email"})
+		c.JSON(500, gin.H{"error": "failed to fetch at the moment"})
 		return
 	}
 
-	// just for keeping a latest login track.
-	// do not return if this action fails.
-	superAdmin.VisitedAt = time.Now()
-	result = h.DB.Updates(&superAdmin)
+	// fetch all faculty posts.
+	// limit set to 25 latest posts in a single fetch.
+	var posts []models.FacultyPost
+	result = h.DB.Find(&posts).
+	Order("created_at DESC").
+	Limit(25).
+	Preload("Comments").
+	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
+		return db.Select("id, name, email, department, house_number, block, type, phone_number")
+	})
+
 	if result.Error != nil {
-		c.JSON(500, gin.H{"error": "failed updating visited-at at the moment"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "no record found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch faculty posts at the moment."})
+		return
 	}
 
-	c.JSON(200, gin.H{"success": "an email has been sent to you with the access link"})
+	c.JSON(200, gin.H{
+		"success": "faculty posts fetched successfully!",
+		"posts": posts,
+	})
 }
 
-// SuperAdminAccess opens from the magic login link, and verifies
-// the user's identity through the jwt token.
-func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
-	token := c.Query("token")
-	claims, err := helpers.VerifyToken(token)
-	if err != nil {
+// SuperAdminGetWardenPosts fetches warden authored posts with a limit
+// of 25 latest ones.
+func (h *SuperAdminHandler) SuperAdminGetWardenPosts(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
 		c.JSON(401, gin.H{"error": "unauthenticated access!"})
 		return
 	}
 
-	email := claims.Email
-
-	// check for this email in superadmin table.
-	var superAdmin models.SuperAdmin
-	result := h.DB.Where("email = ?", email).Take(&superAdmin)
+	// check if the user is a superadmin.
+	result := h.DB.Where("email = ?", email)
 	if result.Error != nil {
-		c.JSON(500, gin.H{"error": "failed to lookup at the moment"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch at the moment"})
 		return
 	}
 
-	c.SetCookie(
-		"token",
-		token,
-		24 * 60 * 60,	// 24 hours
-		"/",
-		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
-		true,
-		false,
-	)
+	// fetch all warden posts.
+	// limit set to 25 latest posts in a single fetch.
+	var posts []models.WardenPost
+	result = h.DB.Find(&posts).
+	Order("created_at DESC").
+	Limit(25).
+	Preload("Comments").
+	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
+		return db.Select("id, name, email, hostel, phone_number")
+	})
 
-	c.JSON(200, gin.H{"success": "logged in successfully!"})
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "no record found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch warden posts at the moment."})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "warden posts fetched successfully!",
+		"posts": posts,
+	})
+}
+
+
+func (h *SuperAdminHandler) SuperAdminGetCentreheadPosts(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		return
+	}
+
+	// check if the user is a superadmin.
+	result := h.DB.Where("email = ?", email)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch at the moment"})
+		return
+	}
+
+	// fetch all warden posts.
+	// limit set to 25 latest posts in a single fetch.
+	var posts []models.CentreheadPost
+	result = h.DB.Find(&posts).
+	Order("created_at DESC").
+	Limit(25).
+	Preload("Comments").
+	Preload("Author", func(db *gorm.DB) (*gorm.DB) {
+		return db.Select("id, name, email, building, phone_number")
+	})
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "no record found"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to fetch centrehead posts at the moment."})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "centrehead posts fetched successfully!",
+		"posts": posts,
+	})
 }
