@@ -83,7 +83,7 @@ func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
 	c.SetCookie(
 		"token",
 		token,
-		24 * 60 * 60,	// 24 hours
+		3 * 24 * 60 * 60,	// 3 days.
 		"/",
 		helpers.GetEnvWithDefault("COOKIE_DOMAIN", "localhost"),
 		true,
