@@ -132,7 +132,14 @@ interface PostsPage {
   hasMore: boolean;
   nextOffset: number;
   total: number;
+  /** Whole-table counts keyed by status, from the API. */
+  statusCounts: Record<string, number>;
+  /** Whole-table counts keyed by type_of_post, from the API. */
+  typeCounts: Record<string, number>;
 }
+
+const asCounts = (v: unknown): Record<string, number> =>
+  v && typeof v === 'object' ? (v as Record<string, number>) : {};
 
 async function fetchPosts(endpoint: string, offset = 0): Promise<PostsPage> {
   const res = await fetch(`${endpoint}?offset=${offset}`, { credentials: 'include' });
@@ -153,6 +160,8 @@ async function fetchPosts(endpoint: string, offset = 0): Promise<PostsPage> {
     hasMore: Boolean(json.has_more),
     nextOffset: typeof json.next_offset === 'number' ? json.next_offset : offset + posts.length,
     total: typeof json.total_posts === 'number' ? json.total_posts : offset + posts.length,
+    statusCounts: asCounts(json.status_counts),
+    typeCounts: asCounts(json.type_counts),
   };
 }
 
@@ -349,8 +358,22 @@ interface InsightsProps {
 function Insights({ data, activeSource, onSourceSelect, activeStage, onStageSelect }: InsightsProps) {
   const loaded = [...data.faculty.posts, ...data.warden.posts, ...data.centrehead.posts];
   const grandTotal = SECTIONS.reduce((a, s) => a + data[s.key].total, 0);
-  const resolved = loaded.filter(p => p.status.toLowerCase() === 'resolved_all').length;
   const comments = loaded.reduce((a, p) => a + (p.comments?.length ?? 0), 0);
+
+  // Whole-table counts, summed across the three sources.
+  const sumCounts = (pick: (page: PostsPage) => Record<string, number>) => {
+    const out: Record<string, number> = {};
+    for (const s of SECTIONS) {
+      for (const [k, v] of Object.entries(pick(data[s.key]))) {
+        const key = k.toLowerCase();
+        out[key] = (out[key] ?? 0) + v;
+      }
+    }
+    return out;
+  };
+  const statusTotals = sumCounts(p => p.statusCounts);
+  const typeTotals = sumCounts(p => p.typeCounts);
+  const resolved = statusTotals['resolved_all'] ?? 0;
 
   const sourceSegments: DonutSegment[] = SECTIONS.map(s => ({
     key: s.key,
@@ -361,21 +384,22 @@ function Insights({ data, activeSource, onSourceSelect, activeStage, onStageSele
   }));
 
   const stageSegments: DonutSegment[] = STAGES.map(st => {
-    const inStage = loaded.filter(p => stageOf(p.status) === st.key);
-    const pending = inStage.filter(p => p.status.toLowerCase().startsWith('pending')).length;
-    const detail = st.statuses.length > 1 ? `${pending} pending · ${inStage.length - pending} resolved` : undefined;
-    return { key: st.key, label: st.label, value: inStage.length, color: st.color, detail };
+    const count = (status: string) => statusTotals[status] ?? 0;
+    const value = st.statuses.reduce((a, status) => a + count(status), 0);
+    const pending = st.statuses.filter(x => x.startsWith('pending')).reduce((a, status) => a + count(status), 0);
+    const detail = st.statuses.length > 1 ? `${pending} pending · ${value - pending} resolved` : undefined;
+    return { key: st.key, label: st.label, value, color: st.color, detail };
   });
 
-  const civil = loaded.filter(p => p.type_of_post.toLowerCase() === 'civil').length;
-  const electrical = loaded.length - civil;
+  const civil = typeTotals['civil'] ?? 0;
+  const electrical = typeTotals['electrical'] ?? 0;
 
   return (
     <div className="mb-8 flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatTile label="Total complaints" value={grandTotal} hint="across all sources" />
         <StatTile label="Loaded on this page" value={loaded.length} hint={`${Math.round(grandTotal ? (loaded.length / grandTotal) * 100 : 0)}% of total`} />
-        <StatTile label="Fully resolved" value={resolved} hint={`${loaded.length - resolved} still in pipeline`} />
+        <StatTile label="Fully resolved" value={resolved} hint={`${grandTotal - resolved} still in pipeline`} />
         <StatTile label="Comments" value={comments} hint="on loaded complaints" />
       </div>
 
@@ -390,15 +414,15 @@ function Insights({ data, activeSource, onSourceSelect, activeStage, onStageSele
         />
         <DonutChart
           title="Where complaints sit in the pipeline"
-          caption="Loaded complaints, by the desk currently holding them."
+          caption="Every complaint on record, by the desk currently holding it."
           segments={stageSegments}
-          centreLabel="loaded"
+          centreLabel="complaints"
           selected={activeStage}
           onSelect={key => onStageSelect(key as Stage | null)}
         />
         <Meter
           title="Civil vs Electrical"
-          caption="Loaded complaints, by works category."
+          caption="Every complaint on record, by works category."
           a={{ label: 'Civil', value: civil, color: TYPE_FILL }}
           b={{ label: 'Electrical', value: electrical, color: TYPE_TRACK }}
         />
@@ -448,6 +472,8 @@ export function SuperAdminDashboard() {
           hasMore: page.hasMore,
           nextOffset: page.nextOffset,
           total: page.total,
+          statusCounts: page.statusCounts,
+          typeCounts: page.typeCounts,
         },
       } : prev);
     } catch (err) {
