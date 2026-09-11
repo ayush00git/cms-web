@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ayush00git/cms-web/helpers"
+	"github.com/ayush00git/cms-web/middleware"
 	"github.com/ayush00git/cms-web/models"
 	"github.com/ayush00git/cms-web/services"
 	"github.com/gin-gonic/gin"
@@ -89,4 +90,45 @@ func (h *SuperAdminHandler) SuperAdminAccess(c *gin.Context) {
 	)
 
 	c.JSON(200, gin.H{"success": "logged in successfully!"})
+}
+
+func (h *SuperAdminHandler) SuperAdminAssignNewAdmin(c *gin.Context) {
+	email, ok := c.Get(middleware.EmailKey)
+	if !ok {
+		c.JSON(401, gin.H{"error": "unauthenticated access!"})
+		return
+	}
+
+	// check if the caller is a superadmin.
+	var superAdmin models.SuperAdmin
+	result := h.DB.Where("email = ?", email).Take(&superAdmin)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(403, gin.H{"error": "you are not authorized for this action. get back!"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to lookup at the moment"})
+		return
+	}
+
+	var newAdmin models.SuperAdmin
+	if err := c.ShouldBindJSON(&newAdmin); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request body"})
+		return
+	}
+	// never trust client-supplied ids or timestamps.
+	newAdmin.ID = 0
+	newAdmin.CreatedAt = time.Now()
+
+	result = h.DB.Create(&newAdmin)
+	if result.Error != nil {
+		// email carries a unique index; the db rejects duplicates.
+		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+			c.JSON(409, gin.H{"error": "a superadmin with this email already exists"})
+			return
+		}
+		c.JSON(500, gin.H{"error": "failed to assign an new admin."})
+		return
+	}
+	c.JSON(201, gin.H{"success": "new superadmin assigned!", "admin": newAdmin})
 }
