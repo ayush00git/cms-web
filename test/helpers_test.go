@@ -148,7 +148,8 @@ func newPostRouter(db *gorm.DB, auth gin.HandlerFunc) *gin.Engine {
 	e.GET("/api/posts/faculty", auth, h.GetFacultyPosts)
 	e.GET("/api/posts/warden", auth, h.GetWardenPosts)
 	e.GET("/api/posts/centrehead", auth, h.GetCentreheadPosts)
-	e.GET("/api/posts/:role/:post_id", auth, h.GetPostByID)
+	// public route, mirrors routes/post.go: no auth middleware.
+	e.GET("/api/posts/:role/:post_id", h.GetPostByID)
 
 	e.POST("/api/posts/faculty/comment/:post_id", auth, h.FacultyPostComment)
 	e.POST("/api/posts/warden/comment/:post_id", auth, h.WardenPostComment)
