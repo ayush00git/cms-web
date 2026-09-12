@@ -32,11 +32,14 @@ func PostRoute(e *gin.Engine, h *handlers.PostHandler) {
 		posts.GET("/faculty", h.GetFacultyPosts)
 		posts.GET("/warden", h.GetWardenPosts)
 		posts.GET("/centrehead", h.GetCentreheadPosts)
-		posts.GET("/:role/:post_id", h.GetPostByID)
 
 		// APIs for comments on the posts
 		posts.POST("/faculty/comment/:post_id", h.FacultyPostComment)
 		posts.POST("/warden/comment/:post_id", h.WardenPostComment)
 		posts.POST("/centrehead/comment/:post_id", h.CentreheadPostComment)
 	}
+
+	// let this be public, anyone can read a single post, rate limited by IP.
+	publicPostLimiter := middleware.NewRateLimiter(200, 1.0/10.0)
+	e.GET("/api/posts/:role/:post_id", publicPostLimiter.Limit(), h.GetPostByID)
 }
