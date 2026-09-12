@@ -3,12 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Hammer, Trash2, Pencil, X, Check, Calendar, MapPin, BedDouble,
   MessageSquare, Wrench, ArrowLeft, AlertCircle,
-  Clock, Users,
+  Clock, Users, LogIn, UserCircle2, Mail,
 } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { POST_PLACES } from '../../constants/models';
 import { CommentBox } from '../../components/CommentBox';
 import { Loader } from '../../components/Loader';
+import { useAuth } from '../../context/auth-context';
+import type { ProfileData } from '../../context/auth-context';
 
 type Role = 'faculty' | 'warden' | 'centrehead';
 
@@ -40,7 +42,29 @@ interface ComplaintPost {
   comments?: ComplaintComment[] | null;
   status_audit_logs?: StatusAudit[] | null;
   people_in_thread?: string[] | null;
+  // author foreign key, one of these depending on the post's role
+  faculty_id?: number;
+  warden_id?: number;
+  centrehead_id?: number;
+  // preloaded author; the Go struct field has no json tag, so the key is "Author"
+  Author?: { id: number; name: string; email: string };
 }
+
+// roleOf derives the complaint-side role of a logged-in profile from the
+// role-specific field the profile API returns; admins and super admins get null.
+function roleOf(profile: ProfileData | null): Role | null {
+  if (!profile || profile.position || profile.role === 'superadmin') return null;
+  if (profile.department !== undefined) return 'faculty';
+  if (profile.hostel !== undefined) return 'warden';
+  if (profile.building !== undefined) return 'centrehead';
+  return null;
+}
+
+const LOGIN_PATH: Record<Role, string> = {
+  faculty: '/faculty/login',
+  warden: '/warden/login',
+  centrehead: '/centre-head/login',
+};
 
 interface EditForm {
   title: string;
@@ -87,6 +111,8 @@ function formatDateTime(iso: string) {
 export function PostView() {
   const { role, post_id } = useParams<{ role: Role; post_id: string }>();
   const navigate = useNavigate();
+  const { status: authStatus, profile } = useAuth();
+  const isLoggedIn = authStatus === 'authenticated';
 
   const [post, setPost] = useState<ComplaintPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -190,6 +216,12 @@ export function PostView() {
   const comments = post.comments ?? [];
   const editExpired = isEditWindowExpired(post.created_at);
 
+  // Only the post's author may edit or delete it. The API enforces this too;
+  // this just keeps the buttons away from everyone else.
+  const authorId = role === 'faculty' ? post.faculty_id : role === 'warden' ? post.warden_id : post.centrehead_id;
+  const isOwner = isLoggedIn && roleOf(profile) === role && profile?.id !== undefined && profile.id === authorId;
+  const canManage = isOwner && !editExpired;
+
   const editBase = isFaculty ? '/api/posts/faculty/edit' : isWarden ? '/api/posts/warden/edit' : '/api/posts/centrehead/edit';
   const deleteBase = isFaculty ? '/api/posts/faculty/delete' : isWarden ? '/api/posts/warden/delete' : '/api/posts/centrehead/delete';
 
@@ -289,13 +321,13 @@ export function PostView() {
         
         {/* Back Link */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link to="/profile" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          <Link to={isLoggedIn ? '/profile' : '/'} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> {isLoggedIn ? 'Back to Dashboard' : 'Back to Home'}
           </Link>
           
           {/* Action buttons */}
           <div className="flex items-center gap-2 flex-wrap">
-            {!isEditing && !editExpired && (
+            {!isEditing && canManage && (
               <button
                 onClick={startEdit}
                 disabled={isBusy}
@@ -323,7 +355,7 @@ export function PostView() {
                 </button>
               </>
             )}
-            {!editExpired && (
+            {canManage && (
               <button
                 onClick={handleDelete}
                 disabled={isBusy}
@@ -344,6 +376,22 @@ export function PostView() {
           <div className={`h-1.5 w-full ${theme.accentBar}`} />
           
           <div className="p-6 space-y-6">
+
+            {/* Author */}
+            {post.Author && (
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs border-b border-gray-100 pb-4">
+                <span className="inline-flex items-center gap-1.5 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+                  <UserCircle2 className="w-4 h-4" /> Author
+                </span>
+                <span className="text-gray-600">
+                  Name: <span className="font-semibold text-gray-800">{post.Author.name}</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                  <Mail className="w-3.5 h-3.5 text-gray-400" />
+                  Email: <a href={`mailto:${post.Author.email}`} className="font-semibold text-gray-800 hover:underline">{post.Author.email}</a>
+                </span>
+              </div>
+            )}
             
             {/* Title / Badges */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -591,6 +639,24 @@ export function PostView() {
                 {/* Precision-aligned Connector Dot */}
                 <div className="absolute left-[10px] top-[26px] w-3 h-3 rounded-full border-[2.5px] border-white bg-zinc-300 z-10 shadow-sm" />
 
+                {authStatus === 'loading' ? (
+                  <div className="bg-white border border-zinc-200/80 rounded-xl p-5 flex items-center gap-3 text-xs text-zinc-400">
+                    <Loader size="sm" color="dark" /> Checking your session…
+                  </div>
+                ) : !isLoggedIn ? (
+                  <div className="bg-white border border-zinc-200/80 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-800">Log in to reply</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Only the author of this complaint can add updates.</p>
+                    </div>
+                    <Link
+                      to={LOGIN_PATH[role ?? 'faculty']}
+                      className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-lg transition-colors shrink-0"
+                    >
+                      <LogIn className="w-3.5 h-3.5" /> Login
+                    </Link>
+                  </div>
+                ) : (
                 <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-sm focus-within:border-zinc-400 focus-within:ring-4 focus-within:ring-zinc-800/5 transition-all duration-300">
                   <textarea
                     value={commentText}
@@ -628,7 +694,8 @@ export function PostView() {
                     </button>
                   </div>
                 </div>
-                
+                )}
+
                 {commentError && (
                   <p className="text-xs font-semibold text-red-500 mt-2 flex items-center gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {commentError}
