@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 
 export interface ProfileData {
+  id?: number;
   name?: string;
   email?: string;
   is_verified?: boolean;
