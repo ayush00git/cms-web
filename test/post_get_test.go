@@ -89,7 +89,7 @@ func TestFacultyPost_GetByID_NotFound(t *testing.T) {
 	assertStatus(t, rec, 404)
 }
 
-func TestFacultyPost_GetByID_WrongUser(t *testing.T) {
+func TestFacultyPost_GetByID_OtherUserCanRead(t *testing.T) {
 	db := newTestDB(t)
 	f1 := seedFaculty(t, db, "fac1@iit.ac.in")
 	f2 := seedFaculty(t, db, "fac2@iit.ac.in")
@@ -103,10 +103,49 @@ func TestFacultyPost_GetByID_WrongUser(t *testing.T) {
 	}
 	db.Create(&post)
 
-	// User 2 tries to access User 1's post
+	// User 2 reads User 1's post: the route is public, so this succeeds.
 	e := newPostRouter(db, authAs(f2.ID, f2.Email))
 	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty/1", nil)
 
-	// Should not find the post as it filters by user ID
-	assertStatus(t, rec, 404)
+	assertStatus(t, rec, 200)
+}
+
+func TestFacultyPost_GetByID_Unauthenticated(t *testing.T) {
+	db := newTestDB(t)
+	f := seedFaculty(t, db, "fac.public@iit.ac.in")
+
+	post := models.FacultyPost{
+		FacultyID:   f.ID,
+		Place:       models.PlaceDepartmental,
+		TypeOfPost:  models.TypeCivil,
+		Title:       "Title 1",
+		Description: "Desc 1",
+	}
+	db.Create(&post)
+
+	// No session at all: still readable, and the author comes back without secrets.
+	e := newPostRouter(db, noAuth())
+	rec := doRequest(t, e, http.MethodGet, "/api/posts/faculty/1", nil)
+
+	assertStatus(t, rec, 200)
+
+	var res struct {
+		Post struct {
+			ID     uint `json:"id"`
+			Author struct {
+				Name     string `json:"name"`
+				Email    string `json:"email"`
+				Password string `json:"password"`
+			} `json:"Author"`
+		} `json:"post"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
+		t.Fatalf("failed to decode body: %v", err)
+	}
+	if res.Post.Author.Email != f.Email {
+		t.Fatalf("expected author email %q, got %q", f.Email, res.Post.Author.Email)
+	}
+	if res.Post.Author.Password != "" {
+		t.Fatalf("author password hash must not be returned, got %q", res.Post.Author.Password)
+	}
 }
