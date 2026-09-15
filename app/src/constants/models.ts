@@ -12,7 +12,8 @@ export const DEPARTMENTS = [
   { value: "Architecture", label: "Architecture" },
   { value: "Humanities & Social Sciences", label: "Humanities & Social Sciences" },
   { value: "Management Studies", label: "Management Studies" },
-  { value: "Centre For Energy Studies", label: "Centre For Energy Studies" }
+  { value: "Centre For Energy Studies", label: "Centre For Energy Studies" },
+  { value: "Administration (Other)", label: "Administration (Other)" }
 ];
 
 export const BLOCK_LABELS = [
