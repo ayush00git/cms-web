@@ -152,7 +152,7 @@ jobs:
           script: |
             set -e
 
-            export PATH="/home/serv-admin/.nvm/versions/node/v24.19.0/bin:$PATH"
+            export PATH="/usr/local/bin:$PATH"
 
             echo "Node version:"
             node --version
@@ -184,4 +184,3 @@ jobs:
             sudo -n /usr/bin/systemctl reload nginx
 
             echo "Frontend deployed successfully."
-            
